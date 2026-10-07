@@ -1,6 +1,6 @@
 # Work log
 
-## 2026-10-07 — Flowrio interaction revision (active)
+## 2026-10-07 — Flowrio interaction revision (complete)
 
 - 12:03 Bangkok usage: five-hour 68% used / 32% remaining; weekly 11% used / 89% remaining. Shared account reading. Reserve for QA and deployment; no optional visual artifacts.
 - Rules and all owner sources captured in docs/WORKING_RULES.md. Screenshot's large star/caption aside is explicitly the About area to remove.
@@ -13,6 +13,8 @@
 - Browser: widths320/390/768/1280 have no horizontal overflow; five card layouts, horizontal next and keyboard Home/End work; final gallery boundary disables Next. Project/contact dialogs centered, entry/exit animation names observed, Escape/button/backdrop close correctly, focus returns and scroll lock clears. Mobile dialog fits at350x796 in390x844 viewport. Tool/tech lanes run in view and all five pause out of view. No warn/error console entries.
 - React checklist: component-local scramble updates; no page-scroll render loop; CSS transform/opacity lanes with bounded copies; resize-only measurements; inaccessible clones hidden/inert; reduced-motion static content; native dialog focus trapping retained. OS reduced-motion preference and a physical touch device were reviewed in source, not simulated. No broad backend retests needed because API/storage unchanged.
 - Local check and production build passed; compressed main JS139.08kB. Ready to push/deploy required changes; no optional feature work added.
+- Commit0b9879d pushed to main and automatically deployed READY to production as dpl_C97N2GKirWRmpAMieEQhqxcQP1fR. Live site verified flowrio. wordmark, five gallery slots, five marquees, removed About aside, updated footer and no Demo badge. Browser warning/error log empty. Public /api/visits returns total4 from Supabase; offset remains frontend-only.
+- 12:16 Bangkok final usage: five-hour86% used /14% remaining; weekly13% used /87% remaining. Required work complete, no pending feature or approval. Saved source/rules continuity note; final response omits unnecessary screenshot/video artifacts per owner request.
 - 12:15 Bangkok pre-push usage: five-hour85% used /15% remaining; weekly13% used /87% remaining. Required QA complete; preserve remaining reserve for deployment verification.
 
 ## 2026-10-07 — Portfolio layout
