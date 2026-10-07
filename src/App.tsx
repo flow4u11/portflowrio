@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from 'motion/react';
+import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useSpring } from 'motion/react';
 import { ArrowDown, ArrowUp, ArrowUpRight, Check, Code2, Film, Gamepad2, Grid2X2, Lightbulb, X } from 'lucide-react';
 import { ThemeTogglerButton } from './components/animate-ui/theme-toggler';
 import { StarsBackground } from './components/animate-ui/stars-background';
@@ -7,13 +7,12 @@ import { PixelAvatar } from './components/PixelAvatar';
 import { VisitsCounter } from './components/VisitsCounter';
 import { Typewriter } from './components/Typewriter';
 import { BrandIcon } from './components/BrandIcon';
+import { ScrambleWordmark } from './components/ScrambleWordmark';
+import { CyclingAboutTitle } from './components/CyclingAboutTitle';
+import { LoopingMarquee } from './components/LoopingMarquee';
+import { ProjectGallery, type Project } from './components/ProjectGallery';
 
 type Theme = 'light' | 'dark';
-type Project = {
-  id: string; title: string; category: string; image: string; alt: string;
-  description: string; tags: string[]; details: { label: string; text: string }[];
-  status: string; liveUrl?: string; sourceUrl?: string;
-};
 const projects: Project[] = [
   {
     id: 'laststand', title: 'LastStand', category: 'Unreal Engine 5 · FPS game', image: '/assets/project-laststand.svg',
@@ -44,7 +43,7 @@ const navigation = [{ id: 'home', label: 'Home' }, { id: 'about', label: 'About'
 
 function Depth({ children, className = '' }: { children: ReactNode; className?: string }) {
   const reduced = useReducedMotion();
-  return <div className={`depth-stage ${className}`}><motion.div initial={reduced ? false : { opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.08 }} transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div></div>;
+  return <div className={`depth-stage ${className}`}><motion.div initial={reduced ? false : { opacity: 0, y: 18 }} animate={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false, amount: 0.12, margin: '-12px 0px -12px 0px' }} transition={{ duration: reduced ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div></div>;
 }
 
 function Loader({ progress, reduced }: { progress: number; reduced: boolean }) {
@@ -83,11 +82,15 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [scrolled, setScrolled] = useState(false);
   const [modal, setModal] = useState<Project | 'contact' | null>(null);
+  const [dialogClosing, setDialogClosing] = useState(false);
   const [copied, setCopied] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const outsideDown = useRef(false);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const heroVisible = useInView(heroRef, { amount: 0.15 });
   const { scrollYProgress } = useScroll();
   const pageProgress = useSpring(scrollYProgress, { stiffness: 150, damping: 35 });
 
@@ -151,10 +154,20 @@ export default function App() {
     dialog.scrollTop = 0;
     dialog.querySelector<HTMLButtonElement>('.dialog-close')?.focus({ preventScroll: true });
   }, [modal]);
-  useEffect(() => () => { if (copyTimer.current) clearTimeout(copyTimer.current); }, []);
-  const openModal = (next: Project | 'contact', trigger: HTMLElement) => { triggerRef.current = trigger; setModal(next); };
-  const closeModal = () => dialogRef.current?.close();
-  const onDialogClose = () => { setModal(null); triggerRef.current?.focus({ preventScroll: true }); triggerRef.current = null; };
+  useEffect(() => () => { if (copyTimer.current) clearTimeout(copyTimer.current); if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
+  const openModal = (next: Project | 'contact', trigger: HTMLElement) => { triggerRef.current = trigger; setDialogClosing(false); setCopied(false); setModal(next); };
+  const finishModalClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+    dialogRef.current?.close();
+  };
+  const closeModal = () => {
+    if (!dialogRef.current?.open || closeTimer.current) return;
+    if (reduced) { finishModalClose(); return; }
+    setDialogClosing(true);
+    closeTimer.current = setTimeout(finishModalClose, 250);
+  };
+  const onDialogClose = () => { if (closeTimer.current) clearTimeout(closeTimer.current); closeTimer.current = null; setDialogClosing(false); setModal(null); triggerRef.current?.focus({ preventScroll: true }); triggerRef.current = null; };
   const copyDiscord = async () => {
     try {
       await navigator.clipboard.writeText('flow4u');
@@ -171,7 +184,7 @@ export default function App() {
       <div id="header-sentinel" aria-hidden="true" />
       <a className="skip-link" href="#home">Skip to content</a>
       <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
-        <a href="#home" className="wordmark" aria-label="kimportflowrio, back to home">kimportflowrio<span>.</span></a>
+        <a href="#home" className="wordmark" aria-label="flowrio, back to home"><ScrambleWordmark /></a>
         <nav aria-label="Main navigation">{navigation.map(item => <a key={item.id} href={`#${item.id}`} className={item.id === 'home' ? 'nav-home' : undefined} aria-current={activeSection === item.id ? 'location' : undefined}>{activeSection === item.id && <motion.span className="nav-indicator" layoutId="active-navigation" transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 34 }} aria-hidden="true" />}<span className="nav-label">{item.label}</span></a>)}</nav>
         <ThemeTogglerButton theme={theme} onThemeChange={setTheme} className="theme-control" aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} />
         <motion.div className="page-progress" style={{ scaleX: pageProgress }} aria-hidden="true" />
@@ -179,7 +192,7 @@ export default function App() {
 
       <main>
         <section className="hero" id="home" aria-labelledby="hero-title">
-          <motion.div className="hero-profile" initial={false} animate={loading ? { opacity: 0, y: 18, rotateX: 8 } : { opacity: 1, y: 0, rotateX: 0 }} transition={{ duration: reduced ? 0 : 1, delay: reduced ? 0 : 0.12, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.div ref={heroRef} className="hero-profile" initial={false} animate={!loading && (heroVisible || reduced) ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }} transition={{ duration: reduced ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}>
             <div className="profile-frame"><PixelAvatar className="profile-avatar" defaultSrc="/assets/profile-anime.png" hoverSrc="/assets/profile-kim.jpg" /><span className="profile-corner profile-corner--one" aria-hidden="true">+</span><span className="profile-corner profile-corner--two" aria-hidden="true">+</span></div>
             <h1 id="hero-title">Chayathorn Chianpolsane</h1>
             <p className="hero-role"><Typewriter /></p>
@@ -190,20 +203,18 @@ export default function App() {
         </section>
 
         <section className="section about-section" id="about" aria-labelledby="about-title">
-          <div className="about-grid">
-            <Depth className="about-aside"><p className="eyebrow"><span>01</span> About me</p><div className="about-symbol" aria-hidden="true">✳</div><p className="aside-caption">A curious mind.<br />An eye for the details.</p></Depth>
-            <div className="about-content">
-              <Depth><h2 id="about-title">A little design.<br />A little <i>play.</i></h2><p className="about-lead">I’m Kim — a first-year Games and Interactive Media student at Bangkok University.</p><p className="about-copy">I love UX/UI design and the visual side of games, especially lighting and graphics. I’m curious about how an interface feels, how a scene sets a mood, and how small details shape an experience.</p><p className="about-copy">Before this, I edited gaming montages. That’s where my interest in rhythm, storytelling, and visual craft started — and it still influences the way I create.</p></Depth>
-              <Depth><div className="study-strip"><span className="study-mark">BU</span><div><strong>Bangkok University</strong><span>Games and Interactive Media</span></div><span className="year-label">YEAR 01</span></div></Depth>
-              <Depth><div className="interest-row"><span><Grid2X2 size={15} />UX/UI design</span><span><Lightbulb size={15} />Game lighting</span><span><Gamepad2 size={15} />Game graphics</span><span><Film size={15} />Montage editing</span></div><div className="tools-block"><p className="eyebrow">My creative toolkit</p><div className="tool-list">{toolkit.map(tool => <div className="tool-item" key={tool}><ToolIcon tool={tool} /><span>{tool}</span></div>)}</div></div></Depth>
-              <Depth><div className="technology-block"><p className="eyebrow">The technology behind my projects</p>{technologyGroups.map(group => <div className="technology-group" key={group.label}><h3>{group.label}</h3><div className="technology-list">{group.items.map(item => <span key={item}>{item}</span>)}</div></div>)}</div></Depth>
-            </div>
+          <Depth><p className="eyebrow"><span>01</span> About me</p></Depth>
+          <div className="about-layout">
+            <Depth className="about-introduction"><CyclingAboutTitle id="about-title" /><p className="about-lead">I’m Kim — a first-year Games and Interactive Media student at Bangkok University.</p><div className="study-strip"><span className="study-mark">BU</span><div><strong>Bangkok University</strong><span>Games and Interactive Media</span></div><span className="year-label">YEAR 01</span></div></Depth>
+            <Depth className="about-story"><p className="about-copy">I love UX/UI design and the visual side of games, especially lighting and graphics. I’m curious about how an interface feels, how a scene sets a mood, and how small details shape an experience.</p><p className="about-copy">Before this, I edited gaming montages. That’s where my interest in rhythm, storytelling, and visual craft started — and it still influences the way I create.</p><div className="interest-row"><span><Grid2X2 size={15} />UX/UI design</span><span><Lightbulb size={15} />Game lighting</span><span><Gamepad2 size={15} />Game graphics</span><span><Film size={15} />Montage editing</span></div></Depth>
           </div>
+          <Depth><div className="tools-block"><p className="eyebrow">My creative toolkit</p><LoopingMarquee label="Creative tools" contentClassName="tool-list" durationSeconds={40}>{toolkit.map(tool => <div className="tool-item" key={tool}><ToolIcon tool={tool} /><span>{tool}</span></div>)}</LoopingMarquee></div></Depth>
+          <Depth><div className="technology-block"><p className="eyebrow">The technology behind my projects</p><div className="technology-grid">{technologyGroups.map((group, index) => <div className="technology-group" key={group.label}><h3>{group.label}</h3><LoopingMarquee label={group.label} contentClassName="technology-list" direction={index % 2 ? 'right' : 'left'} durationSeconds={32 + index * 4}>{group.items.map(item => <span key={item}>{item}</span>)}</LoopingMarquee></div>)}</div></div></Depth>
         </section>
 
         <section className="section projects-section" id="projects" aria-labelledby="projects-title">
-          <Depth><div className="section-heading"><div><p className="eyebrow"><span>02</span> Selected projects</p><h2 id="projects-title">Ideas taking<br /><i>shape.</i></h2></div><p className="section-intro">A game. A useful little website.<br />Two different ways to create an experience.</p></div></Depth>
-          <div className="projects-grid">{projects.map((project, index) => <Depth key={project.id}><article className="project-card"><button className="project-trigger" onClick={event => openModal(project, event.currentTarget)} aria-label={`Explore ${project.title}`}><span className="project-image"><img src={project.image} alt={project.alt} width="1200" height="800" loading="lazy" decoding="async" /><span className="project-status"><span />{project.status}</span><span className="project-view"><ArrowUpRight size={19} aria-hidden="true" /></span></span><span className="project-caption"><span className="project-number">0{index + 1}</span><span className="project-copy"><strong>{project.title}</strong><span>{project.category}</span></span><ArrowUpRight size={19} aria-hidden="true" /></span></button><p className="project-description">{project.description}</p><div className="project-tags">{project.tags.map(tag => <span key={tag}>{tag}</span>)}</div>{project.liveUrl && <div className="project-links"><a href={project.liveUrl} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={13} /></a><a href={project.sourceUrl} target="_blank" rel="noopener noreferrer"><BrandIcon brand="github" /> Source code</a></div>}</article></Depth>)}</div>
+          <Depth><div className="section-heading"><div><p className="eyebrow"><span>02</span> Selected projects</p><h2 id="projects-title">Ideas taking<br /><i>shape.</i></h2></div><p className="section-intro">Games, useful tools, and what comes next.<br />Scroll through the collection.</p></div></Depth>
+          <Depth><ProjectGallery projects={projects} onOpen={openModal} /></Depth>
           <Depth><p className="draft-note"><span aria-hidden="true">+</span> Work in progress. More screens, stories, and details coming soon.</p></Depth>
         </section>
 
@@ -213,10 +224,10 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="site-footer"><div className="footer-brand"><a className="wordmark" href="#home">kimportflowrio<span>.</span></a><p>© {new Date().getFullYear()} Chayathorn Chianpolsane</p></div><VisitsCounter /><a className="back-to-top" href="#home">Back to top <ArrowUp size={13} aria-hidden="true" /></a></footer>
+      <footer className="site-footer"><div className="footer-brand"><a className="wordmark" href="#home" aria-label="flowrio, back to home"><ScrambleWordmark /></a><p>© {new Date().getFullYear()} · Made with curiosity.</p></div><VisitsCounter /><a className="back-to-top" href="#home">Back to top <ArrowUp size={13} aria-hidden="true" /></a></footer>
     </div>
 
-    <dialog ref={dialogRef} className={`detail-dialog ${modal === 'contact' ? 'detail-dialog--contact' : ''}`} aria-labelledby="dialog-title" data-lenis-prevent onClose={onDialogClose} onPointerDown={event => { const rect = event.currentTarget.getBoundingClientRect(); outsideDown.current = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; }} onClick={event => { const rect = event.currentTarget.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outsideDown.current && outside) closeModal(); outsideDown.current = false; }}>
+    <dialog ref={dialogRef} className={`detail-dialog ${modal === 'contact' ? 'detail-dialog--contact' : ''}`} aria-labelledby="dialog-title" data-closing={dialogClosing || undefined} onClose={onDialogClose} onCancel={event => { event.preventDefault(); closeModal(); }} onAnimationEnd={event => { if (event.target === event.currentTarget && event.animationName === 'dialog-out') finishModalClose(); }} onPointerDown={event => { const rect = event.currentTarget.getBoundingClientRect(); outsideDown.current = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; }} onClick={event => { const rect = event.currentTarget.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outsideDown.current && outside) closeModal(); outsideDown.current = false; }}>
       <button className="dialog-close" onClick={closeModal} aria-label="Close preview"><X size={18} /></button>
       {modal === 'contact' ? <div className="contact-dialog-content"><p className="eyebrow">Let’s make a connection</p><h2 id="dialog-title">Hello, <i>Kim.</i></h2><p>A project idea, a design conversation, or just a hello — find me here.</p><div className="contact-channels"><a href="mailto:flowxyzy@gmail.com"><BrandIcon brand="gmail" /><span><strong>Gmail</strong>flowxyzy@gmail.com</span><ArrowUpRight size={16} /></a><button onClick={copyDiscord}><BrandIcon brand="discord" /><span><strong>Discord</strong>flow4u</span>{copied ? <Check size={16} /> : <span className="copy-hint">Copy</span>}</button><a href="https://github.com/flow4u11" target="_blank" rel="noopener noreferrer"><BrandIcon brand="github" /><span><strong>GitHub</strong>flow4u11</span><ArrowUpRight size={16} /></a></div><span className="copy-status" aria-live="polite">{copied ? 'Discord username copied.' : 'Click Discord to copy my username.'}</span></div> : modal ? <><img className="dialog-cover" src={modal.image} alt={modal.alt} width="1200" height="800" /><div className="dialog-content"><p className="eyebrow">{modal.status}</p><h2 id="dialog-title">{modal.title}</h2><p>{modal.description}</p>{modal.liveUrl && <div className="project-links"><a href={modal.liveUrl} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={14} /></a><a href={modal.sourceUrl} target="_blank" rel="noopener noreferrer"><BrandIcon brand="github" /> GitHub</a></div>}<div className="project-tags">{modal.tags.map(tag => <span key={tag}>{tag}</span>)}</div><div className="case-study-rows">{modal.details.map(item => <div key={item.label}><h3>{item.label}</h3><p>{item.text}</p></div>)}</div><p className="case-study-note">{modal.liveUrl ? 'An original illustrated cover. Open the live website to explore the actual app.' : 'Concept cover for a project in development. Gameplay captures are coming soon.'}</p></div></> : null}
     </dialog>

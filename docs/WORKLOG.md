@@ -1,5 +1,20 @@
 # Work log
 
+## 2026-10-07 — Flowrio interaction revision (active)
+
+- 12:03 Bangkok usage: five-hour 68% used / 32% remaining; weekly 11% used / 89% remaining. Shared account reading. Reserve for QA and deployment; no optional visual artifacts.
+- Rules and all owner sources captured in docs/WORKING_RULES.md. Screenshot's large star/caption aside is explicitly the About area to remove.
+- Required: scramble flowrio./portflorio. wordmarks; repeatable scroll entry/exit; popup entry/exit; full-width About with cycling design/play title; moving toolkit/technology; footer text and Demo badge removal; component hover feedback; native scroll gallery with two actual and three future project layouts.
+- Work split: root handles App/layout/dialog integration, one agent handles scoped idle components, one handles project gallery. Visits offset clarification pending; preserve previous fake-count preference unless owner changes it.
+- In progress; record validation and deployment before completion or a usage-limited stop.
+- 12:08 Bangkok usage: five-hour 78% used / 22% remaining; weekly 12% used / 88% remaining. Required implementation complete; type/server syntax check passed. Proceed only with focused UI verification and deployment, reserving usage.
+- No Visits clarification received during implementation; applied the previous explicit fake-count preference: removed visible Demo badge while retaining baseline1284 and transparent tooltip/accessibility description. Change to real-only if owner requests it.
+- 12:12 Bangkok usage before deployment: five-hour83% used /17% remaining; weekly13% used /87% remaining. Owner-requested continuity note saved in Codex memory; project working rules/source links are committed documentation.
+- Browser: widths320/390/768/1280 have no horizontal overflow; five card layouts, horizontal next and keyboard Home/End work; final gallery boundary disables Next. Project/contact dialogs centered, entry/exit animation names observed, Escape/button/backdrop close correctly, focus returns and scroll lock clears. Mobile dialog fits at350x796 in390x844 viewport. Tool/tech lanes run in view and all five pause out of view. No warn/error console entries.
+- React checklist: component-local scramble updates; no page-scroll render loop; CSS transform/opacity lanes with bounded copies; resize-only measurements; inaccessible clones hidden/inert; reduced-motion static content; native dialog focus trapping retained. OS reduced-motion preference and a physical touch device were reviewed in source, not simulated. No broad backend retests needed because API/storage unchanged.
+- Local check and production build passed; compressed main JS139.08kB. Ready to push/deploy required changes; no optional feature work added.
+- 12:15 Bangkok pre-push usage: five-hour85% used /15% remaining; weekly13% used /87% remaining. Required QA complete; preserve remaining reserve for deployment verification.
+
 ## 2026-10-07 — Portfolio layout
 
 - Request: clean, minimal portfolio inspired by the supplied screenshot; upper-right Light/Dark control; animated background and components; complete sections; layout first.

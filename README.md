@@ -20,12 +20,15 @@ Open http://127.0.0.1:5173. The custom development server serves the frontend an
 
 - Light/dark themes with a circular iris from the toggle click; an iris curtain supports browsers without native View Transitions.
 - One shared animated canvas background, brighter in light mode. Particle count, pixel density, and drawing rate are bounded; hidden tabs and reduced motion pause it.
-- Native scrolling, one-time section entrances, a sliding navigation highlight, a rotating typewriter phrase, and idle arrow motion.
+- Native scrolling, repeatable section entry/exit, a sliding navigation highlight, a rotating typewriter phrase, and idle arrow motion.
+- Header/footer scramble wordmark alternates flowrio. and portflorio. with reserved width. A full-width About section cycles design/play and moves tools/technologies in seamless lanes, paused offscreen or hidden.
 - Pixel portrait transition on hover, focus, or touch.
-- LastStand project concept and the live [School Ledger](https://school-ledger-beta.vercel.app) app, with [source](https://github.com/flow4u11/student-grade-system).
+- A native horizontal gallery with LastStand, the live [School Ledger](https://school-ledger-beta.vercel.app) app ([source](https://github.com/flow4u11/student-grade-system)), and three empty future project layouts. Arrow buttons and keyboard navigation work alongside touch scrolling.
 - Creative tools and technologies used across Kim's projects.
-- Gmail, Discord username copy, and GitHub contact links; centered accessible dialogs.
-- Footer demo baseline of 1,284 plus a separate real anonymous browser counter. The Demo label explains the baseline.
+- Gmail, Discord username copy, and GitHub contact links; centered accessible dialogs animate both entry and exit, preserving focus trapping and focus return.
+- Footer baseline of 1,284 plus a separate real anonymous browser counter. Tooltip/accessibility text explains the presentation baseline; the visible Demo badge was removed at the owner's request.
+
+Owner working rules, usage checkpoints, and supplied source links are retained in [working rules](docs/WORKING_RULES.md) and [work log](docs/WORKLOG.md).
 
 ## Stack
 

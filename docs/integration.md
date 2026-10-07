@@ -2,7 +2,7 @@
 
 ## Visit counter
 
-The footer shows a **1,284 demo offset plus recorded anonymous browsers**. The small Demo label and tooltip explain the split. The offset is presentation data only: it is never inserted into Supabase. Glyph avatars are generated shapes rather than visitor photos.
+The footer shows a **1,284 presentation offset plus recorded anonymous browsers**. The owner requested removing the visible Demo badge on 2026-10-07; tooltip and accessibility text still explain the split. The offset is presentation data only: it is never inserted into Supabase. Glyph avatars are generated shapes rather than visitor photos.
 
 The browser keeps one random UUID under `portfolio-visitor-v1` in local storage. When the footer comes within 600 px of the viewport, the page sends that UUID once to the same-origin `/api/visits` endpoint. The server hashes it before storage. Refreshing the same browser does not increase its unique count. Clearing storage or using another browser creates another identifier; this is a browser count rather than verified people. No IP address, email, or raw UUID is stored.
 

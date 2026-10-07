@@ -68,7 +68,7 @@ export function VisitsCounter() {
     <div className="visitor-avatars" aria-hidden="true">
       {avatars.map(seed => <span className="visitor-avatar" key={seed}><VisitorGlyph seed={seed} /></span>)}
     </div>
-    <span className="visits-label" aria-live="polite"><strong>{total.toLocaleString('en-US')}</strong> Visits <span className="visits-demo-label">Demo</span></span>
+    <span className="visits-label" aria-live="polite"><strong>{total.toLocaleString('en-US')}</strong> Visits</span>
     {error ? <button className="visits-retry" onClick={() => setRetry(value => value + 1)} aria-label="Retry real visit counter">Retry</button> : null}
   </div>;
 }
