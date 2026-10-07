@@ -82,3 +82,4 @@ Update this file after material changes. See README.md for running the project a
 - Browser footer request persisted one real anonymous browser; SQL snapshot matches rendered1285 (1284 demo+1 real).
 - Source commit1492998 pushed to the new private repository; working tree clean after push. Secrets and generated configuration were excluded.
 - GitHub automatic deployment connection remains pending: CLI git connect failed and the account has no Vercel GitHub App installed. Requested action-time approval for the official app limited to kimportflowrio. Live manual deployment and Supabase integration are already verified.
+- Owner approved installation scoped only to kimportflowrio and completed GitHub Mobile verification. GitHub showed Installation Approved. CLI git connect succeeded; project API confirmed flow4u11/kimportflowrio, production branch main, fork protection enabled. A documentation push will verify the automatic production deployment.

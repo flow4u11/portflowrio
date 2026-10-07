@@ -29,7 +29,7 @@ If the database is unavailable, the footer retains its labeled demo value and of
 
 Production is live at https://kimportflowrio.vercel.app with server variables configured. Source is pushed to the new private `flow4u11/kimportflowrio` repository. Both frontend and API deploy together; no frontend keys or database passwords are necessary.
 
-Automatic deployments from GitHub are pending: the Vercel GitHub App is not installed on this account, so `vercel git connect` could not connect the private repository. Install the official app with access limited to `kimportflowrio`, then connect it in the Vercel project's Git settings. The existing production deployment and Supabase counter work independently of this step. Never grant all-repository access when only this repository is needed.
+The official Vercel GitHub App is installed with access limited to `kimportflowrio`, after the owner approved access and completed GitHub Mobile verification. The Vercel project is connected to `flow4u11/kimportflowrio`; production branch is `main`, and fork protection remains enabled. Pushes to `main` trigger production deployments. Production Supabase variables are already configured; preview deployments intentionally have no database credential.
 
 ## Verification
 
