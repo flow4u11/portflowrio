@@ -80,3 +80,5 @@ Update this file after material changes. See README.md for running the project a
 - Deployed page and API reachable publicly with HTTP200; GET /api/visits reads Supabase. GitHub Desktop launch hung and was canceled without any repo mutation; switched to signed-in Safari GitHub UI.
 - New private repository flow4u11/kimportflowrio created via signed-in Safari GitHub, initial main commit confirmed through connector.
 - Browser footer request persisted one real anonymous browser; SQL snapshot matches rendered1285 (1284 demo+1 real).
+- Source commit1492998 pushed to the new private repository; working tree clean after push. Secrets and generated configuration were excluded.
+- GitHub automatic deployment connection remains pending: CLI git connect failed and the account has no Vercel GitHub App installed. Requested action-time approval for the official app limited to kimportflowrio. Live manual deployment and Supabase integration are already verified.

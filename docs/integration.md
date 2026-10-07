@@ -27,7 +27,9 @@ If the database is unavailable, the footer retains its labeled demo value and of
 
 `vercel.json` builds the Vite frontend and deploys `api/visits.mjs` as a Node function. The API supports Vercel's parsed request body as well as the local streaming request body. JSON, UUID, origin, request size, response shape, and upstream timeout are checked. API responses cannot be cached.
 
-Connect the `flow4u11/kimportflowrio` GitHub repository to the portfolio Vercel project and set the server variables for the desired environments. Both frontend and API deploy from the same repository; no frontend keys or database passwords are necessary.
+Production is live at https://kimportflowrio.vercel.app with server variables configured. Source is pushed to the new private `flow4u11/kimportflowrio` repository. Both frontend and API deploy together; no frontend keys or database passwords are necessary.
+
+Automatic deployments from GitHub are pending: the Vercel GitHub App is not installed on this account, so `vercel git connect` could not connect the private repository. Install the official app with access limited to `kimportflowrio`, then connect it in the Vercel project's Git settings. The existing production deployment and Supabase counter work independently of this step. Never grant all-repository access when only this repository is needed.
 
 ## Verification
 

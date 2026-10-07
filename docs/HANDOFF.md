@@ -21,3 +21,5 @@ Vercel: new project kimportflowrio, ID prj_cUFSjtxYWcFccwd4KImAEskVSyly, owner t
 Checks: npm run check, npm run test:visits (7), npm run build. Browser widths 320/390/768/1280 verified no horizontal overflow, modal fit, focus return, no console errors. See WORKLOG for final deployment state.
 
 Final state: production https://kimportflowrio.vercel.app, new private source https://github.com/flow4u11/kimportflowrio. Local repository initialized from its initial main commit without touching working files. Live UI-to-API-to-Supabase counter verified.
+
+Source commit `1492998` pushed to main. Remaining integration: GitHub automatic deployments. Vercel GitHub App is absent from the account's installed apps, and CLI git connect failed. Action-time approval requested before installing the official app with access limited to `kimportflowrio`. The user is using Safari concurrently; avoid operating their active tabs without fresh state. An isolated in-app GitHub installation page requires sign-in. Do not overwrite existing repositories or grant the app access to all repositories.
