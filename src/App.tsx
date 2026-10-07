@@ -19,7 +19,7 @@ import { CyclingAboutTitle } from './components/CyclingAboutTitle';
 import { LoopingMarquee } from './components/LoopingMarquee';
 import { ProjectGallery, type Project } from './components/ProjectGallery';
 import { MotionSettingsDialog, FpsOverlay, useMotionSettings } from './components/MotionSettings';
-import { useSectionTransition } from './components/SectionTransition';
+import { useSectionNavigation } from './components/useSectionNavigation';
 import { IdleGlare, ProfileCheck } from './components/IdleDetails';
 
 type Theme = 'light' | 'dark';
@@ -37,7 +37,7 @@ export default function App() {
   const reduced = useReducedMotion() ?? false;
   const { settings } = useMotionSettings();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { navigate, navigating, curtain } = useSectionTransition({ reduced, speed: settings.animationSpeed });
+  const { navigate, navigating } = useSectionNavigation({ reduced });
   const [language, setLanguage] = useState<Language>(() => {
     try { return localStorage.getItem('portfolio-language') === 'th' ? 'th' : 'en'; } catch { return 'en'; }
   });
@@ -156,7 +156,7 @@ export default function App() {
       <a className="skip-link" href="#home">Skip to content</a>
       <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
         <button type="button" className="wordmark wordmark-settings" onClick={() => setSettingsOpen(true)} aria-label={language === 'th' ? 'เปิดการตั้งค่า' : 'Open motion settings'} aria-haspopup="dialog"><ScrambleWordmark /></button>
-        <nav aria-label="Main navigation">{navigation.map(item => <a key={item.id} href={`#${item.id}`} className={item.id === 'home' ? 'nav-home' : undefined} aria-disabled={navigating || undefined} onClick={event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); if (!transitioning) navigate({ ...item, keyboard: event.detail === 0 }); }} aria-current={activeSection === item.id ? 'location' : undefined}>{activeSection === item.id && <motion.span className="nav-indicator" layoutId="active-navigation" transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 160 * settings.animationSpeed ** 2, damping: 25 * settings.animationSpeed }} aria-hidden="true" />}<span className="nav-label">{item.label}</span></a>)}</nav>
+        <nav aria-label="Main navigation">{navigation.map(item => <a key={item.id} href={`#${item.id}`} className={item.id === 'home' ? 'nav-home' : undefined} onClick={event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); if (!transitioning) navigate({ ...item, keyboard: event.detail === 0 }); }} aria-current={activeSection === item.id ? 'location' : undefined}>{activeSection === item.id && <motion.span className="nav-indicator" layoutId="active-navigation" transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 160 * settings.animationSpeed ** 2, damping: 25 * settings.animationSpeed }} aria-hidden="true" />}<span className="nav-label">{item.label}</span></a>)}</nav>
         <div className="header-controls"><LanguageControl language={language} onChange={setLanguage} /><SpecialThemeControl active={specialTheme} onExit={exitSpecial} language={language} disabled={transitioning || navigating}><ThemeTogglerButton theme={theme} onThemeChange={setTheme} disabled={transitioning || navigating} className="theme-control" aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} /></SpecialThemeControl></div>
         <motion.div className="page-progress" style={{ scaleX: pageProgress }} aria-hidden="true" />
       </header>
@@ -195,7 +195,6 @@ export default function App() {
 
       <footer className="site-footer"><div className="footer-brand"><a className="wordmark" href="#home" aria-label="flowrio, back to home"><ScrambleWordmark /></a><p>© {new Date().getFullYear()} · Made with curiosity.</p><p className="design-credit"><LocalizedCopy text={text.footer} language={language} /></p></div>{!loading && <FooterConfetti />}<a className="back-to-top" href="#home">Back to top <ArrowUp size={13} aria-hidden="true" /></a></footer>
     </div>
-    {curtain}
     <FpsOverlay />
     <MotionSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} language={language} />
 

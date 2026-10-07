@@ -23,7 +23,8 @@
 }
 * { box-sizing: border-box; }
 html { scroll-padding-top: 86px; scroll-behavior: smooth; scrollbar-gutter: stable; }
-body { margin: 0; background: var(--bg); color: var(--text); font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: "DM Sans", "Noto Sans Thai", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+body [lang="th"], .motion-settings-dialog[lang="th"] legend { font-family: "Noto Sans Thai", "DM Sans", sans-serif; letter-spacing: 0; }
 body.scroll-locked { overflow: hidden; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { font: inherit; cursor: pointer; }

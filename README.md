@@ -19,9 +19,10 @@ Open http://127.0.0.1:5173. The development server serves the frontend and Visit
 
 - Light/Dark themes with an iris transition. An About keyword experiment unlocks a separate neobrutalism design.
 - English/Thai key information, short scramble transitions, genuine tool icons, and separate toolkit and technology collections, each moving in two rows ordered by category.
-- Shared particle background, bounded 2.5D viewport reveals, a moving name gradient with a fixed font, and full-viewport, once-per-session footer confetti. Motion pauses when hidden/offscreen and respects reduced-motion preferences.
+- Shared particle background, bounded 2.5D viewport reveals, a moving name gradient with a fixed font, and full-viewport, once-per-session paper confetti with gravity, air resistance and flutter. Motion pauses when hidden/offscreen and respects reduced-motion preferences.
+- Noto Sans Thai for Thai content and a blue scalloped profile check badge.
 - LastStand, my first Unreal Engine 5 FPS project; the live School Ledger app; and three layouts reserved for future projects.
-- Motion settings from the top-left wordmark: star speed/count, component pace and an optional FPS estimate, saved locally. Section links use a short curtain transition.
+- Motion settings from the top-left wordmark: star speed/count, component pace and an optional FPS estimate, saved locally. Section links use native smooth scrolling with keyboard focus handling and user interruption.
 - Native gallery scrolling, centered dialogs with keyboard focus handling, contact/profile links, and a hover/focus portrait transition.
 
 ## Stack

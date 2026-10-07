@@ -68,7 +68,6 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, offset
     let resizeFrame = 0;
     let previousFrame = 0;
     let onScreen = true;
-    let covered = document.documentElement.dataset.navigating === 'true';
     let disposed = false;
     let publishedCount = -1;
     let publishedSpeed = -1;
@@ -105,7 +104,7 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, offset
     };
 
     const tick = (timestamp: number) => {
-      if (disposed || document.hidden || !onScreen || covered || reduceMotion) return;
+      if (disposed || document.hidden || !onScreen || reduceMotion) return;
       if (!previousFrame || timestamp - previousFrame >= FRAME_INTERVAL - 1) {
         const { speed: currentSpeed, speedMultiplier: multiplier } = configRef.current;
         const rate = 60 / Math.max(Number.isFinite(currentSpeed) ? currentSpeed : 90, 1)
@@ -121,7 +120,7 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, offset
     const resume = () => {
       window.cancelAnimationFrame(frame);
       previousFrame = 0;
-      if (!document.hidden && onScreen && !covered) {
+      if (!document.hidden && onScreen) {
         draw();
         if (!reduceMotion) frame = window.requestAnimationFrame(tick);
       }
@@ -154,11 +153,7 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, offset
     });
     visibilityObserver.observe(canvas);
     document.addEventListener('visibilitychange', resume);
-    const navigationStart = () => { covered = true; resume(); };
-    const navigationEnd = () => { covered = false; resume(); };
-    window.addEventListener('portfolio:navigation-start', navigationStart);
-    window.addEventListener('portfolio:navigation-end', navigationEnd);
-    repaintRef.current = () => { if (!document.hidden && onScreen && !covered) draw(); };
+    repaintRef.current = () => { if (!document.hidden && onScreen) draw(); };
     resize();
 
     return () => {
@@ -168,8 +163,6 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, offset
       resizeObserver.disconnect();
       visibilityObserver.disconnect();
       document.removeEventListener('visibilitychange', resume);
-      window.removeEventListener('portfolio:navigation-start', navigationStart);
-      window.removeEventListener('portfolio:navigation-end', navigationEnd);
       repaintRef.current = null;
     };
   }, [offset, reduceMotion]);

@@ -14,7 +14,7 @@
   position: fixed;
   inset: 0;
   z-index: 20;
-  contain: layout;
+  contain: layout paint;
   overflow: hidden;
   pointer-events: none;
   visibility: hidden;
@@ -25,6 +25,8 @@
   top: 0;
   left: 0;
   opacity: 0;
+  transform-origin: center;
+  border-radius: .5px;
   /* Sprites exist only during the finite burst and are then removed. */
   will-change: transform, opacity;
 }
