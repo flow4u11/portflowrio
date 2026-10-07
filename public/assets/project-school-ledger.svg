@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="ledger-title ledger-desc">
+  <title id="ledger-title">School Ledger illustrated product overview</title>
+  <desc id="ledger-desc">An original monochrome illustration of School Ledger, a student grade management system with a classroom dashboard, subject grades, publication workflow, and GPA. Counts represent the public demo's fictional data.</desc>
+  <defs>
+    <pattern id="ledger-grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#fff" stroke-opacity=".04"/></pattern>
+    <clipPath id="ledger-window"><rect x="58" y="88" width="1084" height="630" rx="14"/></clipPath>
+  </defs>
+  <rect width="1200" height="800" fill="#171719"/>
+  <rect width="1200" height="800" fill="url(#ledger-grid)"/>
+  <g fill="#9e9ea5" font-family="Arial, Helvetica, sans-serif" font-size="10" letter-spacing="2">
+    <text x="58" y="47">SCHOOL LEDGER / ACADEMIC WORKSPACE</text>
+    <text x="1142" y="47" text-anchor="end">DESIGNED &amp; BUILT BY FLOW4U</text>
+  </g>
+  <rect x="69" y="101" width="1084" height="630" rx="14" fill="#000" opacity=".23"/>
+  <rect x="58" y="88" width="1084" height="630" rx="14" fill="#fcfcfc"/>
+  <g clip-path="url(#ledger-window)" font-family="Arial, Helvetica, sans-serif">
+    <rect x="58" y="88" width="1084" height="33" fill="#ededee"/>
+    <g fill="#b6b6bc"><circle cx="78" cy="104" r="4"/><circle cx="94" cy="104" r="4"/><circle cx="110" cy="104" r="4"/></g>
+    <rect x="415" y="95" width="372" height="19" rx="6" fill="#f9f9f9"/>
+    <text x="601" y="108" fill="#85858d" font-size="9" text-anchor="middle">school-ledger-beta.vercel.app</text>
+    <rect x="58" y="121" width="198" height="597" fill="#232326"/>
+    <g fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"><path d="M86 148h10c4 0 7 2 9 4 2-2 5-4 9-4h10v23h-10c-4 0-7 1-9 4-2-3-5-4-9-4H86zM105 152v23"/></g>
+    <text x="86" y="203" fill="#fff" font-size="20" font-weight="600" letter-spacing="-.5">School Ledger</text>
+    <text x="86" y="224" fill="#9e9ea6" font-size="10">Student grade management</text>
+    <text x="86" y="272" fill="#76767e" font-size="8.5" letter-spacing="1.6">TEACHING</text>
+    <rect x="73" y="286" width="168" height="38" rx="7" fill="#3b3b40"/>
+    <g fill="none" stroke="#b7b7bf" stroke-width="1.3"><rect x="88" y="298" width="6" height="6" rx="1"/><rect x="97" y="298" width="6" height="6" rx="1"/><rect x="88" y="307" width="6" height="6" rx="1"/><rect x="97" y="307" width="6" height="6" rx="1"/></g>
+    <text x="116" y="311" fill="#fff" font-size="11" font-weight="600">Overview</text>
+    <g fill="#a5a5af" font-size="11"><text x="116" y="350">Students</text><text x="116" y="390">Gradebook</text><text x="116" y="430">Classes</text></g>
+    <g fill="none" stroke="#82828c" stroke-width="1.3"><circle cx="96" cy="340" r="4"/><path d="M88 352c0-7 16-7 16 0M89 379h14v16H89zm4 5h6m-6 5h6M89 418h14v13H89zm0 4h14"/></g>
+    <path d="M86 457h139" stroke="#3d3d42"/>
+    <text x="86" y="481" fill="#76767e" font-size="8.5" letter-spacing="1.6">SCHOOL</text>
+    <g fill="#a5a5af" font-size="11"><text x="116" y="510">Subjects &amp; terms</text><text x="116" y="550">Grading criteria</text><text x="116" y="590">Audit history</text></g>
+    <g fill="none" stroke="#82828c" stroke-width="1.3"><path d="M89 499h14v13H89zm0 4h14M89 539h14m-14 5h14m-14 5h14M90 578v10h10m-4-13a9 9 0 1 1-8 15"/></g>
+    <path d="M86 637h139" stroke="#3d3d42"/>
+    <rect x="86" y="654" width="29" height="29" rx="9" fill="#45454d"/>
+    <text x="100.5" y="674" fill="#dedee4" font-size="10" text-anchor="middle">SL</text>
+    <text x="126" y="666" fill="#dddde3" font-size="10">Demo administrator</text>
+    <text x="126" y="681" fill="#767680" font-size="8.5">Fictional workspace</text>
+    <path d="M256 182h886" stroke="#e8e8ec"/>
+    <text x="288" y="155" fill="#55555d" font-size="11" font-weight="600">Workspace / Overview</text>
+    <rect x="938" y="138" width="166" height="27" rx="6" fill="#f3f3f5" stroke="#e3e3e8"/>
+    <text x="952" y="155" fill="#71717b" font-size="10">2026 · Semester 1</text>
+    <path d="m1083 149 4 4 4-4" fill="none" stroke="#92929c" stroke-width="1.2"/>
+    <text x="288" y="218" fill="#8c8c97" font-size="8.5" letter-spacing="1.8">YOUR CLASSROOM, IN ONE PLACE.</text>
+    <text x="288" y="252" fill="#222226" font-size="29" font-weight="600" letter-spacing="-.9">Ready for a new school day.</text>
+    <text x="288" y="276" fill="#92929c" font-size="11">Track students, manage scores, and publish results with confidence.</text>
+    <g fill="#f6f6f8" stroke="#e5e5e9"><rect x="288" y="300" width="188" height="81" rx="9"/><rect x="495" y="300" width="188" height="81" rx="9"/><rect x="702" y="300" width="188" height="81" rx="9"/><rect x="909" y="300" width="195" height="81" rx="9"/></g>
+    <g fill="#8b8b96" font-size="9"><text x="304" y="323">STUDENTS</text><text x="511" y="323">CLASSES</text><text x="718" y="323">SUBJECTS</text><text x="925" y="323">PUBLISHED RESULTS</text></g>
+    <g fill="#303037" font-size="28" font-weight="600"><text x="304" y="359">06</text><text x="511" y="359">02</text><text x="718" y="359">04</text><text x="925" y="359">24</text></g>
+    <rect x="288" y="404" width="514" height="244" rx="9" fill="#fff" stroke="#e3e3e8"/>
+    <text x="308" y="432" fill="#393941" font-size="12" font-weight="600">This semester's subjects</text>
+    <text x="783" y="432" fill="#9a9aa4" font-size="9" text-anchor="end">VIEW GRADEBOOK ↗</text>
+    <path d="M289 449h512" stroke="#eeeeF1"/>
+    <g fill="#3e3e47" font-size="11.5"><text x="330" y="479">Thai language</text><text x="330" y="530">Mathematics</text><text x="330" y="581">Science</text><text x="330" y="632">English language</text></g>
+    <g fill="#92929e" font-size="8.5"><text x="330" y="492">6 students · Semester 1</text><text x="330" y="543">6 students · Semester 1</text><text x="330" y="594">6 students · Semester 1</text><text x="330" y="645">6 students · Semester 1</text></g>
+    <g fill="#f1f1f4"><rect x="305" y="466" width="16" height="23" rx="4"/><rect x="305" y="517" width="16" height="23" rx="4"/><rect x="305" y="568" width="16" height="23" rx="4"/><rect x="305" y="619" width="16" height="23" rx="4"/></g>
+    <g fill="#6a6a76" font-size="9" text-anchor="end"><text x="783" y="483">6 / 6 PUBLISHED</text><text x="783" y="534">6 / 6 PUBLISHED</text><text x="783" y="585">6 / 6 PUBLISHED</text><text x="783" y="636">6 / 6 PUBLISHED</text></g>
+    <path d="M308 500h474M308 551h474M308 602h474" stroke="#f0f0f3"/>
+    <rect x="822" y="404" width="282" height="244" rx="9" fill="#f6f6f8" stroke="#e5e5e9"/>
+    <text x="842" y="432" fill="#393941" font-size="12" font-weight="600">A clear grading workflow</text>
+    <path d="M853 471v118" stroke="#d6d6df" stroke-width="1.5"/>
+    <g fill="#32323a"><circle cx="853" cy="473" r="8"/><circle cx="853" cy="524" r="8"/><circle cx="853" cy="575" r="8"/></g>
+    <g fill="#fff" font-size="8" text-anchor="middle"><text x="853" y="476">1</text><text x="853" y="527">2</text><text x="853" y="578">3</text></g>
+    <g fill="#4a4a55" font-size="10" font-weight="600"><text x="874" y="473">Enter &amp; save scores</text><text x="874" y="524">Review grades &amp; GPA</text><text x="874" y="575">Publish student results</text></g>
+    <g fill="#92929e" font-size="9"><text x="874" y="489">By subject or by student</text><text x="874" y="540">Weighted, configurable criteria</text><text x="874" y="591">Role-based access</text></g>
+    <rect x="842" y="612" width="242" height="22" rx="5" fill="#e9e9ef"/>
+    <text x="963" y="627" fill="#757583" font-size="8.5" text-anchor="middle">IMPORT / EXPORT EXCEL</text>
+    <path d="M288 674h816" stroke="#e8e8ec"/>
+    <text x="288" y="696" fill="#a1a1ad" font-size="9">Illustrated product overview · Public demo data</text>
+    <text x="1104" y="696" fill="#92929f" font-size="9" text-anchor="end">Next.js · TypeScript · Supabase</text>
+  </g>
+  <g fill="#8e8e98" font-family="Arial, Helvetica, sans-serif" font-size="9" letter-spacing="1.2"><text x="58" y="759">A SYSTEM BUILT AROUND TEACHERS.</text><text x="1142" y="759" text-anchor="end">FULL STACK / BETA</text></g>
+</svg>

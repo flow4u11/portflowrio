@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="gradetrack-title gradetrack-desc">
+  <title id="gradetrack-title">GradeTrack web app interface draft</title>
+  <desc id="gradetrack-desc">A clean monochrome concept dashboard for entering and viewing course grades by semester. The placeholder name GradeTrack and all course entries are fictional interface draft data, not real student records.</desc>
+  <defs>
+    <pattern id="gt-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#fff" stroke-opacity=".045" stroke-width="1"/></pattern>
+    <radialGradient id="gt-backing" cx="50%" cy="38%" r="80%"><stop stop-color="#303030"/><stop offset="1" stop-color="#141414"/></radialGradient>
+    <filter id="gt-shadow" x="-15%" y="-20%" width="130%" height="150%"><feDropShadow dx="0" dy="20" stdDeviation="19" flood-color="#000" flood-opacity=".35"/></filter>
+    <clipPath id="gt-window"><rect x="64" y="80" width="1072" height="640" rx="12"/></clipPath>
+  </defs>
+  <rect width="1200" height="800" fill="url(#gt-backing)"/>
+  <rect width="1200" height="800" fill="url(#gt-grid)"/>
+  <g stroke="#7b7b7b" stroke-width=".8" opacity=".6"><path d="M42 80h8m-4-4v8M1150 80h8m-4-4v8M42 720h8m-4-4v8M1150 720h8m-4-4v8"/></g>
+  <g filter="url(#gt-shadow)"><rect x="64" y="80" width="1072" height="640" rx="12" fill="#fff"/></g>
+  <g clip-path="url(#gt-window)" font-family="Arial, Helvetica, sans-serif">
+    <rect x="64" y="80" width="1072" height="30" fill="#ededed"/>
+    <g fill="#bababa"><circle cx="82" cy="95" r="3.5"/><circle cx="96" cy="95" r="3.5"/><circle cx="110" cy="95" r="3.5"/></g>
+    <rect x="468" y="87" width="264" height="16" rx="4" fill="#fafafa"/>
+    <text x="600" y="98" text-anchor="middle" fill="#999" font-size="8" letter-spacing=".4">GradeTrack — interface concept</text>
+    <rect x="64" y="110" width="208" height="610" fill="#f7f7f7"/>
+    <path d="M272 110V720" stroke="#e6e6e6"/>
+    <rect x="91" y="141" width="23" height="23" rx="6" fill="#171717"/>
+    <path d="M97 153l4 4 7-8" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="124" y="157" fill="#252525" font-size="17" font-weight="700" letter-spacing="-.6">GradeTrack</text>
+    <text x="91" y="202" fill="#969696" font-size="8.5" letter-spacing="1.4">WORKSPACE</text>
+    <rect x="81" y="219" width="174" height="37" rx="7" fill="#e8e8e8"/>
+    <g fill="none" stroke="#555" stroke-width="1.25"><rect x="97" y="231" width="5" height="5" rx=".6"/><rect x="105" y="231" width="5" height="5" rx=".6"/><rect x="97" y="239" width="5" height="5" rx=".6"/><rect x="105" y="239" width="5" height="5" rx=".6"/></g>
+    <text x="124" y="242" fill="#313131" font-size="11.5" font-weight="600">Overview</text>
+    <g fill="none" stroke="#929292" stroke-width="1.2"><rect x="98" y="273" width="12" height="14" rx="2"/><path d="M101 277h6m-6 3h6m-6 3h4"/><path d="M98 317h12v10H98zm0 3h12m-9-6v5m6-5v5"/></g>
+    <text x="124" y="284" fill="#858585" font-size="11.5">Grade entry</text><text x="124" y="326" fill="#858585" font-size="11.5">Semesters</text>
+    <path d="M91 358H245" stroke="#e2e2e2"/>
+    <text x="91" y="384" fill="#969696" font-size="8.5" letter-spacing="1.4">SEMESTERS</text>
+    <circle cx="103" cy="411" r="3" fill="#4b4b4b"/><text x="124" y="415" fill="#505050" font-size="11.5">Semester 1</text><rect x="221" y="402" width="22" height="16" rx="5" fill="#ebebeb"/><text x="232" y="413" text-anchor="middle" fill="#828282" font-size="8.5">04</text>
+    <circle cx="103" cy="445" r="3" fill="#c9c9c9"/><text x="124" y="449" fill="#989898" font-size="11.5">Semester 2</text>
+    <path d="M91 645H245" stroke="#e2e2e2"/>
+    <rect x="92" y="664" width="29" height="29" rx="8" fill="#e9e9e9"/><path d="M101 681h11m-10-6h9v10h-9z" fill="none" stroke="#838383" stroke-width="1"/>
+    <text x="132" y="674" fill="#515151" font-size="10.5" font-weight="600">Demo workspace</text><text x="132" y="689" fill="#999" font-size="8.5">Interface draft</text>
+    <path d="M272 178H1136" stroke="#ededed"/>
+    <text x="310" y="150" fill="#353535" font-size="12" font-weight="600">Overview</text><text x="398" y="150" fill="#9b9b9b" font-size="12">Grade entry</text>
+    <path d="M310 177H368" stroke="#222" stroke-width="2"/>
+    <rect x="983" y="130" width="112" height="28" rx="7" fill="#f5f5f5" stroke="#e5e5e5"/><path d="M998 138v12m-4-6h8" stroke="#787878" stroke-width="1"/><text x="1010" y="148" fill="#686868" font-size="10">Add course</text>
+    <text x="310" y="227" fill="#202020" font-size="29" font-weight="600" letter-spacing="-.85">Semester overview</text>
+    <text x="310" y="251" fill="#939393" font-size="11.5">Enter grades and keep your courses in view.</text>
+    <rect x="975" y="211" width="121" height="25" rx="12.5" fill="#f3f3f3"/><circle cx="987" cy="223.5" r="2.5" fill="#9c9c9c"/><text x="998" y="227" fill="#747474" font-size="8" letter-spacing="1">INTERFACE DRAFT</text>
+    <g>
+      <rect x="310" y="280" width="246" height="71" rx="8" fill="#fafafa" stroke="#e7e7e7"/>
+      <rect x="577" y="280" width="246" height="71" rx="8" fill="#fafafa" stroke="#e7e7e7"/>
+      <rect x="844" y="280" width="252" height="71" rx="8" fill="#fafafa" stroke="#e7e7e7"/>
+      <g fill="#9b9b9b" font-size="9"><text x="326" y="301">CURRENT SEMESTER</text><text x="593" y="301">COURSES</text><text x="860" y="301">ENTRY STATUS</text></g>
+      <g fill="#3e3e3e" font-size="18" font-weight="600" letter-spacing="-.3"><text x="326" y="330">Semester 1</text><text x="593" y="330">04 <tspan font-size="10" fill="#969696" font-weight="400">courses</tspan></text><text x="860" y="330">Draft <tspan font-size="10" fill="#969696" font-weight="400">· unsaved example</tspan></text></g>
+      <path d="M534 317l3 3 3-3" fill="none" stroke="#939393" stroke-width="1"/>
+    </g>
+    <rect x="310" y="375" width="786" height="221" rx="8" fill="#fff" stroke="#e5e5e5"/>
+    <path d="M311 412H1095" stroke="#e5e5e5"/>
+    <g fill="#8c8c8c" font-size="9.5" letter-spacing=".2"><text x="332" y="398">Course</text><text x="785" y="398">Credits</text><text x="944" y="398" text-anchor="middle">Grade</text></g>
+    <g fill="#454545" font-size="12.5" font-weight="500"><text x="332" y="435">Design fundamentals</text><text x="332" y="481">Web development</text><text x="332" y="527">Data systems</text><text x="332" y="573">Research methods</text></g>
+    <g fill="#aaa" font-size="8.5"><text x="332" y="449">COURSE 101 · EXAMPLE ENTRY</text><text x="332" y="495">COURSE 102 · EXAMPLE ENTRY</text><text x="332" y="541">COURSE 103 · EXAMPLE ENTRY</text><text x="332" y="587">COURSE 104 · EXAMPLE ENTRY</text></g>
+    <g fill="#858585" font-size="11"><text x="803" y="441">3</text><text x="803" y="487">3</text><text x="803" y="533">3</text><text x="803" y="579">3</text></g>
+    <g fill="#fafafa" stroke="#dedede"><rect x="889" y="422" width="112" height="27" rx="5"/><rect x="889" y="468" width="112" height="27" rx="5"/><rect x="889" y="514" width="112" height="27" rx="5"/><rect x="889" y="560" width="112" height="27" rx="5"/></g>
+    <g fill="#4a4a4a" font-size="11"><text x="901" y="439">A</text><text x="901" y="485">B+</text><text x="901" y="531">A−</text><text x="901" y="577">B</text></g>
+    <g fill="none" stroke="#a0a0a0" stroke-width="1"><path d="M981 434l3 3 3-3M981 480l3 3 3-3M981 526l3 3 3-3M981 572l3 3 3-3"/></g>
+    <g fill="#b1b1b1"><circle cx="1069" cy="435" r="1.3"/><circle cx="1069" cy="439" r="1.3"/><circle cx="1069" cy="443" r="1.3"/><circle cx="1069" cy="481" r="1.3"/><circle cx="1069" cy="485" r="1.3"/><circle cx="1069" cy="489" r="1.3"/><circle cx="1069" cy="527" r="1.3"/><circle cx="1069" cy="531" r="1.3"/><circle cx="1069" cy="535" r="1.3"/><circle cx="1069" cy="573" r="1.3"/><circle cx="1069" cy="577" r="1.3"/><circle cx="1069" cy="581" r="1.3"/></g>
+    <path d="M330 458H1076M330 504H1076M330 550H1076" stroke="#eeeeee"/>
+    <text x="310" y="636" fill="#999" font-size="10">4 courses · 12 credits</text>
+    <rect x="972" y="614" width="124" height="36" rx="7" fill="#202020"/><path d="M986 625h10v13h-10zm2 0v4h6v-4m-6 13v-4h6v4" fill="none" stroke="#ededed" stroke-width=".9"/><text x="1008" y="636" fill="#fff" font-size="10.5">Save grades</text>
+    <path d="M310 667H1096" stroke="#eee"/>
+    <text x="310" y="689" fill="#a4a4a4" font-size="9">Fictional course data · Interface concept</text><text x="1096" y="689" text-anchor="end" fill="#aaa" font-size="9">GradeTrack / placeholder name</text>
+  </g>
+</svg>
