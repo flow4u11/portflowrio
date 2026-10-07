@@ -68,15 +68,11 @@
 .looping-marquee-set > * { flex-shrink: 0; white-space: nowrap; }
 .looping-marquee[data-direction="right"] .looping-marquee-track { animation-direction: reverse; }
 .looping-marquee[data-running="true"] .looping-marquee-track { animation-play-state: running; }
+/* Pause the existing animation timeline; never remove the track or its copies. */
 .looping-marquee:hover .looping-marquee-track,
+.looping-marquee:active .looping-marquee-track,
 .looping-marquee:focus-within .looping-marquee-track { animation-play-state: paused; }
 @keyframes idle-marquee-loop { to { transform: translateX(-50%); } }
-
-/* Keyboard focus exposes the real set at its natural position for scrolling. */
-.looping-marquee[data-focused="true"] { overflow-x: auto; scrollbar-width: thin; }
-.looping-marquee[data-focused="true"] .looping-marquee-track { animation: none; transform: none; }
-.looping-marquee[data-focused="true"] .looping-marquee-copy,
-.looping-marquee[data-focused="true"] .looping-marquee-clone { display: none; }
 
 .looping-marquee[data-static="true"] { overflow: visible; }
 .looping-marquee[data-static="true"] .looping-marquee-track { width: auto; animation: none; transform: none; }

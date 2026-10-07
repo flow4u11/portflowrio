@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 type VisitData = { total: number; avatars: string[] };
-const demoVisits = 1284;
-const demoAvatars = ['4f820d11', '943b277c', 'bf3b51a8', '6658c32a'];
+const presentationVisits = 1284;
+const presentationAvatars = ['4f820d11', '943b277c', 'bf3b51a8', '6658c32a'];
 const visitorIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 let visitRequest: Promise<VisitData> | null = null;
 let temporaryVisitorId: string | null = null;
@@ -61,9 +61,9 @@ export function VisitsCounter() {
     return () => { alive = false; };
   }, [nearFooter, retry]);
 
-  const total = demoVisits + (data?.total ?? 0);
-  const description = data ? `${demoVisits.toLocaleString('en-US')} demo visits + ${data.total.toLocaleString('en-US')} recorded anonymous browsers` : `${demoVisits.toLocaleString('en-US')} demo visits. Real counter ${error ? 'unavailable' : 'loading'}.`;
-  const avatars = data?.avatars.length ? data.avatars : demoAvatars;
+  const total = presentationVisits + (data?.total ?? 0);
+  const description = data ? `${presentationVisits.toLocaleString('en-US')} presentation visits + ${data.total.toLocaleString('en-US')} recorded anonymous browsers` : `${presentationVisits.toLocaleString('en-US')} presentation visits. Anonymous counter ${error ? 'unavailable' : 'loading'}.`;
+  const avatars = data?.avatars.length ? data.avatars : presentationAvatars;
   return <div ref={counter} className="visits-counter" aria-label={description} title={description}>
     <div className="visitor-avatars" aria-hidden="true">
       {avatars.map(seed => <span className="visitor-avatar" key={seed}><VisitorGlyph seed={seed} /></span>)}

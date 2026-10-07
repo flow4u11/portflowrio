@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { ArrowLeft, ArrowRight, ArrowUpRight, Plus } from 'lucide-react';
-import { BrandIcon } from './BrandIcon';
+import { ToolBrandIcon } from './ToolBrandIcon';
+import { LocalizedCopy, type Language } from './LocalizedCopy';
 import './project-gallery.css';
 
 export type Project = {
@@ -15,10 +16,13 @@ export type Project = {
   status: string;
   liveUrl?: string;
   sourceUrl?: string;
+  videoUrl?: string;
+  videoId?: string;
 };
 
 type ProjectGalleryProps = {
   projects: Project[];
+  language?: Language;
   onOpen: (project: Project, trigger: HTMLElement) => void;
 };
 
@@ -30,7 +34,8 @@ const futureSlots = [
 
 type GalleryPosition = { index: number; atStart: boolean; atEnd: boolean };
 
-export function ProjectGallery({ projects, onOpen }: ProjectGalleryProps) {
+export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGalleryProps) {
+  const thai = language === 'th';
   const trackRef = useRef<HTMLDivElement>(null);
   const instructionId = useId();
   const trackId = useId();
@@ -137,11 +142,12 @@ export function ProjectGallery({ projects, onOpen }: ProjectGalleryProps) {
           </span>
         </button>
         <div className="pg-body">
-          <p className="pg-description">{project.description}</p>
+          <p className="pg-description"><LocalizedCopy text={project.description} language={language} /></p>
           <div className="pg-tags">{project.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
-          {(project.liveUrl || project.sourceUrl) && <div className="pg-links">
-            {project.liveUrl && <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={13} aria-hidden="true" /></a>}
-            {project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer"><BrandIcon brand="github" />Source code</a>}
+          {(project.liveUrl || project.sourceUrl || project.videoUrl) && <div className="pg-links">
+            {project.videoUrl && <a href={project.videoUrl} target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="YouTube" />{thai ? 'ชมเกมเพลย์' : 'Watch gameplay'}<ArrowUpRight size={13} aria-hidden="true" /></a>}
+            {project.liveUrl && <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">{thai ? 'เปิดเว็บไซต์' : 'Visit website'} <ArrowUpRight size={13} aria-hidden="true" /></a>}
+            {project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="GitHub" />Source code</a>}
           </div>}
         </div>
       </article>)}
@@ -159,7 +165,7 @@ export function ProjectGallery({ projects, onOpen }: ProjectGalleryProps) {
           <Plus size={19} aria-hidden="true" />
         </div>
         <div className="pg-body">
-          <p className="pg-description">A little space for what comes next. A new project, its story, and the details will live here when they’re ready.</p>
+          <p className="pg-description"><LocalizedCopy language={language} text={thai ? 'พื้นที่สำหรับไอเดียถัดไป โปรเจกต์ เรื่องราว และรายละเอียดใหม่ ๆ จะอยู่ที่นี่เมื่อพร้อม' : 'A little space for what comes next. A new project, its story, and the details will live here when they’re ready.'} /></p>
           <p className="pg-empty-note"><span aria-hidden="true" />No project added yet</p>
         </div>
       </article>)}

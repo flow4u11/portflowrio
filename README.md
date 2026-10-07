@@ -1,48 +1,37 @@
 # kimportflowrio
 
-Chayathorn Chianpolsane (Kim)'s portfolio: design, games, and interactive experiences.
+My portfolio for design, games, and interactive experiences.
 
-Live: https://kimportflowrio.vercel.app
-Source: https://github.com/flow4u11/kimportflowrio (private)
+[Visit the portfolio](https://kimportflowrio.vercel.app).
 
 ## Local preview
 
-Node.js 22.12 or later:
+Use Node.js 22.12 or later:
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173. The custom development server serves the frontend and `/api/visits` together. Set `PORT` to change the port.
+Open http://127.0.0.1:5173. The development server serves the frontend and Visits API together.
 
 ## Experience
 
-- Light/dark themes with a circular iris from the toggle click; an iris curtain supports browsers without native View Transitions.
-- One shared animated canvas background, brighter in light mode. Particle count, pixel density, and drawing rate are bounded; hidden tabs and reduced motion pause it.
-- Native scrolling, repeatable section entry/exit, a sliding navigation highlight, a rotating typewriter phrase, and idle arrow motion.
-- Header/footer scramble wordmark alternates flowrio. and portflorio. with reserved width. A full-width About section cycles design/play and moves tools/technologies in seamless lanes, paused offscreen or hidden.
-- Pixel portrait transition on hover, focus, or touch.
-- A native horizontal gallery with LastStand, the live [School Ledger](https://school-ledger-beta.vercel.app) app ([source](https://github.com/flow4u11/student-grade-system)), and three empty future project layouts. Arrow buttons and keyboard navigation work alongside touch scrolling.
-- Creative tools and technologies used across Kim's projects.
-- Gmail, Discord username copy, and GitHub contact links; centered accessible dialogs animate both entry and exit, preserving focus trapping and focus return.
-- Footer baseline of 1,284 plus a separate real anonymous browser counter. Tooltip/accessibility text explains the presentation baseline; the visible Demo badge was removed at the owner's request.
-
-Owner working rules, usage checkpoints, and supplied source links are retained in [working rules](docs/WORKING_RULES.md) and [work log](docs/WORKLOG.md).
+- Light/Dark themes with an iris transition. An About keyword experiment unlocks a separate neobrutalism design.
+- English/Thai key information, short scramble transitions, genuine tool icons, and categorized moving tool/technology lanes.
+- Shared particle background, bounded 2.5D viewport reveals, name/font motion, and once-per-session footer confetti. Motion pauses when hidden/offscreen and respects reduced-motion preferences.
+- LastStand, my first Unreal Engine 5 FPS project; the live School Ledger app; and three layouts reserved for future projects.
+- Native gallery scrolling, centered dialogs with keyboard focus handling, contact/profile links, and a hover/focus portrait transition.
 
 ## Stack
 
-This portfolio uses React, TypeScript, Vite, Tailwind CSS, Motion, Lucide, and a Node.js visits API backed by Supabase PostgreSQL. The technology display also includes verified technologies from School Ledger; it does not imply every listed tool runs on this portfolio.
+React, TypeScript, Vite, Tailwind CSS, Motion, Lucide and a Node.js Visits API backed by Supabase PostgreSQL. The displayed technology collection also includes tools used in other projects.
 
-## Visits and deployment
+## Visits
 
-Set server-only `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in ignored `.env.local` for cloud-connected local development. Without either setting, local preview uses `.data/visits.json`. Production on Vercel requires both settings and never writes a counter to an ephemeral filesystem.
+The frontend adds a presentation baseline of 1,284 to the separate anonymous browser counter. Configure server-only environment values using `.env.example`. Local environment files are ignored. See [integration](docs/integration.md) for storage and API behavior.
 
-Visits use the existing Supabase project in a separate private schema. Only hashes of random browser identifiers are persisted. The displayed demo baseline is never added to the database. See [integration details](docs/integration.md) and `.env.example`. Keep server keys outside source control and never use a `VITE_` prefix.
-
-`vercel.json` deploys the Vite frontend and `/api/visits` as a server function. `.vercel` and environment files are ignored.
-
-## Validation
+## Verification
 
 ```sh
 npm run check
@@ -51,6 +40,10 @@ npm run build
 npm start
 ```
 
-Production preview runs at http://127.0.0.1:4173. Backend tests cover deduplication, concurrency, validation, Supabase requests, and failure handling. Browser checks cover themes, navigation, centered dialogs, focus return, and responsive layouts.
+Production preview runs at http://127.0.0.1:4173. Builds are minified with source maps disabled; this does not make rendered design impossible to reproduce.
 
-The School Ledger cover is an original illustration; LastStand's cover is a concept, not a gameplay capture. Original component license notices are documented in `docs/animate-ui-sources.md`; the background renderer and iris transition were rewritten for this version.
+## Design and attribution
+
+Original designs are created in Figma, with AI-assisted implementation. Project covers are original illustrations, not gameplay or app captures. LastStand links to the actual gameplay video; the packaged game is not included in this repository.
+
+Original design, content, artwork and application code are reserved under [LICENSE](LICENSE). Third-party software and brand assets retain their own terms. See [component sources](docs/animate-ui-sources.md) and [icon sources](src/assets/icons/ATTRIBUTION.md).

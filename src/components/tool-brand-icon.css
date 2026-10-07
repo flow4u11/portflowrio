@@ -1,0 +1,16 @@
+.tool-brand-icon {
+  --tool-brand-icon-size: 18px;
+  display: inline-block;
+  width: var(--tool-brand-icon-size);
+  height: var(--tool-brand-icon-size);
+  flex: 0 0 var(--tool-brand-icon-size);
+  object-fit: contain;
+  vertical-align: middle;
+  user-select: none;
+  pointer-events: none;
+}
+.tool-brand-icon-mono {
+  background-color: currentColor;
+  -webkit-mask: var(--tool-brand-icon-source) center / contain no-repeat;
+  mask: var(--tool-brand-icon-source) center / contain no-repeat;
+}

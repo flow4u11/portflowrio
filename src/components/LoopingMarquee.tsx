@@ -12,13 +12,12 @@ type LoopingMarqueeProps = {
   durationSeconds?: number;
 };
 
-/** Use presentational chips without IDs; duplicate sets are inert and aria-hidden. */
+/** Children are presentational chips without IDs or focusable controls. */
 export function LoopingMarquee({ children, label, className = '', contentClassName = '', direction = 'left', durationSeconds = 32 }: LoopingMarqueeProps) {
   const { ref, active, reduced } = useIdleMotion<HTMLDivElement>();
   const original = useRef<HTMLDivElement>(null);
   const [setsPerGroup, setSetsPerGroup] = useState(1);
   const [ready, setReady] = useState(false);
-  const [focused, setFocused] = useState(false);
 
   useLayoutEffect(() => {
     const viewport = ref.current;
@@ -46,16 +45,15 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
   const duration = Number.isFinite(durationSeconds) ? Math.max(8, durationSeconds) : 32;
   const style = { '--marquee-duration': `${duration}s` } as CSSProperties;
 
-  return <div ref={ref} className={`looping-marquee ${className}`} role="group" aria-label={label} tabIndex={0}
-    data-running={active && ready} data-direction={direction} data-static={reduced} data-focused={focused} style={style}
-    onFocusCapture={() => setFocused(true)}
-    onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
+  return <div ref={ref} className={`looping-marquee ${className}`} role="group" aria-label={label} tabIndex={reduced ? undefined : 0}
+    data-running={active && ready} data-direction={direction} data-static={reduced} style={style}>
     <div className="looping-marquee-track">
       <div className="looping-marquee-group">
         <div ref={original} className={`looping-marquee-set ${contentClassName}`}>{children}</div>
-        {Array.from({ length: copies }, (_, index) => <div key={index} className={`looping-marquee-set looping-marquee-copy ${contentClassName}`} aria-hidden="true" inert>{children}</div>)}
+        {/* aria-hidden avoids repeated announcements; copies still receive pointer hover/press. */}
+        {Array.from({ length: copies }, (_, index) => <div key={index} className={`looping-marquee-set looping-marquee-copy ${contentClassName}`} aria-hidden="true">{children}</div>)}
       </div>
-      {!reduced && <div className="looping-marquee-group looping-marquee-clone" aria-hidden="true" inert>
+      {!reduced && <div className="looping-marquee-group looping-marquee-clone" aria-hidden="true">
         {Array.from({ length: setsPerGroup }, (_, index) => <div key={index} className={`looping-marquee-set ${contentClassName}`}>{children}</div>)}
       </div>}
     </div>

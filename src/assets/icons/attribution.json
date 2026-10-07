@@ -1,0 +1,483 @@
+{
+  "retrieved": "2026-10-07",
+  "assets": [
+    {
+      "name": "Figma",
+      "file": "figma.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/figma.svg",
+      "source": "https://www.figma.com/using-the-figma-brand/",
+      "guidelines": "https://www.figma.com/using-the-figma-brand/",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "2f86fca501dfed321a62f28743f29d9dd738dac91668eac5260ab746d1ef8840"
+    },
+    {
+      "name": "Unreal Engine 5",
+      "file": "unrealengine.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/unrealengine.svg",
+      "source": "https://www.unrealengine.com/en-US/branding",
+      "guidelines": "https://www.unrealengine.com/en-US/branding",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "06bbd4833c91e4ad085dd8203b26739538a881e38755a3efc9ed8d57cfadbb73"
+    },
+    {
+      "name": "Unity",
+      "file": "unity.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/unity.svg",
+      "source": "https://brand.unity.com",
+      "guidelines": "https://unity.com/legal/branding-trademarks",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "b5b66fda997db7445483ff2917b1c17abb8da607d43905835551991aeb940753"
+    },
+    {
+      "name": "Roblox Studio",
+      "file": "robloxstudio.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/robloxstudio.svg",
+      "source": "https://create.roblox.com",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "860ab0e50fe4dac0e9fe8be35b80313c393ed6b63121ff4e78ccc4eba6ff8c86"
+    },
+    {
+      "name": "DaVinci Resolve",
+      "file": "davinciresolve.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/davinciresolve.svg",
+      "source": "https://www.blackmagicdesign.com/media/images/davinci-resolve-logo-square",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "0b5b2ac424bb9116a76e8b85508d6b38879676dbb32a9df15a39ac51627545b2"
+    },
+    {
+      "name": "Cursor",
+      "file": "cursor.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/cursor.svg",
+      "source": "https://cursor.com/brand",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "71572a9be192cc069ec22b48d785e61d754eeed7edb7d082d615f6d5620f70ec"
+    },
+    {
+      "name": "Blender",
+      "file": "blender.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/blender.svg",
+      "source": "https://www.blender.org/about/logo",
+      "guidelines": "https://www.blender.org/about/logo",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "ec86e2c9cf9fc25f5c8d3bf2e8d201c0dce6683137f37a1e61f992da6566bff5"
+    },
+    {
+      "name": "Claude",
+      "file": "claude.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/claude.svg",
+      "source": "https://claude.ai",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "2d6fda79eb18ddccca35b799eeb3cece0dfabc22520ce3b10abd25668df9fa93"
+    },
+    {
+      "name": "Gemini",
+      "file": "googlegemini.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/googlegemini.svg",
+      "source": "https://gemini.google.com",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "a6228d8846040401e941a39ed17459785e8324dbb7b870ce84233c9b3e9863a0"
+    },
+    {
+      "name": "React",
+      "file": "react.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/react.svg",
+      "source": "https://github.com/facebook/create-react-app/blob/282c03f9525fdf8061ffa1ec50dce89296d916bd/test/fixtures/relative-paths/src/logo.svg",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "ab9136a1a4a8be72ac6743e1bdd1912d878bd68d57787ea7a6c6838e3b23c01c"
+    },
+    {
+      "name": "Next.js",
+      "file": "nextdotjs.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/nextdotjs.svg",
+      "source": "https://vercel.com/design/brands#next-js",
+      "guidelines": "https://vercel.com/design/brands#next-js",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "593e14da3ddb65be4c8fa6a178f2f48a01a8bd39ea384f679cd7182b520da502"
+    },
+    {
+      "name": "TypeScript",
+      "file": "typescript.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/typescript.svg",
+      "source": "https://www.typescriptlang.org/branding",
+      "guidelines": "https://www.typescriptlang.org/branding",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "7f023e8d1e767370306ec9437d2de5d5af97491d6208dd7799a3808a7c10a36a"
+    },
+    {
+      "name": "JavaScript",
+      "file": "javascript.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/javascript.svg",
+      "source": "https://github.com/voodootikigod/logo.js/blob/1544bdeed6d618a6cfe4f0650d04ab8d9cfa76d9/js.svg",
+      "guidelines": null,
+      "logoLicense": {
+        "type": "MIT"
+      },
+      "packageLicense": "CC0-1.0",
+      "sha256": "c9be35a7a861ebe80ae4ee706d05004b99ee59fc63db69da6dcc10776718434b"
+    },
+    {
+      "name": "HTML",
+      "file": "html5.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/html5.svg",
+      "source": "https://www.w3.org/html/logo/",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "dfd65fdd7e4f997c6b163e48793de5ad18c4c99e191807a61752ea702f123d1d"
+    },
+    {
+      "name": "CSS",
+      "file": "css.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/css.svg",
+      "source": "https://github.com/CSS-Next/logo.css/blob/bacc20878227204b283c68a6b935f8279e06b0cd/css.svg",
+      "guidelines": "https://github.com/CSS-Next/logo.css",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "9a97b95e3207aa4a6545dbb862e22450a01f37201c00e6b7d9c2958b59ca9ff9"
+    },
+    {
+      "name": "Tailwind CSS",
+      "file": "tailwindcss.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/tailwindcss.svg",
+      "source": "https://tailwindcss.com/brand",
+      "guidelines": "https://tailwindcss.com/brand",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "5d4ede3c95da824f543c6eefbe7c78b45ecce6796f6633de196dd712a7841140"
+    },
+    {
+      "name": "Vite",
+      "file": "vite.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/vite.svg",
+      "source": "https://github.com/voidzero-dev/community-design-resources/blob/55902097229cf01cf2a4ceb376f992f5cf306756/brand-assets/vite/vite-icon-color-bracketless.svg",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "642bb261d6476ddf326b8ed7757543b3443a93a77fef1e434021fc201defa21c"
+    },
+    {
+      "name": "GSAP",
+      "file": "gsap.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/gsap.svg",
+      "source": "https://gsap.com/brand/",
+      "guidelines": "https://gsap.com/brand/",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "3a5839e0dbee31a3291d7c16454dec2601467a0f502cfded0e477dc811f5ae6a"
+    },
+    {
+      "name": "Radix UI",
+      "file": "radixui.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/radixui.svg",
+      "source": "https://www.radix-ui.com",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "9e1ac441029b2e0412a4d39a16f944b393d8688bbf6cbaf8ffa8555fc03c51e5"
+    },
+    {
+      "name": "Node.js",
+      "file": "nodedotjs.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/nodedotjs.svg",
+      "source": "https://nodejs.org/en/about/branding",
+      "guidelines": "https://nodejs.org/en/about/branding",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "021851b758cde7d3e04819c3ac02047d0ff281c712e8387afa0c76a6dac6db6c"
+    },
+    {
+      "name": "Supabase",
+      "file": "supabase.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/supabase.svg",
+      "source": "https://github.com/supabase/supabase/blob/4031a7549f5d46da7bc79c01d56be4177dc7c114/packages/common/assets/images/supabase-logo-wordmark--light.svg",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "61bf16d93be418f723ae1e137e57afdad4f185352fbc6dea9482af1e0a89ccf7"
+    },
+    {
+      "name": "PostgreSQL",
+      "file": "postgresql.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/postgresql.svg",
+      "source": "https://wiki.postgresql.org/wiki/Logo",
+      "guidelines": "https://www.postgresql.org/about/policies/trademarks/",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "c8ccadbd88c9312c2ad3734c4861b31d3485ce179ee91d64793143f83cfa745c"
+    },
+    {
+      "name": "Zod",
+      "file": "zod.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/zod.svg",
+      "source": "https://github.com/colinhacks/zod/blob/ff89187172ac6aa4a6264592980d1628ee785242/logo/Logo%20White.ai",
+      "guidelines": null,
+      "logoLicense": {
+        "type": "MIT"
+      },
+      "packageLicense": "CC0-1.0",
+      "sha256": "e8808a8b34a76aa064ca1b5b378d4f73cbc7690303f1e4a1c864d2ad08b712b3"
+    },
+    {
+      "name": "Git",
+      "file": "git.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/git.svg",
+      "source": "https://git-scm.com/community/logos",
+      "guidelines": null,
+      "logoLicense": {
+        "type": "CC-BY-3.0"
+      },
+      "packageLicense": "CC0-1.0",
+      "sha256": "95724d436215d483de82288610c3c144854138f49945424697fcdf8be66e17d6"
+    },
+    {
+      "name": "GitHub",
+      "file": "github.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/github.svg",
+      "source": "https://github.com/logos",
+      "guidelines": "https://github.com/logos",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "3bf8cceead820aec50d4ee825a3fd02c5a1cd6665cc9cf4cbf3d9c8861a204bb"
+    },
+    {
+      "name": "Vercel",
+      "file": "vercel.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/vercel.svg",
+      "source": "https://vercel.com/geist/brands",
+      "guidelines": "https://vercel.com/geist/brands",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "57f1e4135486c566e9878fddd259f7f6bf8ec43f31e7e6e38a36d9e814a1c0e0"
+    },
+    {
+      "name": "Vitest",
+      "file": "vitest.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/vitest.svg",
+      "source": "https://github.com/voidzero-dev/community-design-resources/blob/55902097229cf01cf2a4ceb376f992f5cf306756/brand-assets/vitest/vitest-icon-color-bracketless.svg",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "216ef31fa83484d7c42fa9caae00a857d3756cb6158516dd395799f2b6631d5c"
+    },
+    {
+      "name": "Gmail",
+      "file": "gmail.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/gmail.svg",
+      "source": "https://fonts.gstatic.com/s/i/productlogos/gmail_2020q4/v8/192px.svg",
+      "guidelines": null,
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "a537f5d85d9a27efa3a5d6086e8df6072ee93f76b4d176639a5e483f74b74b9f"
+    },
+    {
+      "name": "Discord",
+      "file": "discord.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/discord.svg",
+      "source": "https://discord.com/branding",
+      "guidelines": "https://discord.com/branding",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "1d364b72c9eaf1fe37d17ca88cd8fb541308dc0f3b09e2ab3b824f380b3493d5"
+    },
+    {
+      "name": "YouTube",
+      "file": "youtube.svg",
+      "provider": "Simple Icons",
+      "version": "16.34.0",
+      "download": "https://raw.githubusercontent.com/simple-icons/simple-icons/16.34.0/icons/youtube.svg",
+      "source": "https://www.youtube.com/howyoutubeworks/resources/brand-resources/#logos-icons-and-colors",
+      "guidelines": "https://www.youtube.com/howyoutubeworks/resources/brand-resources/#logos-icons-and-colors",
+      "logoLicense": null,
+      "packageLicense": "CC0-1.0",
+      "sha256": "5038808acbbc4e6edda16cbeb1cc6dec80e4e4ee4e227e039c41229fa222aa8c"
+    },
+    {
+      "name": "Premiere Pro",
+      "file": "premiere-pro.svg",
+      "provider": "Adobe",
+      "download": "https://main--cc--adobecom.aem.live/cc-shared/assets/img/product-icons/svg/premiere-pro.svg",
+      "source": "https://www.adobe.com/products/premiere.html",
+      "license": "Brand/trademark asset; no blanket open-source license asserted. See source brand usage terms.",
+      "modification": "None; intact asset.",
+      "sha256": "bb8a26c488d8ea444e88878b83faf35d7f7760ecff0a11410270e641b2b905ea"
+    },
+    {
+      "name": "After Effects",
+      "file": "after-effects.svg",
+      "provider": "Adobe",
+      "download": "https://main--cc--adobecom.aem.live/cc-shared/assets/img/product-icons/svg/after-effects-40.svg",
+      "source": "https://www.adobe.com/products/aftereffects.html",
+      "license": "Brand/trademark asset; no blanket open-source license asserted. See source brand usage terms.",
+      "modification": "None; intact asset.",
+      "sha256": "9aee5e1f2d29ff2ec30591fa1bf45b1b40319cec99405e2b5c86177629f6a5aa"
+    },
+    {
+      "name": "Substance Painter",
+      "file": "substance-painter.svg",
+      "provider": "Adobe",
+      "download": "https://main--cc--adobecom.aem.live/cc-shared/assets/img/product-icons/svg/substance-3d-painter-64.svg",
+      "source": "https://www.adobe.com/products/substance3d/apps/painter.html",
+      "license": "Brand/trademark asset; no blanket open-source license asserted. See source brand usage terms.",
+      "modification": "None; intact asset.",
+      "sha256": "69b1a1dc9127c3895c2dd8bf251d616b650b422215de22e0c9ace18ec4dbb64f"
+    },
+    {
+      "name": "VS Code",
+      "file": "vscode.svg",
+      "provider": "Microsoft",
+      "download": "https://code.visualstudio.com/assets/branding/visual-studio-code-icons.zip",
+      "source": "https://code.visualstudio.com/brand",
+      "license": "Brand/trademark asset; no blanket open-source license asserted. See source brand usage terms.",
+      "modification": "None; intact asset.",
+      "sha256": "74ad401c6487a0dc5af1f6b2935556ab2d3553ae45effc7e1697b4d117d046b6"
+    },
+    {
+      "name": "Motion",
+      "file": "motion.svg",
+      "provider": "Motion",
+      "download": "https://motion.dev/favicon.svg",
+      "source": "https://motion.dev",
+      "license": "Brand/trademark asset; no blanket open-source license asserted. See source brand usage terms.",
+      "modification": "None; intact asset.",
+      "sha256": "01958f3da9eb8e0529fdb561bdd314853f20728fefdddbf4fc2d784160bdfa9d"
+    },
+    {
+      "name": "Playwright",
+      "file": "playwright.svg",
+      "provider": "Microsoft",
+      "download": "https://playwright.dev/img/playwright-logo.svg",
+      "source": "https://playwright.dev",
+      "license": "Brand/trademark asset; no blanket open-source license asserted. See source brand usage terms.",
+      "modification": "None; intact asset.",
+      "sha256": "6b0a4367bdeab10995bc239278f04c68c10e48adbec15e799e01909a0d66dcb9"
+    },
+    {
+      "name": "CapCut",
+      "file": "capcut.ico",
+      "provider": "CapCut",
+      "download": "https://sf16-web-tos-buz.capcutstatic.com/obj/capcut-web-buz-sg/common/images/lv_web-2.ico",
+      "source": "https://www.capcut.com",
+      "license": "Brand/trademark asset; no blanket open-source license asserted. See source brand usage terms.",
+      "modification": "None; intact asset.",
+      "sha256": "22bc5cebfe9b857ea51b5f861fe1d32e17c3adb6af198bff922f97b126b02965"
+    },
+    {
+      "name": "Fastwork",
+      "file": "fastwork.ico",
+      "provider": "Fastwork",
+      "download": "https://fastwork.co/static-v4/favicons/favicon.ico",
+      "source": "https://fastwork.co",
+      "license": "Brand/trademark asset; no blanket open-source license asserted. See source brand usage terms.",
+      "modification": "None; intact asset.",
+      "sha256": "3dc3d0cfa975f9a57db073464f7799a60f69d0c1baf36bc51df4394c276af8cb"
+    },
+    {
+      "name": "Codex",
+      "file": "codex.png",
+      "provider": "OpenAI",
+      "download": "Installed official Codex.app: Contents/Resources/app.icns",
+      "source": "https://openai.com/codex/",
+      "license": "Brand/trademark asset; no blanket open-source license asserted. See source brand usage terms.",
+      "modification": "Converted bundled original ICNS frame to 64px PNG; proportions and artwork unchanged.",
+      "sha256": "480ff72b3f6c8684ae9a1d76445ef61860df304a95f678fae79cc43acb84c063",
+      "appVersion": "26.930.61225 (13232), com.openai.codex"
+    },
+    {
+      "name": "ChatGPT",
+      "file": "chatgpt.png",
+      "provider": "OpenAI",
+      "download": "Installed official Codex.app: Contents/Resources/icon-chatgpt.icns",
+      "source": "https://openai.com/brand/",
+      "license": "Brand/trademark asset; no blanket open-source license asserted. See source brand usage terms.",
+      "modification": "Converted bundled original ICNS frame to 64px PNG; proportions and artwork unchanged.",
+      "sha256": "d851584fdeeb4df84ea3e024cb8d2f8346f0e4009e58d62bd39b4069f6790a09",
+      "appVersion": "26.930.61225 (13232), com.openai.codex"
+    },
+    {
+      "name": "Supabase Auth",
+      "aliasOf": "Supabase",
+      "note": "Uses the actual Supabase mark; no separate Auth mark fabricated."
+    },
+    {
+      "name": "ExcelJS",
+      "source": "https://github.com/exceljs/exceljs",
+      "note": "No independent official app logo found. Organization avatar is an identicon; render text only."
+    }
+  ]
+}
