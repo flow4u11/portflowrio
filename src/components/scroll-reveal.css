@@ -6,7 +6,7 @@
   opacity: 1;
   transform: none;
   transform-origin: center center;
-  transition: opacity .42s ease, transform .62s cubic-bezier(.22, 1, .36, 1);
+  transition: opacity calc(.42s * var(--motion-duration-factor, 1)) ease, transform calc(.62s * var(--motion-duration-factor, 1)) cubic-bezier(.22, 1, .36, 1);
 }
 .scroll-reveal[data-reveal="before"] > .scroll-reveal-content {
   opacity: 0;

@@ -1,46 +1,12 @@
 .animated-name {
   position: relative;
-  display: inline-grid;
-  grid-template-columns: minmax(0, 1fr);
+  display: inline-block;
   max-width: 100%;
   vertical-align: bottom;
-  line-height: 1.4;
-}
-.animated-name-accessible {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-.animated-name-font {
-  position: relative;
-  grid-area: 1 / 1;
-  min-width: 0;
-  align-self: center;
-  color: var(--text, #050505);
+  font: inherit;
+  letter-spacing: inherit;
   overflow-wrap: anywhere;
-  animation: name-sans-cycle 18s ease-in-out infinite;
-  animation-play-state: paused;
-}
-.animated-name-font--sans { font-family: "DM Sans", Tahoma, sans-serif; }
-.animated-name-font--mono {
-  font-family: "Space Mono", "DM Sans", Tahoma, monospace;
-  font-weight: 400;
-  font-size: .94em;
-  letter-spacing: -.065em;
-  opacity: 0;
-  animation-name: name-mono-cycle;
-}
-.animated-name-font--serif {
-  font-family: Georgia, "Times New Roman", Tahoma, serif;
-  font-weight: 400;
-  font-style: italic;
-  letter-spacing: -.035em;
-  opacity: 0;
-  animation-name: name-serif-cycle;
+  color: var(--text, #050505);
 }
 .animated-name-gradient {
   position: absolute;
@@ -52,31 +18,15 @@
   -webkit-background-clip: text;
   background-clip: text;
   opacity: .85;
-  /* One 12-second leg / 180 steps keeps the small text repaint near 15Hz. */
-  animation: name-gradient-travel 12s steps(180, end) infinite alternate;
+  /* Duration and step count scale together, keeping text repaints near 15Hz. */
+  animation: name-gradient-travel var(--name-gradient-duration, 12s) steps(var(--name-gradient-steps, 180), end) infinite alternate;
   animation-play-state: paused;
 }
-.animated-name[data-running="true"] .animated-name-font,
 .animated-name[data-running="true"] .animated-name-gradient { animation-play-state: running; }
 @keyframes name-gradient-travel {
   from { background-position: 0% 50%; }
   to { background-position: 100% 50%; }
 }
-@keyframes name-sans-cycle {
-  0%, 27%, 100% { opacity: 1; }
-  33%, 94% { opacity: 0; }
-}
-@keyframes name-mono-cycle {
-  0%, 27%, 66%, 100% { opacity: 0; }
-  33%, 60% { opacity: 1; }
-}
-@keyframes name-serif-cycle {
-  0%, 60%, 100% { opacity: 0; }
-  66%, 94% { opacity: 1; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .animated-name-font, .animated-name-gradient { animation: none; }
-  .animated-name-font--sans { opacity: 1; }
-  .animated-name-font--mono, .animated-name-font--serif { opacity: 0; }
-  .animated-name-gradient { opacity: .85; }
+  .animated-name-gradient { animation: none; }
 }

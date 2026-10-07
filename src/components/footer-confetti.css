@@ -12,18 +12,13 @@
 }
 .footer-confetti-stage {
   position: fixed;
-  bottom: 0;
+  inset: 0;
   z-index: 20;
-  width: min(42vw, 240px);
-  height: min(46vh, 320px);
-  height: min(46svh, 320px);
-  contain: layout paint;
+  contain: layout;
   overflow: hidden;
   pointer-events: none;
   visibility: hidden;
 }
-.footer-confetti-stage--left { left: 0; }
-.footer-confetti-stage--right { right: 0; }
 .footer-confetti-stage[data-active="true"] { visibility: visible; }
 .footer-confetti-particle {
   position: absolute;

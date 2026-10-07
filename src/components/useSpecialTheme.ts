@@ -1,5 +1,6 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
+import { useMotionSettings } from './MotionSettings';
 import './special-theme.css';
 
 export type ThemeOrigin = { x: number; y: number };
@@ -25,6 +26,9 @@ function applyDesign(special: boolean) {
 
 /** Design is independent of the ordinary Light/Dark preference and iris control. */
 export function useSpecialTheme(): SpecialThemeController {
+  const { settings } = useMotionSettings();
+  const speedRef = useRef(settings.animationSpeed);
+  speedRef.current = settings.animationSpeed;
   const [specialTheme, setSpecialTheme] = useState(readDesign);
   const [transitioning, setTransitioning] = useState(false);
   const currentRef = useRef(specialTheme);
@@ -54,6 +58,7 @@ export function useSpecialTheme(): SpecialThemeController {
   const changeDesign = useCallback((next: boolean, origin?: ThemeOrigin) => {
     if (!mountedRef.current || changingRef.current || currentRef.current === next) return;
     changingRef.current = true;
+    const speed = speedRef.current;
     let applied = false;
     let cancelled = false;
     let curtain: HTMLDivElement | undefined;
@@ -125,13 +130,13 @@ export function useSpecialTheme(): SpecialThemeController {
         await Promise.all(panels.map((panel, index) => animate(panel, [
           { transform: `translateY(${index % 2 ? '-105%' : '105%'})`, opacity: 1 },
           { transform: 'translateY(0)', opacity: 1 },
-        ], { duration: 280, delay: (startRight ? 2 - index : index) * 35, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards' })));
+        ], { duration: 280 / speed, delay: (startRight ? 2 - index : index) * 35 / speed, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards' })));
         if (cancelled) return;
         commit();
         await Promise.all(panels.map((panel, index) => animate(panel, [
           { transform: 'translateY(0)', opacity: 1 },
           { transform: `translateY(${index % 2 ? '108%' : '-108%'})`, opacity: 0.92 },
-        ], { duration: 350, delay: (startRight ? index : 2 - index) * 30, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' })));
+        ], { duration: 350 / speed, delay: (startRight ? index : 2 - index) * 30 / speed, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' })));
       } catch {
         if (!cancelled) commit();
       } finally {

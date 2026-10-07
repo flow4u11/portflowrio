@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useMotionSettings } from './MotionSettings';
 
 type PixelAvatarProps = {
   defaultSrc: string;
@@ -21,6 +22,9 @@ const TILE_COUNT = GRID_SIZE * GRID_SIZE;
 
 /** A portrait that changes through shuffled pixel tiles on hover, focus, or tap. */
 export function PixelAvatar({ defaultSrc, hoverSrc, className }: PixelAvatarProps) {
+  const { settings } = useMotionSettings();
+  const speed = useRef(settings.animationSpeed);
+  speed.current = settings.animationSpeed;
   const [alternate, setAlternate] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -159,8 +163,8 @@ export function PixelAvatar({ defaultSrc, hoverSrc, className }: PixelAvatarProp
       order.forEach((index, rank) => {
         transitions[index] = {
           from: values[index],
-          delay: (rank / TILE_COUNT) * 140,
-          duration: 240 + Math.random() * 80,
+          delay: (rank / TILE_COUNT) * 140 / speed.current,
+          duration: (240 + Math.random() * 80) / speed.current,
         };
       });
       startedAt = window.performance.now();

@@ -25,7 +25,7 @@
   position: absolute;
   inset: 0;
   white-space: nowrap;
-  animation: about-design-cycle 8s ease-in-out infinite;
+  animation: about-design-cycle calc(8s * var(--motion-duration-factor, 1)) ease-in-out infinite;
   animation-play-state: paused;
 }
 .cycling-about-play { opacity: 0; animation-name: about-play-cycle; }
@@ -47,7 +47,7 @@
   overflow: hidden;
   border-radius: 4px;
 }
-.looping-marquee:focus-visible { outline: 1px solid var(--text, currentColor); outline-offset: 5px; }
+.looping-marquee[data-keyboard-focus="true"] { outline: 1px solid var(--text, currentColor); outline-offset: 5px; }
 .looping-marquee-track {
   display: flex;
   width: max-content;
@@ -67,15 +67,9 @@
 }
 .looping-marquee-set > * { flex-shrink: 0; white-space: nowrap; }
 .looping-marquee[data-direction="right"] .looping-marquee-track { animation-direction: reverse; }
+/* One explicit state owns pausing. Browser hover/focus pseudo-classes can stay
+   cached after transformed rows leave view, so they never control this timeline. */
 .looping-marquee[data-running="true"] .looping-marquee-track { animation-play-state: running; }
-/* Pause the existing animation timeline; never remove the track or its copies. */
-.looping-marquee:active .looping-marquee-track,
-.looping-marquee:focus-visible .looping-marquee-track { animation-play-state: paused; }
-/* Pointer clicks may leave focus behind; only keyboard focus holds the pause.
-   Touch-only devices must not inherit a sticky emulated hover pause. */
-@media (hover: hover) and (pointer: fine) {
-  .looping-marquee:hover .looping-marquee-track { animation-play-state: paused; }
-}
 @keyframes idle-marquee-loop { to { transform: translateX(-50%); } }
 
 .looping-marquee[data-static="true"] { overflow: visible; }

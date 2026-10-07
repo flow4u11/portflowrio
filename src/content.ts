@@ -8,7 +8,7 @@ export const copy = {
     learning: 'Coding isn’t my favorite part, but I keep learning. I want to work in this field, and I believe **designers should understand code** to communicate clearly with developers.',
     leisure: 'Gaming montages first taught me rhythm and visual storytelling. Away from a project, you’ll find me playing **basketball or FPS games**.',
     themeBefore: 'I enjoy experimenting with visual styles. Even a different ', themeAfter: ' can give the same idea a new personality. Try one of mine.',
-    birth: 'Date of birth', birthValue: '22 July 2006', country: 'Country', countryValue: 'Thailand', school: 'High school', schoolValue: 'Matthayom Taksin Rayong School (MTRS)',
+    country: 'Country', countryValue: 'Thailand', school: 'High school', schoolValue: 'Matthayom Taksin Rayong School (MTRS)',
     projectIntro: 'Games, useful tools, and what comes next. Scroll through the collection.',
     projectNote: 'A growing collection. Three open layouts are waiting for their next project.',
     contact: 'Have an idea, a project, or a shared love for design? **I’d love to hear about it.**',
@@ -23,7 +23,7 @@ export const copy = {
     learning: 'การเขียนโค้ดอาจไม่ใช่ส่วนที่ผมชอบที่สุด แต่ผมยังเรียนรู้ต่อ เพราะอยากทำงานในสายนี้ และเชื่อว่า **ดีไซเนอร์ควรเข้าใจโค้ด** เพื่อคุยกับนักพัฒนาได้รู้เรื่อง',
     leisure: 'การตัดต่อมอนทาจเกมทำให้ผมเริ่มสนใจจังหวะและการเล่าเรื่องด้วยภาพ เวลาว่างผมชอบ **เล่นบาสเกตบอลและเกม FPS**',
     themeBefore: 'ผมชอบทดลองรูปแบบการออกแบบ แค่เปลี่ยน ', themeAfter: ' ก็ทำให้ไอเดียเดิมมีบุคลิกใหม่ได้ ลองธีมที่ผมออกแบบดูได้ครับ',
-    birth: 'วันเกิด', birthValue: '22 กรกฎาคม 2006', country: 'ประเทศ', countryValue: 'ไทย', school: 'มัธยมศึกษา', schoolValue: 'โรงเรียนมัธยมตากสินระยอง (MTRS)',
+    country: 'ประเทศ', countryValue: 'ไทย', school: 'มัธยมศึกษา', schoolValue: 'โรงเรียนมัธยมตากสินระยอง (MTRS)',
     projectIntro: 'เกม เครื่องมือที่ใช้งานได้จริง และไอเดียใหม่ ๆ เลื่อนดูผลงานในคอลเลกชันได้เลย',
     projectNote: 'คอลเลกชันที่กำลังเติบโต พร้อมอีกสามเลย์เอาต์สำหรับโปรเจกต์ถัดไป',
     contact: 'มีไอเดีย โปรเจกต์ หรือสนใจการออกแบบเหมือนกันไหม? **ผมยินดีพูดคุยด้วยครับ**',
@@ -35,16 +35,27 @@ export const copy = {
 } as const;
 
 export const toolkitItems = [
+  // Design, game engines, video, code editors, then AI assistants.
   'Figma', 'Blender', 'Substance Painter', 'Unreal Engine 5', 'Unity', 'Roblox Studio',
   'Premiere Pro', 'After Effects', 'CapCut', 'DaVinci Resolve', 'VS Code', 'Cursor',
-  'Claude', 'Codex', 'ChatGPT', 'Gemini', 'React', 'Next.js', 'TypeScript', 'JavaScript',
-  'HTML', 'CSS', 'Tailwind CSS', 'Vite', 'Motion', 'GSAP', 'Radix UI', 'Node.js',
+  'Claude', 'Codex', 'ChatGPT', 'Gemini',
+];
+export const technologyItems = [
+  // Frontend, motion, backend, then shipping and testing.
+  'React', 'Next.js', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Tailwind CSS', 'Vite',
+  'Motion', 'GSAP', 'Radix UI', 'Node.js',
   'Supabase', 'PostgreSQL', 'Supabase Auth', 'Zod', 'ExcelJS', 'Git', 'GitHub',
   'Vercel', 'Vitest', 'Playwright',
 ];
+// Keep whole categories together: design/engines, then video/editors/AI.
 export const toolkitRows = [
-  toolkitItems.filter((_, index) => index % 2 === 0),
-  toolkitItems.filter((_, index) => index % 2 === 1),
+  toolkitItems.slice(0, 6),
+  toolkitItems.slice(6),
+];
+// Frontend/motion, then backend/shipping; each technology row has 11 items.
+export const technologyRows = [
+  technologyItems.slice(0, 11),
+  technologyItems.slice(11),
 ];
 
 export function getProjects(language: Language): Project[] {

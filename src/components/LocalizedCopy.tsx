@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Languages } from 'lucide-react';
 import { useIdleMotion } from './useIdleMotion';
+import { useMotionSettings } from './MotionSettings';
 import './localized-copy.css';
 
 export type Language = 'en' | 'th';
@@ -8,6 +9,9 @@ const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 /** Keep readable content in the accessibility tree while a short visual layer resolves. */
 export function LocalizedCopy({ text, language }: { text: string; language: Language }) {
+  const { settings } = useMotionSettings();
+  const speed = useRef(settings.animationSpeed);
+  speed.current = settings.animationSpeed;
   const { ref, active, reduced } = useIdleMotion<HTMLSpanElement>();
   const previous = useRef(text);
   const [scramble, setScramble] = useState<string | null>(null);
@@ -24,7 +28,7 @@ export function LocalizedCopy({ text, language }: { text: string; language: Lang
       setScramble(characters.map((character, index) => index < resolved || /\s|[.,!?—·]/u.test(character)
         ? character : glyphs[Math.floor(Math.random() * glyphs.length)]).join(''));
     };
-    const timer = setInterval(tick, 55);
+    const timer = setInterval(tick, 55 / speed.current);
     tick();
     return () => clearInterval(timer);
   }, [text, active, reduced]);

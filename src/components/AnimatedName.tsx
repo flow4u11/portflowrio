@@ -1,16 +1,19 @@
+import type { CSSProperties } from 'react';
 import { useIdleMotion } from './useIdleMotion';
+import { useMotionSettings } from './MotionSettings';
 import './animated-name.css';
 
-const FONTS = ['sans', 'mono', 'serif'] as const;
-
-/** All font variants reserve one shared grid cell, so cycling cannot move the page. */
+/** Original heading typography with a small, visibility-gated monochrome shimmer. */
 export function AnimatedName({ children, className = '' }: { children: string; className?: string }) {
   const { ref, active } = useIdleMotion<HTMLSpanElement>();
+  const { settings } = useMotionSettings();
+  const speed = Number.isFinite(settings.animationSpeed) ? Math.min(2, Math.max(.5, settings.animationSpeed)) : 1;
+  const style = {
+    '--name-gradient-duration': `${12 / speed}s`,
+    '--name-gradient-steps': Math.round(180 / speed),
+  } as CSSProperties;
 
-  return <span ref={ref} className={`animated-name ${className}`} data-running={active}>
-    <span className="animated-name-accessible">{children}</span>
-    {FONTS.map(font => <span key={font} className={`animated-name-font animated-name-font--${font}`} aria-hidden="true">
-      {children}<span className="animated-name-gradient">{children}</span>
-    </span>)}
+  return <span ref={ref} className={`animated-name ${className}`} data-running={active} style={style}>
+    {children}<span className="animated-name-gradient" aria-hidden="true">{children}</span>
   </span>;
 }

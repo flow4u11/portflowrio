@@ -4,27 +4,36 @@
 import * as React from 'react';
 import { motion, useReducedMotion, type HTMLMotionProps, type SpringOptions, type Transition } from 'motion/react';
 import { cn } from '../../lib/utils';
+import { useMotionSettings } from '../MotionSettings';
 
 type Star = { x: number; y: number; depth: number; opacity: number };
 type Offset = { x: number; y: number };
 type StarCanvasProps = {
   starColor: string;
   speed: number;
+  speedMultiplier?: number;
   count?: number;
   size?: number;
   offset?: React.RefObject<Offset>;
 };
 
-const MAX_STARS = 180;
+const MAX_STARS = 240;
+const MOBILE_STAR_CAP = 120;
 const FRAME_INTERVAL = 1000 / 30;
 
-function StarCanvas({ starColor, speed, count, size, offset }: StarCanvasProps) {
+function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, offset }: StarCanvasProps) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const starsRef = React.useRef<Star[]>([]);
   const phaseRef = React.useRef(0);
   const colorRef = React.useRef(starColor);
   const repaintRef = React.useRef<(() => void) | null>(null);
+  const configRef = React.useRef({ speed, speedMultiplier, count, size });
   const reduceMotion = useReducedMotion();
+
+  React.useLayoutEffect(() => {
+    configRef.current = { speed, speedMultiplier, count, size };
+    repaintRef.current?.();
+  }, [speed, speedMultiplier, count, size]);
 
   React.useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -37,7 +46,7 @@ function StarCanvas({ starColor, speed, count, size, offset }: StarCanvasProps) 
     updateColor();
     if (starColor !== 'currentColor') return;
     const themeObserver = new MutationObserver(updateColor);
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-design', 'class'] });
     return () => themeObserver.disconnect();
   }, [starColor]);
 
@@ -55,31 +64,39 @@ function StarCanvas({ starColor, speed, count, size, offset }: StarCanvasProps) 
 
     let width = 0;
     let height = 0;
-    let starCount = 0;
     let frame = 0;
     let resizeFrame = 0;
     let previousFrame = 0;
     let onScreen = true;
+    let covered = document.documentElement.dataset.navigating === 'true';
     let disposed = false;
+    let publishedCount = -1;
+    let publishedSpeed = -1;
     const currentOffset = { x: 0, y: 0 };
     const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
-    const rate = 60 / Math.max(speed, 1);
 
     const draw = () => {
       if (!width || !height) return;
       context.clearRect(0, 0, width, height);
       context.fillStyle = colorRef.current;
-      const target = reduceMotion ? { x: 0, y: 0 } : offset?.current;
+      const target = reduceMotion ? undefined : offset?.current;
       currentOffset.x += ((target?.x ?? 0) - currentOffset.x) * 0.09;
       currentOffset.y += ((target?.y ?? 0) - currentOffset.y) * 0.09;
       const fieldHeight = height + 48;
+      const config = configRef.current;
+      const requestedCount = config.count ?? Math.max(48, width * height / 8500);
+      const particleCap = coarsePointer || width < 600 ? MOBILE_STAR_CAP : MAX_STARS;
+      const starCount = Math.min(particleCap, Math.max(0, Math.round(Number.isFinite(requestedCount) ? requestedCount : 120)));
+      const currentSpeed = Math.min(2, Math.max(0.25, Number.isFinite(config.speedMultiplier) ? config.speedMultiplier : 1));
+      if (publishedCount !== starCount) { canvas.dataset.starCount = String(starCount); publishedCount = starCount; }
+      if (publishedSpeed !== currentSpeed) { canvas.dataset.starSpeed = String(currentSpeed); publishedSpeed = currentSpeed; }
       for (let index = 0; index < starCount; index++) {
         const star = starsRef.current[index];
-        const drift = phaseRef.current * rate * (3.5 + star.depth * 9);
+        const drift = phaseRef.current * (3.5 + star.depth * 9);
         const x = star.x * width + currentOffset.x * star.depth;
         const y = ((star.y * fieldHeight - drift) % fieldHeight + fieldHeight) % fieldHeight - 24
           + currentOffset.y * star.depth;
-        const diameter = size ?? (0.85 + star.depth * 1.35);
+        const diameter = config.size ?? (0.85 + star.depth * 1.35);
         context.globalAlpha = star.opacity;
         // Small rects avoid hundreds of paths, shadows, and full-page CSS paints.
         context.fillRect(x, y, diameter, diameter);
@@ -88,9 +105,13 @@ function StarCanvas({ starColor, speed, count, size, offset }: StarCanvasProps) 
     };
 
     const tick = (timestamp: number) => {
-      if (disposed || document.hidden || !onScreen || reduceMotion) return;
+      if (disposed || document.hidden || !onScreen || covered || reduceMotion) return;
       if (!previousFrame || timestamp - previousFrame >= FRAME_INTERVAL - 1) {
-        phaseRef.current += previousFrame ? Math.min((timestamp - previousFrame) / 1000, 0.1) : 0;
+        const { speed: currentSpeed, speedMultiplier: multiplier } = configRef.current;
+        const rate = 60 / Math.max(Number.isFinite(currentSpeed) ? currentSpeed : 90, 1)
+          * Math.min(2, Math.max(0.25, Number.isFinite(multiplier) ? multiplier : 1));
+        // Integrate speed into the phase so a slider change does not jump the field.
+        phaseRef.current += previousFrame ? Math.min((timestamp - previousFrame) / 1000, 0.1) * rate : 0;
         previousFrame = timestamp;
         draw();
       }
@@ -100,7 +121,7 @@ function StarCanvas({ starColor, speed, count, size, offset }: StarCanvasProps) 
     const resume = () => {
       window.cancelAnimationFrame(frame);
       previousFrame = 0;
-      if (!document.hidden && onScreen) {
+      if (!document.hidden && onScreen && !covered) {
         draw();
         if (!reduceMotion) frame = window.requestAnimationFrame(tick);
       }
@@ -119,7 +140,6 @@ function StarCanvas({ starColor, speed, count, size, offset }: StarCanvasProps) 
       canvas.width = Math.max(1, Math.round(width * density));
       canvas.height = Math.max(1, Math.round(height * density));
       context.setTransform(density, 0, 0, density, 0, 0);
-      starCount = Math.min(MAX_STARS, Math.max(0, Math.round(count ?? Math.max(48, width * height / 8500))));
       resume();
     };
 
@@ -134,7 +154,11 @@ function StarCanvas({ starColor, speed, count, size, offset }: StarCanvasProps) 
     });
     visibilityObserver.observe(canvas);
     document.addEventListener('visibilitychange', resume);
-    repaintRef.current = draw;
+    const navigationStart = () => { covered = true; resume(); };
+    const navigationEnd = () => { covered = false; resume(); };
+    window.addEventListener('portfolio:navigation-start', navigationStart);
+    window.addEventListener('portfolio:navigation-end', navigationEnd);
+    repaintRef.current = () => { if (!document.hidden && onScreen && !covered) draw(); };
     resize();
 
     return () => {
@@ -144,9 +168,11 @@ function StarCanvas({ starColor, speed, count, size, offset }: StarCanvasProps) 
       resizeObserver.disconnect();
       visibilityObserver.disconnect();
       document.removeEventListener('visibilitychange', resume);
+      window.removeEventListener('portfolio:navigation-start', navigationStart);
+      window.removeEventListener('portfolio:navigation-end', navigationEnd);
       repaintRef.current = null;
     };
-  }, [count, offset, reduceMotion, size, speed]);
+  }, [offset, reduceMotion]);
 
   return <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none absolute inset-0 size-full" />;
 }
@@ -170,6 +196,7 @@ export function StarLayer({ count, size, transition, starColor, className, ...pr
 export type StarsBackgroundProps = React.ComponentProps<'div'> & {
   factor?: number;
   speed?: number;
+  starCount?: number;
   transition?: SpringOptions;
   starColor?: string;
   pointerEvents?: boolean;
@@ -180,7 +207,8 @@ export function StarsBackground({
   children,
   className,
   factor = 0.05,
-  speed = 50,
+  speed = 90,
+  starCount,
   transition: _transition,
   starColor = 'currentColor',
   pointerEvents = true,
@@ -190,6 +218,7 @@ export function StarsBackground({
   ...props
 }: StarsBackgroundProps) {
   const reduceMotion = useReducedMotion();
+  const { settings } = useMotionSettings();
   const offset = React.useRef({ x: 0, y: 0 });
   return (
     <div
@@ -209,7 +238,7 @@ export function StarsBackground({
         offset.current.y = 0;
       }}
     >
-      <StarCanvas starColor={starColor} speed={speed} offset={offset} />
+      <StarCanvas starColor={starColor} speed={speed} speedMultiplier={settings.starSpeed} count={starCount ?? settings.starCount} offset={offset} />
       {children}
     </div>
   );
