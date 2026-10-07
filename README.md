@@ -18,18 +18,18 @@ Open http://127.0.0.1:5173. The development server serves the frontend and Visit
 ## Experience
 
 - Light/Dark themes with an iris transition. An About keyword experiment unlocks a separate neobrutalism design.
-- English/Thai key information, short scramble transitions, genuine tool icons, and categorized moving tool/technology lanes.
+- English/Thai key information, short scramble transitions, genuine tool icons, and a combined toolkit and technology collection moving in two lanes.
 - Shared particle background, bounded 2.5D viewport reveals, name/font motion, and once-per-session footer confetti. Motion pauses when hidden/offscreen and respects reduced-motion preferences.
 - LastStand, my first Unreal Engine 5 FPS project; the live School Ledger app; and three layouts reserved for future projects.
 - Native gallery scrolling, centered dialogs with keyboard focus handling, contact/profile links, and a hover/focus portrait transition.
 
 ## Stack
 
-React, TypeScript, Vite, Tailwind CSS, Motion, Lucide and a Node.js Visits API backed by Supabase PostgreSQL. The displayed technology collection also includes tools used in other projects.
+React, TypeScript, Vite, Tailwind CSS, Motion and Lucide. An optional Node.js Visits API backed by Supabase PostgreSQL is retained. The displayed technology collection also includes tools used in other projects.
 
 ## Visits
 
-The frontend adds a presentation baseline of 1,284 to the separate anonymous browser counter. Configure server-only environment values using `.env.example`. Local environment files are ignored. See [integration](docs/integration.md) for storage and API behavior.
+The footer has no visitor counter, and the page does not record new visits. The existing server endpoint is retained for optional future use. Configure server-only environment values using `.env.example`. Local environment files are ignored. See [integration](docs/integration.md) for storage and API behavior.
 
 ## Verification
 

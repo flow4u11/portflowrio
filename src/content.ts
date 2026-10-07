@@ -34,18 +34,17 @@ export const copy = {
   },
 } as const;
 
-export const toolkitGroups = [
-  { label: 'Design & 3D', items: ['Figma', 'Blender', 'Substance Painter'] },
-  { label: 'Game engines', items: ['Unreal Engine 5', 'Unity', 'Roblox Studio'] },
-  { label: 'Video & motion', items: ['Premiere Pro', 'After Effects', 'CapCut', 'DaVinci Resolve'] },
-  { label: 'IDE & editors', items: ['VS Code', 'Cursor'] },
-  { label: 'AI tools', items: ['Claude', 'Codex', 'ChatGPT', 'Gemini'] },
+export const toolkitItems = [
+  'Figma', 'Blender', 'Substance Painter', 'Unreal Engine 5', 'Unity', 'Roblox Studio',
+  'Premiere Pro', 'After Effects', 'CapCut', 'DaVinci Resolve', 'VS Code', 'Cursor',
+  'Claude', 'Codex', 'ChatGPT', 'Gemini', 'React', 'Next.js', 'TypeScript', 'JavaScript',
+  'HTML', 'CSS', 'Tailwind CSS', 'Vite', 'Motion', 'GSAP', 'Radix UI', 'Node.js',
+  'Supabase', 'PostgreSQL', 'Supabase Auth', 'Zod', 'ExcelJS', 'Git', 'GitHub',
+  'Vercel', 'Vitest', 'Playwright',
 ];
-export const technologyGroups = [
-  { label: 'Frontend', items: ['React', 'Next.js', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Tailwind CSS', 'Vite'] },
-  { label: 'Motion & interface', items: ['Motion', 'GSAP', 'Radix UI'] },
-  { label: 'Backend & data', items: ['Node.js', 'Supabase', 'PostgreSQL', 'Supabase Auth', 'Zod', 'ExcelJS'] },
-  { label: 'Ship & test', items: ['Git', 'GitHub', 'Vercel', 'Vitest', 'Playwright'] },
+export const toolkitRows = [
+  toolkitItems.filter((_, index) => index % 2 === 0),
+  toolkitItems.filter((_, index) => index % 2 === 1),
 ];
 
 export function getProjects(language: Language): Project[] {

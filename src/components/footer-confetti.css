@@ -1,19 +1,38 @@
+.footer-confetti {
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  pointer-events: none;
+}
 .footer-confetti-trigger {
   position: absolute;
   inset: auto 0 0;
   height: 1px;
   pointer-events: none;
 }
-.footer-confetti-canvas {
+.footer-confetti-stage {
   position: fixed;
-  inset: 0;
+  bottom: 0;
   z-index: 20;
-  width: 100%;
-  height: 100%;
+  width: min(42vw, 240px);
+  height: min(46vh, 320px);
+  height: min(46svh, 320px);
+  contain: layout paint;
+  overflow: hidden;
   pointer-events: none;
   visibility: hidden;
 }
-.footer-confetti-canvas[data-active="true"] { visibility: visible; }
+.footer-confetti-stage--left { left: 0; }
+.footer-confetti-stage--right { right: 0; }
+.footer-confetti-stage[data-active="true"] { visibility: visible; }
+.footer-confetti-particle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  /* Sprites exist only during the finite burst and are then removed. */
+  will-change: transform, opacity;
+}
 @media (prefers-reduced-motion: reduce) {
-  .footer-confetti-canvas { display: none; }
+  .footer-confetti-stage { display: none; }
 }

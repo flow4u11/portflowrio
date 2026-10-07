@@ -2,131 +2,146 @@ import { useEffect, useRef } from 'react';
 import './footer-confetti.css';
 
 const SESSION_KEY = 'kimportflowrio:footer-confetti:v1';
-const DURATION_MS = 2700;
-const FRAME_MS = 1000 / 30;
+const MAX_RUNTIME_MS = 2000;
 const COLORS = ['#050505', '#ffffff', '#a3a3a3', '#d8cced', '#c7d7ed', '#d7e2ca'];
 let playedInThisPage = false;
 
-type Particle = {
-  x: number; y: number; vx: number; vy: number;
-  width: number; height: number; angle: number; spin: number;
-  delay: number; color: string;
-};
-
-/** One finite rectangle burst when the actual footer bottom reaches the viewport. */
+/** Small compositor-driven corner bursts; no canvas or per-frame JavaScript. */
 export function FooterConfetti() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLSpanElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const leftRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const container = containerRef.current;
     const trigger = triggerRef.current;
-    const canvas = canvasRef.current;
-    if (!trigger || !canvas || typeof IntersectionObserver === 'undefined') return;
+    const left = leftRef.current;
+    const right = rightRef.current;
+    if (!container || !trigger || !left || !right || typeof IntersectionObserver === 'undefined' || typeof left.animate !== 'function') return;
+    const stages = [left, right];
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
     let alreadyPlayed = playedInThisPage;
     try { alreadyPlayed ||= sessionStorage.getItem(SESSION_KEY) === '1'; } catch { /* A page-local guard still prevents repeat bursts. */ }
     if (alreadyPlayed) return;
 
-    let frame = 0;
+    let disposed = false;
     let atBottom = false;
     let running = false;
-    let observer: IntersectionObserver;
+    let animations: Animation[] = [];
+    let cleanupTimer: ReturnType<typeof setTimeout> | null = null;
+    let observer: IntersectionObserver | null = null;
+
+    const detach = () => {
+      observer?.disconnect();
+      document.removeEventListener('visibilitychange', syncVisibility);
+      preference.removeEventListener('change', syncVisibility);
+      window.removeEventListener('resize', onResize);
+    };
 
     const finish = () => {
-      cancelAnimationFrame(frame);
-      frame = 0;
+      if (!running) return;
       running = false;
-      canvas.dataset.active = 'false';
-      canvas.width = 1;
-      canvas.height = 1;
+      container.dataset.active = 'false';
+      if (cleanupTimer !== null) clearTimeout(cleanupTimer);
+      cleanupTimer = null;
+      for (const animation of animations) animation.cancel();
+      animations = [];
+      for (const stage of stages) {
+        stage.dataset.active = 'false';
+        stage.replaceChildren();
+      }
+      detach();
     };
 
     const celebrate = () => {
-      if (!atBottom || alreadyPlayed || document.hidden || preference.matches) return;
-      const context = canvas.getContext('2d', { alpha: true });
-      if (!context) return;
+      if (disposed || !atBottom || alreadyPlayed || document.hidden || preference.matches) return;
+      // Measure both small stages once, before creating or animating any sprites.
+      const bounds = stages.map(stage => stage.getBoundingClientRect());
+      if (bounds.some(bound => bound.width === 0 || bound.height === 0)) return;
       alreadyPlayed = true;
       playedInThisPage = true;
       try { sessionStorage.setItem(SESSION_KEY, '1'); } catch { /* Storage may be blocked or full. */ }
-      observer.disconnect();
-
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
-      canvas.dataset.active = 'true';
       running = true;
-      const count = width < 600 ? 32 : 48;
-      const particles: Particle[] = Array.from({ length: count }, (_, index) => {
-        const side = index % 2 === 0 ? 1 : -1;
-        return {
-          x: side === 1 ? width * .08 : width * .92,
-          y: height + 12,
-          vx: side * (100 + Math.random() * Math.min(width * .24, 250)),
-          vy: -(Math.min(height, 950) * .66 + 180 + Math.random() * 170),
-          width: 4 + Math.random() * 4,
-          height: 7 + Math.random() * 7,
-          angle: Math.random() * Math.PI,
-          spin: (Math.random() - .5) * 10,
-          delay: Math.random() * .15,
-          color: COLORS[index % COLORS.length],
-        };
+      container.dataset.active = 'true';
+
+      const perSide = window.innerWidth < 600 ? 8 : 12;
+      try {
+        stages.forEach((stage, sideIndex) => {
+          const { width, height } = bounds[sideIndex];
+          const direction = sideIndex === 0 ? 1 : -1;
+          const fragment = document.createDocumentFragment();
+          const pending: { sprite: HTMLSpanElement; keyframes: Keyframe[]; timing: KeyframeAnimationOptions }[] = [];
+          for (let index = 0; index < perSide; index += 1) {
+            const sprite = document.createElement('span');
+            sprite.className = 'footer-confetti-particle';
+            sprite.style.width = `${4 + Math.random() * 3}px`;
+            sprite.style.height = `${7 + Math.random() * 5}px`;
+            sprite.style.backgroundColor = COLORS[(index + sideIndex) % COLORS.length];
+            const startX = width * (sideIndex === 0 ? .12 : .88);
+            const distance = width * (.45 + Math.random() * .3);
+            const peakY = height * (.06 + Math.random() * .32);
+            const rotation = Math.random() * 180;
+            const spin = direction * (180 + Math.random() * 360);
+            const transform = (x: number, y: number, turn: number, scale: number) =>
+              `translate3d(${x}px, ${y}px, 0) rotate(${turn}deg) scaleX(${scale})`;
+            pending.push({
+              sprite,
+              keyframes: [
+                { offset: 0, transform: transform(startX, height + 14, rotation, 1), opacity: 0, easing: 'cubic-bezier(.16,1,.3,1)' },
+                { offset: .08, opacity: 1 },
+                { offset: .42, transform: transform(startX + direction * distance * .5, peakY, rotation + spin * .42, .65), opacity: 1, easing: 'cubic-bezier(.45,0,.85,.5)' },
+                { offset: .78, opacity: .9 },
+                { offset: 1, transform: transform(startX + direction * distance, height + 24, rotation + spin, .35), opacity: 0 },
+              ],
+              timing: { duration: 1450 + Math.random() * 350, delay: Math.random() * 90, fill: 'both' },
+            });
+            fragment.appendChild(sprite);
+          }
+          stage.appendChild(fragment);
+          stage.dataset.active = 'true';
+          for (const particle of pending) animations.push(particle.sprite.animate(particle.keyframes, particle.timing));
+        });
+      } catch {
+        finish();
+        return;
+      }
+      cleanupTimer = setTimeout(finish, MAX_RUNTIME_MS);
+      void Promise.allSettled(animations.map(animation => animation.finished)).then(() => {
+        if (!disposed) finish();
       });
-      const started = performance.now();
-      let lastDraw = -FRAME_MS;
-      const draw = (now: number) => {
-        const elapsed = now - started;
-        if (elapsed >= DURATION_MS) { finish(); return; }
-        frame = requestAnimationFrame(draw);
-        if (elapsed - lastDraw < FRAME_MS) return;
-        lastDraw = elapsed;
-        context.clearRect(0, 0, width, height);
-        for (const particle of particles) {
-          const time = elapsed / 1000 - particle.delay;
-          if (time < 0) continue;
-          const x = particle.x + particle.vx * time;
-          const y = particle.y + particle.vy * time + 240 * time * time;
-          if (y > height + 30 || x < -30 || x > width + 30) continue;
-          context.save();
-          context.globalAlpha = Math.min(1, Math.max(0, (DURATION_MS - elapsed) / 650));
-          context.translate(x, y);
-          context.rotate(particle.angle + particle.spin * time);
-          context.scale(Math.max(.2, Math.abs(Math.cos(time * 6 + particle.angle))), 1);
-          context.fillStyle = particle.color;
-          context.fillRect(-particle.width / 2, -particle.height / 2, particle.width, particle.height);
-          context.restore();
-        }
-      };
-      frame = requestAnimationFrame(draw);
     };
+
+    function syncVisibility() {
+      if (document.hidden || preference.matches) {
+        if (running) finish();
+      } else celebrate();
+    }
+    function onResize() {
+      if (running) finish();
+    }
 
     observer = new IntersectionObserver(([entry]) => {
       atBottom = entry.isIntersecting;
-      celebrate();
+      if (!atBottom) {
+        if (running) finish();
+      } else celebrate();
     }, { threshold: 0 });
     observer.observe(trigger);
-    const syncVisibility = () => {
-      if (document.hidden || preference.matches) { if (running) finish(); }
-      else celebrate();
-    };
-    const onResize = () => { if (running) finish(); };
     document.addEventListener('visibilitychange', syncVisibility);
     preference.addEventListener('change', syncVisibility);
     window.addEventListener('resize', onResize, { passive: true });
 
     return () => {
-      observer.disconnect();
+      disposed = true;
       finish();
-      document.removeEventListener('visibilitychange', syncVisibility);
-      preference.removeEventListener('change', syncVisibility);
-      window.removeEventListener('resize', onResize);
+      detach();
     };
   }, []);
 
-  return <>
+  return <div ref={containerRef} className="footer-confetti" data-active="false" aria-hidden="true">
     <span ref={triggerRef} className="footer-confetti-trigger" aria-hidden="true" />
-    <canvas ref={canvasRef} className="footer-confetti-canvas" width="1" height="1" aria-hidden="true" />
-  </>;
+    <div ref={leftRef} className="footer-confetti-stage footer-confetti-stage--left" aria-hidden="true" />
+    <div ref={rightRef} className="footer-confetti-stage footer-confetti-stage--right" aria-hidden="true" />
+  </div>;
 }

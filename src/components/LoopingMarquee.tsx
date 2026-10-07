@@ -23,22 +23,50 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
     const viewport = ref.current;
     const set = original.current;
     if (!viewport || !set || reduced) return;
+    let disposed = false;
+    const fonts = document.fonts;
+    let fontsSettled = !fonts || fonts.status === 'loaded';
+    let fontTimeout: number | undefined;
     const measure = () => {
-      const width = set.scrollWidth;
-      if (!width || !viewport.clientWidth) return;
+      if (disposed) return;
+      // Fractional widths include the trailing gap. Ancestor scale affects both
+      // rectangles equally, so the number of copies also stays correct during reveals.
+      const width = set.getBoundingClientRect().width;
+      const viewportWidth = viewport.getBoundingClientRect().width;
+      if (!width || !viewportWidth) {
+        setReady(false);
+        return;
+      }
       // Each half must fill the viewport, including short technology groups.
-      setSetsPerGroup(Math.max(1, Math.ceil(viewport.clientWidth / width)));
-      setReady(true);
+      setSetsPerGroup(Math.max(1, Math.ceil(viewportWidth / width)));
+      setReady(fontsSettled);
+    };
+    const finishFonts = () => {
+      if (disposed) return;
+      fontsSettled = true;
+      window.clearTimeout(fontTimeout);
+      measure();
     };
     measure();
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', measure);
-      return () => window.removeEventListener('resize', measure);
+    if (fonts) {
+      // Start from settled text metrics, with a fallback for a stalled font request.
+      if (!fontsSettled) fontTimeout = window.setTimeout(finishFonts, 2000);
+      void fonts.ready.then(finishFonts, finishFonts);
+      fonts.addEventListener('loadingdone', measure);
+      fonts.addEventListener('loadingerror', measure);
     }
-    const observer = new ResizeObserver(measure);
-    observer.observe(viewport);
-    observer.observe(set);
-    return () => observer.disconnect();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(viewport);
+    observer?.observe(set);
+    if (!observer) window.addEventListener('resize', measure);
+    return () => {
+      disposed = true;
+      window.clearTimeout(fontTimeout);
+      observer?.disconnect();
+      window.removeEventListener('resize', measure);
+      fonts?.removeEventListener('loadingdone', measure);
+      fonts?.removeEventListener('loadingerror', measure);
+    };
   }, [ref, reduced]);
 
   const copies = reduced ? 0 : setsPerGroup - 1;
