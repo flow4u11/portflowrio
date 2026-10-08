@@ -22,10 +22,19 @@ export type MotionSettings = {
   nameGradientEnd: string;
   nameGradientStops: 2 | 3;
   nameGradientSpeed: number;
+  backgroundStyle: 'stars' | 'snow';
+  snowSpeed: number;
+  snowDensity: number;
+  snowFlakeSize: number;
+  snowPixelResolution: number;
+  snowDirection: number;
+  snowVariant: 'square' | 'round' | 'snowflake';
+  snowBrightness: number;
+  snowDepth: number;
 };
 
 export const STORAGE_KEY = 'portfolio-motion-settings';
-export const STORAGE_VERSION = 3;
+export const STORAGE_VERSION = 4;
 export const NAME_PALETTES = {
   monochrome: ['#555555', '#999999', '#555555'],
   aurora: ['#7978ee', '#df80bf', '#59c6b5'],
@@ -44,13 +53,16 @@ export function createDefaultSettings(mobile = false): MotionSettings {
     nameGradientPreset: 'monochrome', nameGradientStart: '#7978ee',
     nameGradientMiddle: '#df80bf', nameGradientEnd: '#59c6b5',
     nameGradientStops: 3, nameGradientSpeed: 1,
+    backgroundStyle: 'stars', snowSpeed: 1.25, snowDensity: 0.3,
+    snowFlakeSize: 0.015, snowPixelResolution: 200, snowDirection: 125,
+    snowVariant: 'square', snowBrightness: 0.9, snowDepth: 12,
   };
 }
 
 function boundedNumber(value: unknown, fallback: number, min: number, max: number, step: number) {
   if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
   const bounded = Math.min(max, Math.max(min, value));
-  return Number((Math.round(bounded / step) * step).toFixed(2));
+  return Number((Math.round(bounded / step) * step).toFixed(3));
 }
 function color(value: unknown, fallback: string) {
   return typeof value === 'string' && /^#[\da-f]{6}$/i.test(value) ? value.toLowerCase() : fallback;
@@ -82,6 +94,15 @@ export function normalizeSettings(value: unknown, mobile = false): MotionSetting
     nameGradientEnd: color(source.nameGradientEnd, defaults.nameGradientEnd),
     nameGradientStops: source.nameGradientStops === 2 ? 2 : 3,
     nameGradientSpeed: boundedNumber(source.nameGradientSpeed, defaults.nameGradientSpeed, 0.5, 2, 0.05),
+    backgroundStyle: source.backgroundStyle === 'snow' ? 'snow' : 'stars',
+    snowSpeed: boundedNumber(source.snowSpeed, defaults.snowSpeed, 0.25, 2, 0.05),
+    snowDensity: boundedNumber(source.snowDensity, defaults.snowDensity, 0.1, 0.6, 0.05),
+    snowFlakeSize: boundedNumber(source.snowFlakeSize, defaults.snowFlakeSize, 0.005, 0.04, 0.005),
+    snowPixelResolution: boundedNumber(source.snowPixelResolution, defaults.snowPixelResolution, 100, 360, 10),
+    snowDirection: boundedNumber(source.snowDirection, defaults.snowDirection, 0, 360, 5),
+    snowVariant: source.snowVariant && ['square', 'round', 'snowflake'].includes(source.snowVariant) ? source.snowVariant : defaults.snowVariant,
+    snowBrightness: boundedNumber(source.snowBrightness, defaults.snowBrightness, 0.4, 1.4, 0.05),
+    snowDepth: boundedNumber(source.snowDepth, defaults.snowDepth, 6, 16, 1),
   };
 }
 
@@ -89,7 +110,7 @@ export function parseSettings(serialized: string | null, mobile = false): Motion
   if (!serialized) return createDefaultSettings(mobile);
   try {
     const stored: unknown = JSON.parse(serialized);
-    if (!stored || typeof stored !== 'object' || !('version' in stored) || ![1, 2, STORAGE_VERSION].includes(stored.version as number)) return createDefaultSettings(mobile);
+    if (!stored || typeof stored !== 'object' || !('version' in stored) || ![1, 2, 3, STORAGE_VERSION].includes(stored.version as number)) return createDefaultSettings(mobile);
     return normalizeSettings('settings' in stored ? stored.settings : undefined, mobile);
   } catch { return createDefaultSettings(mobile); }
 }

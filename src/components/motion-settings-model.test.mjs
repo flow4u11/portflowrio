@@ -11,7 +11,7 @@ test('first initialization and reset use adaptive gallery defaults', () => {
 });
 
 test('legacy storage keeps existing controls and migrates new settings', () => {
-  for (const version of [1, 2]) {
+  for (const version of [1, 2, 3]) {
     const migrated = parseSettings(JSON.stringify({ version, settings: {
       starSpeed: 1.4, starCount: 197, showFps: true, animationSpeed: 0.75,
       avatarGrid: 14, avatarDuration: 0.8, avatarStagger: 0.45,
@@ -29,6 +29,40 @@ test('legacy storage keeps existing controls and migrates new settings', () => {
     assert.equal(migrated.galleryPreset, 'vortex');
     assert.equal(migrated.galleryBend, 0.5);
   }
+});
+
+test('version three keeps explicit name, marquee and gallery choices while adding stars default', () => {
+  const migrated = parseSettings(JSON.stringify({ version: 3, settings: {
+    galleryAnimated: true, marqueeEnabled: false, nameGradientPreset: 'custom',
+    nameGradientStart: '#123456', nameGradientMiddle: '#456789', nameGradientEnd: '#abcdef', nameGradientStops: 2, nameGradientSpeed: 1.7,
+  } }), true);
+  assert.equal(migrated.backgroundStyle, 'stars');
+  assert.equal(migrated.galleryAnimated, true);
+  assert.equal(migrated.marqueeEnabled, false);
+  assert.equal(migrated.nameGradientPreset, 'custom');
+  assert.equal(migrated.nameGradientStart, '#123456');
+  assert.equal(migrated.nameGradientStops, 2);
+  assert.equal(migrated.nameGradientSpeed, 1.7);
+  assert.equal(migrated.snowDensity, 0.3);
+});
+
+test('snow controls clamp workload and retain subpixel size precision', () => {
+  const bounded = normalizeSettings({ backgroundStyle: 'snow', snowSpeed: 999, snowDensity: 99, snowFlakeSize: 0.005, snowPixelResolution: 9000, snowDirection: -10, snowVariant: 'snowflake', snowBrightness: 999, snowDepth: 999 });
+  assert.equal(bounded.backgroundStyle, 'snow');
+  assert.equal(bounded.snowSpeed, 2);
+  assert.equal(bounded.snowDensity, 0.6);
+  assert.equal(bounded.snowFlakeSize, 0.005);
+  assert.equal(bounded.snowPixelResolution, 360);
+  assert.equal(bounded.snowDirection, 0);
+  assert.equal(bounded.snowVariant, 'snowflake');
+  assert.equal(bounded.snowBrightness, 1.4);
+  assert.equal(bounded.snowDepth, 16);
+  const invalid = normalizeSettings({ backgroundStyle: 'unknown', snowDensity: NaN, snowSpeed: Infinity, snowVariant: 'injected', snowDepth: -2 });
+  assert.equal(invalid.backgroundStyle, 'stars');
+  assert.equal(invalid.snowDensity, 0.3);
+  assert.equal(invalid.snowSpeed, 1.25);
+  assert.equal(invalid.snowVariant, 'square');
+  assert.equal(invalid.snowDepth, 6);
 });
 
 test('persisted explicit overrides survive a different viewport default', () => {

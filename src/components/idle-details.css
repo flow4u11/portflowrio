@@ -6,16 +6,16 @@
 .profile-check { position: absolute; z-index: 2; right: -6px; bottom: -6px; display: grid; place-items: center; width: 30px; height: 30px; color: #fff; filter: drop-shadow(0 1px 2px rgb(0 0 0 / 16%)); pointer-events: none; }
 .profile-check svg { display: block; }
 .profile-check-star { transform-origin: 16px 16px; animation: profile-star-turn calc(36s * var(--motion-duration-factor, 1)) ease-in-out infinite paused; }
-.profile-check-stroke { transform-origin: 16px 16px; transform-box: view-box; stroke-dasharray: 1; stroke-dashoffset: 0; animation: profile-check-draw calc(5.8s * var(--motion-duration-factor, 1)) cubic-bezier(.22,1,.36,1) infinite paused; }
+.profile-check-stroke { transform-origin: 16px 16px; transform-box: view-box; stroke-dasharray: 1; stroke-dashoffset: 0; animation: profile-check-draw calc(4.2s * var(--motion-duration-factor, 1)) cubic-bezier(.22,1,.36,1) infinite paused; }
 .profile-check[data-running="true"] :is(.profile-check-star, .profile-check-stroke) { animation-play-state: running; }
 @keyframes profile-star-turn { to { transform: rotate(360deg); } }
 @keyframes profile-check-draw {
-  0%, 8% { stroke-dashoffset: 1; opacity: 0; transform: translateY(1px) scale(.82) rotate(-7deg); }
-  13% { stroke-dashoffset: 1; opacity: 1; transform: translateY(1px) scale(.86) rotate(-7deg); animation-timing-function: cubic-bezier(.55,0,.85,.5); }
-  23% { stroke-dashoffset: .66; opacity: 1; transform: translateY(0) scale(1) rotate(0); animation-timing-function: cubic-bezier(.12,.8,.18,1); }
-  35% { stroke-dashoffset: 0; opacity: 1; transform: scale(1.14) rotate(2deg); }
-  43% { stroke-dashoffset: 0; transform: scale(.97) rotate(-1deg); }
-  50%, 83% { stroke-dashoffset: 0; opacity: 1; transform: scale(1) rotate(0); }
+  0%, 4% { stroke-dashoffset: 1; opacity: 0; transform: translateY(1px) scale(.82) rotate(-7deg); }
+  7% { stroke-dashoffset: 1; opacity: 1; transform: translateY(1px) scale(.86) rotate(-7deg); animation-timing-function: cubic-bezier(.55,0,.85,.5); }
+  12% { stroke-dashoffset: .66; opacity: 1; transform: translateY(0) scale(1) rotate(0); animation-timing-function: cubic-bezier(.12,.8,.18,1); }
+  20% { stroke-dashoffset: 0; opacity: 1; transform: scale(1.14) rotate(2deg); }
+  26% { stroke-dashoffset: 0; transform: scale(.97) rotate(-1deg); }
+  34%, 86% { stroke-dashoffset: 0; opacity: 1; transform: scale(1) rotate(0); }
   95% { stroke-dashoffset: 0; opacity: 0; transform: scale(.88) rotate(-4deg); }
   100% { stroke-dashoffset: 1; opacity: 0; transform: translateY(1px) scale(.82) rotate(-7deg); }
 }

@@ -72,6 +72,8 @@ export function useMotionSettings() { return useContext(MotionSettingsContext); 
 
 const COPY = {
   en: {
+    background: 'Background', backgroundStyle: 'Background style', starsStyle: 'Three stars', snowStyle: 'Pixel snow',
+    snowSpeed: 'Snow speed', snowDensity: 'Snow density', snowFlakeSize: 'Flake size', snowPixelResolution: 'Pixel detail', snowDirection: 'Wind direction', snowVariant: 'Flake shape', snowBrightness: 'Brightness', snowDepth: 'Depth', square: 'Square', round: 'Round', snowflake: 'Snowflake', snowHint: 'Colors follow your theme. Reduced motion keeps the snow still.',
     title: 'Motion settings', intro: 'Find a pace that feels right. Changes apply as you adjust them.',
     close: 'Close motion settings', stars: 'Background stars', starSpeed: 'Star speed', starCount: 'Number of stars',
     mobile: 'Mobile screens show up to 120 stars.', components: 'Component animation speed',
@@ -89,6 +91,8 @@ const COPY = {
     stops: 'Color stops', twoStops: 'Two', threeStops: 'Three', startColor: 'First color', middleColor: 'Middle color', endColor: 'Last color', nameSpeed: 'Gradient speed', namePreview: 'Live name preview', nameHint: 'Colors blend with your theme to keep the name readable.',
   },
   th: {
+    background: 'พื้นหลัง', backgroundStyle: 'รูปแบบพื้นหลัง', starsStyle: 'ดาวสามมิติ', snowStyle: 'หิมะพิกเซล',
+    snowSpeed: 'ความเร็วหิมะ', snowDensity: 'ความหนาแน่น', snowFlakeSize: 'ขนาดเกล็ด', snowPixelResolution: 'ความละเอียดพิกเซล', snowDirection: 'ทิศทางลม', snowVariant: 'รูปทรงเกล็ด', snowBrightness: 'ความสว่าง', snowDepth: 'ระยะลึก', square: 'สี่เหลี่ยม', round: 'วงกลม', snowflake: 'เกล็ดหิมะ', snowHint: 'สีเปลี่ยนตามธีม และหยุดนิ่งเมื่อเลือกการลดการเคลื่อนไหว',
     title: 'ตั้งค่าการเคลื่อนไหว', intro: 'เลือกจังหวะที่สบายตา การเปลี่ยนแปลงมีผลทันที',
     close: 'ปิดการตั้งค่าการเคลื่อนไหว', stars: 'ดาวพื้นหลัง', starSpeed: 'ความเร็วของดาว', starCount: 'จำนวนดาว',
     mobile: 'หน้าจอมือถือแสดงดาวสูงสุด 120 ดวง', components: 'ความเร็วแอนิเมชันขององค์ประกอบ',
@@ -189,7 +193,9 @@ export function MotionSettingsDialog({ open, onClose, language }: { open: boolea
   >
     <div className="motion-settings-heading"><Gauge size={18} aria-hidden="true" /><h2 id={`${id}-title`}>{text.title}</h2><button ref={closeRef} type="button" className="motion-settings-close" onClick={requestClose} aria-label={text.close}><X size={18} aria-hidden="true" /></button></div>
     <p id={`${id}-intro`} className="motion-settings-intro">{text.intro}</p>
-    <fieldset className="motion-settings-group"><legend>{text.stars}</legend>
+    <fieldset className="motion-settings-group"><legend>{text.background}</legend>
+      <div className="motion-settings-select-row"><label htmlFor={`${id}-background-style`}>{text.backgroundStyle}</label><select id={`${id}-background-style`} value={settings.backgroundStyle} onChange={event => updateSettings({ backgroundStyle: event.currentTarget.value as MotionSettings['backgroundStyle'] })}><option value="stars">{text.starsStyle}</option><option value="snow">{text.snowStyle}</option></select></div>
+      {settings.backgroundStyle === 'stars' ? <div>
       <div className="motion-settings-range">
         <div className="motion-settings-label"><label htmlFor={`${id}-star-speed`}>{text.starSpeed}</label><output htmlFor={`${id}-star-speed`}>{multiplier(settings.starSpeed)}</output></div>
         <input id={`${id}-star-speed`} type="range" min="0.25" max="2" step="0.05" value={settings.starSpeed} aria-valuetext={multiplier(settings.starSpeed)} onChange={event => updateSettings({ starSpeed: event.currentTarget.valueAsNumber })} />
@@ -201,6 +207,17 @@ export function MotionSettingsDialog({ open, onClose, language }: { open: boolea
         <div className="motion-settings-scale" aria-hidden="true"><span>{text.fewer}</span><span>{text.more}</span></div>
         <p id={`${id}-mobile`} className="motion-settings-hint">{text.mobile}</p>
       </div>
+      </div> : <div className="motion-settings-snow-controls">
+        <div className="motion-settings-select-row"><label htmlFor={`${id}-snow-variant`}>{text.snowVariant}</label><select id={`${id}-snow-variant`} value={settings.snowVariant} onChange={event => updateSettings({ snowVariant: event.currentTarget.value as MotionSettings['snowVariant'] })}>{(['square', 'round', 'snowflake'] as const).map(shape => <option key={shape} value={shape}>{text[shape]}</option>)}</select></div>
+        <SettingRange id={`${id}-snow-speed`} label={text.snowSpeed} value={settings.snowSpeed} min={0.25} max={2} step={0.05} display={multiplier(settings.snowSpeed)} onChange={snowSpeed => updateSettings({ snowSpeed })} />
+        <SettingRange id={`${id}-snow-density`} label={text.snowDensity} value={settings.snowDensity} min={0.1} max={0.6} step={0.05} display={`${Math.round(settings.snowDensity * 100)}%`} onChange={snowDensity => updateSettings({ snowDensity })} />
+        <SettingRange id={`${id}-snow-size`} label={text.snowFlakeSize} value={settings.snowFlakeSize} min={0.005} max={0.04} step={0.005} display={`${Math.round(settings.snowFlakeSize * 1000)}`} onChange={snowFlakeSize => updateSettings({ snowFlakeSize })} />
+        <SettingRange id={`${id}-snow-pixels`} label={text.snowPixelResolution} value={settings.snowPixelResolution} min={100} max={360} step={10} onChange={snowPixelResolution => updateSettings({ snowPixelResolution })} />
+        <SettingRange id={`${id}-snow-direction`} label={text.snowDirection} value={settings.snowDirection} min={0} max={360} step={5} display={`${settings.snowDirection}°`} onChange={snowDirection => updateSettings({ snowDirection })} />
+        <SettingRange id={`${id}-snow-brightness`} label={text.snowBrightness} value={settings.snowBrightness} min={0.4} max={1.4} step={0.05} display={multiplier(settings.snowBrightness)} onChange={snowBrightness => updateSettings({ snowBrightness })} />
+        <SettingRange id={`${id}-snow-depth`} label={text.snowDepth} value={settings.snowDepth} min={6} max={16} step={1} onChange={snowDepth => updateSettings({ snowDepth })} />
+        <p className="motion-settings-hint">{text.snowHint}</p>
+      </div>}
     </fieldset>
     <div className="motion-settings-range motion-settings-component-speed">
       <div className="motion-settings-label"><label htmlFor={`${id}-animation-speed`}>{text.components}</label><output htmlFor={`${id}-animation-speed`}>{multiplier(settings.animationSpeed)}</output></div>

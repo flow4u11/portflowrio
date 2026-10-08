@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useSpring, type Variants } from 'motion/react';
 import { ArrowDown, ArrowUp, ArrowUpRight, Check, Film, Gamepad2, Grid2X2, Lightbulb, X } from 'lucide-react';
 import { ThemeTogglerButton } from './components/animate-ui/theme-toggler';
-import { StarsBackground } from './components/animate-ui/stars-background';
+import { PortfolioBackground } from './components/PortfolioBackground';
 import { PixelAvatar } from './components/PixelAvatar';
 import { Typewriter } from './components/Typewriter';
 import { ToolBrandIcon } from './components/ToolBrandIcon';
@@ -29,9 +29,9 @@ import { HeroPlayground } from './components/HeroPlayground';
 
 type Theme = 'light' | 'dark';
 const heroPart: Variants = {
-  hidden: { opacity: 0, y: 48, rotateX: 28, rotateZ: -3, scale: .9 },
+  hidden: { opacity: 0, y: 28 },
   shown: ({ delay, speed, reduced }: { delay: number; speed: number; reduced: boolean }) => ({
-    opacity: 1, y: 0, rotateX: 0, rotateZ: 0, scale: 1,
+    opacity: 1, y: 0,
     transition: reduced ? { duration: 0 } : {
       type: 'spring', stiffness: 105 * speed ** 2, damping: 16 * speed, mass: .85,
       delay: delay / speed, opacity: { duration: .48 / speed, delay: delay / speed },
@@ -136,7 +136,7 @@ export default function App() {
   return <>
     <AnimatePresence onExitComplete={finishLoaderExit}>{loading ? <PortfolioLoader reduced={reduced} onComplete={finishLoading} /> : null}</AnimatePresence>
     <div className="portfolio-page" inert={loading || !heroEntered || undefined}>
-      <StarsBackground className="page-stars" starColor={theme === 'dark' ? '#d5d8ed' : '#6d7b9c'} factor={0} pointerEvents={false}><div className="navigation-warp" aria-hidden="true">{[8, 20, 32, 44, 56, 68, 80, 92].map((left, index) => <i key={left} style={{ left: `${left}%`, top: `${24 + index % 3 * 25}%`, rotate: `${(left - 50) * -.5}deg` }} />)}</div></StarsBackground>
+      <PortfolioBackground className="page-stars" starColor={theme === 'dark' ? '#d5d8ed' : '#6d7b9c'} factor={0} pointerEvents={false}><div className="navigation-warp" aria-hidden="true">{[8, 20, 32, 44, 56, 68, 80, 92].map((left, index) => <i key={left} style={{ left: `${left}%`, top: `${24 + index % 3 * 25}%`, rotate: `${(left - 50) * -.5}deg` }} />)}</div></PortfolioBackground>
       <div id="header-sentinel" aria-hidden="true" />
       <a className="skip-link" href="#home">Skip to content</a>
       <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
@@ -149,13 +149,13 @@ export default function App() {
       <main>
         <section className="hero" id="home" aria-labelledby="hero-title">
           <HeroPlayground enabled={heroEntered && heroReady} language={language}>
-          <motion.div ref={heroRef} className="hero-profile" inert={!heroReady} initial="hidden" animate={heroEntered && (heroVisible || reduced) ? 'shown' : 'hidden'}>
+          <motion.div ref={heroRef} className="hero-profile" inert={!heroReady} initial="hidden" animate={!loading && (heroVisible || reduced) ? 'shown' : 'hidden'}>
             <motion.div variants={heroPart} custom={{ delay: .16, speed: settings.animationSpeed, reduced }} className="profile-frame"><PixelAvatar className="profile-avatar" defaultSrc="/assets/profile-anime.png" hoverSrc="/assets/profile-photo.png" /><ProfileCheck /><span className="profile-corner profile-corner--one" aria-hidden="true">+</span><span className="profile-corner profile-corner--two" aria-hidden="true">+</span></motion.div>
             <motion.h1 variants={heroPart} custom={{ delay: .38, speed: settings.animationSpeed, reduced }} id="hero-title"><AnimatedName>Chayathorn Chianpolsane</AnimatedName></motion.h1>
             <motion.p variants={heroPart} custom={{ delay: .62, speed: settings.animationSpeed, reduced }} className="hero-role"><Typewriter /></motion.p>
             <motion.div variants={heroPart} custom={{ delay: .82, speed: settings.animationSpeed, reduced }} className="hero-tags"><span>UX/UI</span><span className="tag-dot" aria-hidden="true">·</span><span>Game design</span><span className="tag-dot" aria-hidden="true">·</span><span>Visual craft</span></motion.div>
           </motion.div>
-          <motion.a variants={heroPart} initial="hidden" animate={heroEntered && (heroVisible || reduced) ? 'shown' : 'hidden'} custom={{ delay: 1.02, speed: settings.animationSpeed, reduced }} onAnimationComplete={() => { if (heroEntered) setHeroReady(true); }} href="#about" className="explore-button" inert={!heroReady} onClick={event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate({ id: 'about', label: 'About', keyboard: event.detail === 0 }); }}><span>Explore my world</span><ArrowDown aria-hidden="true" size={15} /><IdleGlare /></motion.a>
+          <motion.a variants={heroPart} initial="hidden" animate={!loading && (heroVisible || reduced) ? 'shown' : 'hidden'} custom={{ delay: 1.02, speed: settings.animationSpeed, reduced }} onAnimationComplete={() => { if (!loading) setHeroReady(true); }} href="#about" className="explore-button" inert={!heroReady} onClick={event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate({ id: 'about', label: 'About', keyboard: event.detail === 0 }); }}><span>Explore my world</span><ArrowDown aria-hidden="true" size={15} /><IdleGlare /></motion.a>
           </HeroPlayground>
         </section>
 

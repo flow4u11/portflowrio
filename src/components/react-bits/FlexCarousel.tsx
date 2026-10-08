@@ -52,6 +52,7 @@ export interface FlexCarouselProps extends Partial<PresetValues> {
   fit?: CardFit;
   squeeze?: number;
   focusOnClick?: boolean;
+  focusOnHover?: boolean;
   autoplay?: boolean;
   interval?: number;
   captureWheel?: boolean;
@@ -69,6 +70,7 @@ interface Settings extends PresetValues {
   fit: CardFit;
   squeeze: number;
   focusOnClick: boolean;
+  focusOnHover: boolean;
   autoplay: boolean;
   interval: number;
   captureWheel: boolean;
@@ -260,7 +262,6 @@ void main() {
   float cardAspect = uSize.x / uSize.y;
   float imageAspect = uImage.x / max(uImage.y, 1.0);
   vec2 scale = imageAspect > cardAspect ? vec2(cardAspect / imageAspect, 1.0) : vec2(1.0, imageAspect / cardAspect);
-  scale /= 1.08;
   vec2 uv = vec2(local.x, 1.0 - local.y);
   uv = (uv - 0.5) * scale + 0.5;
   uv.x += uShift * (1.0 - scale.x) * 0.5;
@@ -383,6 +384,7 @@ const FlexCarousel = ({
   followCursor,
   squeeze = 0.2,
   focusOnClick = true,
+  focusOnHover = false,
   autoplay = false,
   interval = 4,
   captureWheel = true,
@@ -434,6 +436,7 @@ const FlexCarousel = ({
       followCursor: pick(followCursor, 'followCursor'),
       squeeze,
       focusOnClick,
+      focusOnHover,
       autoplay,
       interval,
       captureWheel,
@@ -1152,7 +1155,7 @@ const FlexCarousel = ({
       let nextHover = '';
       if (pointer.over && !pointer.dragging && introState.done) {
         const hit = hitTest(pointer.x, pointer.y);
-        if (focus.target > 0) nextHover = 'close';
+        if (focus.target > 0) nextHover = s.focusOnHover ? 'open' : 'close';
         else if (hit) nextHover = 'open';
       }
       if (nextHover !== hover) {
@@ -1201,25 +1204,36 @@ const FlexCarousel = ({
       const moved = !Number.isFinite(lastHoverPointer.x) || Math.hypot(x - lastHoverPointer.x, y - lastHoverPointer.y) >= 1;
       lastHoverPointer = { x, y };
       if (!moved) return;
-      if (e.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches || pointer.down || pointer.dragging || reducedMotion || !introState.done || focus.target > 0 || Math.abs(goal - pos) > 2 || Math.abs(vel) > 25) {
+      const s = settingsRef.current;
+      const index = hitTest(x, y)?.index ?? -1;
+      if (s?.focusOnHover && focus.target > 0) {
+        if (index !== focus.index) closeFocus();
+        cancelHoverIntent();
+        return;
+      }
+      if (!s || e.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches || pointer.down || pointer.dragging || reducedMotion || !introState.done || focus.target > 0 || Math.abs(goal - pos) > 2 || Math.abs(vel) > 25) {
         cancelHoverIntent();
         return;
       }
       // A centered card can pass beneath the same pointer during its spring.
       // Only fresh physical movement may choose another adjacent destination.
       if (hoverAnchor && Math.hypot(x - hoverAnchor.x, y - hoverAnchor.y) < 14) { cancelHoverIntent(); return; }
-      const index = hitTest(x, y)?.index ?? -1;
-      if (index < 0 || Math.abs(index - activeIndex) !== 1) { cancelHoverIntent(); return; }
+      const centered = index === activeIndex && s.focusOnHover;
+      if (index < 0 || (!centered && Math.abs(index - activeIndex) !== 1)) { cancelHoverIntent(); return; }
       if (hoverCandidate === index) return;
       cancelHoverIntent();
       hoverCandidate = index;
       hoverTimer = setTimeout(() => {
         hoverCandidate = -1;
         const s = settingsRef.current;
-        if (!s || !alive || !visible || document.hidden || scrolling || pointer.down || pointer.dragging || !pointer.over || focus.target > 0 || Math.abs(goal - pos) > 2 || Math.abs(vel) > 25 || Math.abs(index - activeIndex) !== 1 || hitTest(pointer.x, pointer.y)?.index !== index) return;
+        if (!s || !alive || !visible || document.hidden || scrolling || pointer.down || pointer.dragging || !pointer.over || focus.target > 0 || Math.abs(goal - pos) > 2 || Math.abs(vel) > 25 || hitTest(pointer.x, pointer.y)?.index !== index) return;
         hoverAnchor = { x: pointer.x, y: pointer.y };
         interactedAt = performance.now();
-        goTo(metrics(s), index);
+        if (index === activeIndex && s.focusOnHover) openFocus(index);
+        else if (Math.abs(index - activeIndex) === 1) {
+          goTo(metrics(s), index);
+          if (s.focusOnHover) focus.pending = index;
+        }
       }, 180);
     };
 
@@ -1234,7 +1248,7 @@ const FlexCarousel = ({
       pointer.down = true;
       pointer.id = e.pointerId;
       pointer.touch = e.pointerType === 'touch';
-      if (pointer.touch) setHovered(-1);
+      if (pointer.touch) { setHovered(-1); closeFocus(); }
       pointer.startX = x;
       pointer.startY = y;
       pointer.x = x;
@@ -1328,7 +1342,7 @@ const FlexCarousel = ({
         start();
         return;
       }
-      if (closeFocus()) return;
+      if (closeFocus() && !s.focusOnHover) return;
       const [x, y] = localPoint(e);
       const hit = hitTest(x, y);
       if (!hit) return;
@@ -1349,6 +1363,7 @@ const FlexCarousel = ({
       hoverAnchor = null;
       lastHoverPointer = { x: NaN, y: NaN };
       pointer.over = false;
+      if (settingsRef.current?.focusOnHover) closeFocus();
       setHovered(-1);
       if (!pointer.dragging) pointer.down = false;
       dirty = true;
@@ -1424,7 +1439,8 @@ const FlexCarousel = ({
         if (closeFocus()) e.preventDefault();
       } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        if (closeFocus() || activeIndex < 0) return;
+        const wasFocused = closeFocus();
+        if ((wasFocused && !s.focusOnHover) || activeIndex < 0) return;
         callbacksRef.current.onSelect?.(activeIndex, itemsRef.current[activeIndex], container);
         if (s.focusOnClick) openFocus(activeIndex);
       }
@@ -1436,11 +1452,13 @@ const FlexCarousel = ({
     };
     const onBlur = () => {
       cancelHoverIntent();
+      if (settingsRef.current?.focusOnHover) closeFocus();
       hasFocus = false;
       container.removeAttribute('data-keyboard-focus');
     };
     const stop = () => {
       cancelHoverIntent();
+      closeFocus();
       cancelAnimationFrame(raf);
       raf = 0;
       pointer.down = false;
@@ -1456,6 +1474,7 @@ const FlexCarousel = ({
     };
     const onPageScroll = () => {
       cancelHoverIntent();
+      closeFocus();
       if ((!visible && !prewarming) || pointer.dragging) return;
       scrolling = true;
       cancelAnimationFrame(raf);

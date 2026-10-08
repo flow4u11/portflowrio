@@ -410,12 +410,13 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
           speed={settings.gallerySpeed * settings.animationSpeed}
           bend={settings.galleryBend}
           intro="none"
-          cardHeight={0.79}
-          fit="landscape"
+          cardHeight={0.68}
+          fit="natural"
           gap={24}
           radius={16}
           liquid={0.28}
           focusOnClick={false}
+          focusOnHover
           captureWheel={false}
           label={thai ? 'แกลเลอรีโปรเจกต์' : 'Project gallery'}
           descriptionId={instructionId}

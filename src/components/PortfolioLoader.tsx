@@ -31,7 +31,6 @@ export function PortfolioLoader({ reduced, onComplete }: { reduced: boolean; onC
   const labelRef = useRef<HTMLSpanElement>(null);
   const invitationRef = useRef<HTMLSpanElement>(null);
   const barRef = useRef<HTMLSpanElement>(null);
-  const numberRef = useRef<HTMLSpanElement>(null);
   const progressRef = useRef<HTMLProgressElement>(null);
   const configRef = useRef({ reduced, speed: settings.animationSpeed, onComplete });
   configRef.current = { reduced, speed: settings.animationSpeed, onComplete };
@@ -124,7 +123,6 @@ export function PortfolioLoader({ reduced, onComplete }: { reduced: boolean; onC
       const rounded = Math.floor(value);
       if (rounded !== lastNumber) {
         lastNumber = rounded;
-        if (numberRef.current) numberRef.current.textContent = `${rounded}%`;
         if (progressRef.current) progressRef.current.value = rounded;
         rootRef.current?.setAttribute('data-progress', String(rounded));
       }
@@ -214,20 +212,20 @@ export function PortfolioLoader({ reduced, onComplete }: { reduced: boolean; onC
   const complete = phase === 'complete';
   return <motion.div ref={rootRef} className="loading-screen portfolio-loader" role="status" aria-live="polite" aria-atomic="true"
     aria-label={complete ? 'Portfolio ready' : 'Preparing portfolio'} data-phase={phase} data-complete={complete} initial={false}
-    exit={reduced ? { opacity: 0 } : { y: '-28%', rotateX: 48, z: -420, scale: .84, opacity: [1, 1, 0] }}
-    transition={{ duration: reduced ? .12 : .9 / settings.animationSpeed, ease: [.76, 0, .24, 1] }}
-    style={{ transformPerspective: 1200 }}>
+    exit={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
+    transition={{ duration: reduced ? .12 : .85 / settings.animationSpeed, ease: [.22, 1, .36, 1] }}>
     <motion.div className="portfolio-loader-entry" aria-hidden="true"
-      initial={reduced ? { opacity: 0 } : { opacity: 0, rotateY: -48, scale: .65 }}
-      animate={phase === 'entry' ? { opacity: [0, 1, 1, 0], rotateY: [-48, 0, 0], scale: [.65, 1, .78] } : { opacity: 0, scale: .78 }}
+      initial={reduced ? { opacity: 0 } : { opacity: 0, y: 10, scale: .65 }}
+      animate={phase === 'entry' ? { opacity: [0, 1, 1, 0], y: [10, 0, 0], scale: [.65, 1, .78] } : { opacity: 0, scale: .78 }}
       transition={{ duration: reduced ? 0 : .44 / settings.animationSpeed, times: [0, .32, .72, 1], ease: [.22, 1, .36, 1] }}>
       <i /><i /><i /><i />
     </motion.div>
     <motion.div className="portfolio-loader-center" aria-hidden="true"
-      initial={false} animate={phase === 'entry' ? { opacity: 0, y: 18, rotateX: 24, scale: .96 } : { opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+      initial={false} animate={phase === 'entry' ? { opacity: 0, y: 18 } : { opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: reduced ? 0 : -18, transition: { duration: reduced ? .1 : .38 / settings.animationSpeed, ease: [.22, 1, .36, 1] } }}
       transition={{ duration: reduced ? 0 : .52 / settings.animationSpeed, ease: [.22, 1, .36, 1] }}>
       <span ref={labelRef} className="portfolio-loader-label">Loading...</span>
-      <div className="portfolio-loader-meter"><span ref={numberRef}>0%</span><div className="portfolio-loader-track"><span ref={barRef} style={{ transform: 'scaleX(0)' }} /></div></div>
+      <div className="portfolio-loader-meter"><div className="portfolio-loader-track"><motion.span ref={barRef} style={{ transform: 'scaleX(0)' }} exit={{ scaleX: 0, transition: { duration: reduced ? .1 : .28 / settings.animationSpeed, ease: [.22, 1, .36, 1] } }} /></div></div>
       <motion.span ref={invitationRef} className="portfolio-loader-invitation" animate={{ opacity: complete ? 1 : 0, y: complete ? 0 : 6 }} transition={{ duration: reduced ? 0 : .3 / settings.animationSpeed }}>Dive it to flow(rio)</motion.span>
     </motion.div>
     <span className="loader-sr-only">{complete ? fallback ? 'Portfolio ready with simplified visual effects.' : 'Portfolio ready.' : 'Preparing images, fonts, and visual effects.'}</span>

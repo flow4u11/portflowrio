@@ -1,6 +1,6 @@
 # ReactBits component provenance
 
-This portfolio adapts official [ReactBits](https://reactbits.dev) component source by David Haz, fetched on 8 October 2026 from [DavidHDev/react-bits](https://github.com/DavidHDev/react-bits), pinned to revision `63a008de65732d73010bd219d25d15c47739bb31`. The source remains local and editable.
+The original integrations in this portfolio adapt official [ReactBits](https://reactbits.dev) component source by David Haz, fetched on 8 October 2026 from [DavidHDev/react-bits](https://github.com/DavidHDev/react-bits), pinned to revision `63a008de65732d73010bd219d25d15c47739bb31`. The source remains local and editable.
 
 | Portfolio component | Official source | Retained behavior and portfolio adaptations |
 | --- | --- | --- |
@@ -15,6 +15,11 @@ Local portrait/project assets and future-slot artwork are portfolio material. Up
 Active-project details add a finite decorative erase-then-type transition, a blinking caret only while characters change, and numbers that count from their previous visible value in `ProjectMotionText.tsx`. Complete text, emphasis, links and final numbers remain available to assistive technology, with static reduced-motion output and no animation-driven React renders.
 
 The gallery animation preference defaults on for desktop and off for mobile. Disabling it releases the WebGL renderer, stops automatic hover movement and keeps all five native cards, the selected position, immediate keyboard/button navigation and project dialogs. Neo Brutalism always uses native cards. When gallery animation is enabled, both presentations center an adjacent card after a short mouse dwell; the next move requires fresh pointer movement after settling, preventing stationary-pointer cascades. Touch remains swipe and button driven. Page entry waits for an actual prepared GPU paint or a bounded native fallback, with resource and renderer deadlines so preparation cannot restart visibly on arrival.
+
+
+Upgrade 0.4 also uses owner-supplied ReactBits exports for [FlexCarousel](https://reactbits.dev/components/flex-carousel) and [Pixel Snow](https://reactbits.dev/backgrounds/pixel-snow). The exported files do not identify a source revision. Their SHA-256 hashes are `bd563e422deb8877dfe13ebe28d39bab34b47783f7d489cdd4925f7d1b05f03e` (carousel) and `beae8db9e3341e8c1cba889d2da9fa00899d74a72d1c397e753a4e929f9a239f` (snow). The existing complete upstream license notice below applies to these adaptations too. The carousel retains its existing shaders and lifecycle safeguards; its original center-card focus spring, neighbor parting and lens melt now respond to mouse hover, with click and keyboard activation still opening project details. Desktop layout reserves a viewport budget for the selected artwork and full project information; mobile remains readable and stacked.
+
+Pixel Snow adapts the supplied three-dimensional cell traversal, wind, depth fade and square/round/snowflake distance shader. It runs as an alternative to the star field, with persisted controls, a bounded low-resolution framebuffer, finite shader traversal, a 30 Hz draw cap, visibility/reduced-motion handling, explicit first-paint readiness and a Canvas2D fallback. Only the selected background owns a renderer. Three.js is already installed; this addition does not require another dependency.
 
 The ReactBits source uses **MIT + Commons Clause**, rather than unmodified MIT. Its complete notice is retained in `src/components/react-bits/LICENSE.md` and reproduced below from the [pinned upstream license](https://github.com/DavidHDev/react-bits/blob/63a008de65732d73010bd219d25d15c47739bb31/LICENSE.md).
 

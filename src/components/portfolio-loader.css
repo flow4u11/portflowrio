@@ -2,9 +2,8 @@
 .portfolio-loader-center { width: min(440px, 86vw); text-align: center; transform-style: preserve-3d; }
 .portfolio-loader-label { display: block; min-height: 1.14em; font: 800 clamp(42px, 7vw, 68px)/1.14 var(--font-sans); letter-spacing: -.065em; }
 .portfolio-loader-meter { display: flex; flex-direction: column; gap: 10px; width: min(300px, 76vw); margin: 26px auto 0; }
-.portfolio-loader-meter > span { align-self: flex-end; min-width: 4ch; font: 400 10px/1 "Space Mono", monospace; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
 .portfolio-loader-track { height: 3px; overflow: hidden; border-radius: 2px; background: var(--line); }
-.portfolio-loader-track > span { display: block; width: 100%; height: 100%; background: currentColor; transform-origin: left; }
+.portfolio-loader-track > span { display: block; width: 100%; height: 100%; background: currentColor; transform-origin: center; }
 .portfolio-loader-invitation { display: block; min-height: 1.6em; margin-top: 20px; font: 600 clamp(12px, 2.5vw, 14px)/1.6 var(--font-sans); letter-spacing: -.025em; color: var(--muted); }
 .portfolio-loader-entry { position: absolute; top: 50%; left: 50%; translate: -50% -50%; width: 72px; height: 72px; pointer-events: none; transform-style: preserve-3d; }
 .portfolio-loader-entry i { position: absolute; display: block; width: 28px; height: 2px; background: currentColor; transform-origin: center; }

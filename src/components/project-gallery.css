@@ -112,6 +112,7 @@
 .pg-art-card { flex: 0 0 var(--pg-art-width, 90%); height: var(--pg-art-height, 79%); scroll-snap-align: center; transition: opacity calc(.24s * var(--motion-duration-factor, 1)) var(--ease); }
 .pg-art-card .pg-project-trigger, .pg-art-card .pg-cover { height: 100%; }
 .pg-art-card .pg-cover { aspect-ratio: auto; }
+.pg-art-card .pg-cover img { object-fit: contain; }
 .project-gallery[data-animation-disabled] .pg-art-card .pg-project-trigger .pg-cover img, .project-gallery[data-animation-disabled] .pg-art-card.pg-card--future .pg-future-art { transform: none; transition: none; }
 .pg-showcase[data-ready] .pg-art-track { visibility: hidden; pointer-events: none; }
 .pg-showcase .pg-controls { position: absolute; z-index: 2; inset: 50% 0 auto; justify-content: space-between; padding: 0 3px; transform: translateY(-50%); pointer-events: none; }
@@ -180,4 +181,32 @@
   .pg-details { min-height: 330px; }
   .pg-details .pg-description { min-height: 7.6em; }
   .project-gallery[data-static-design] { --pg-stage-height: clamp(265px, 78vw, 375px); }
+}
+
+/* Desktop keeps the complete selected cover and its story within one landing. */
+@media (min-width: 901px) and (min-height: 600px) {
+  .section.projects-section { padding-top: 16px; padding-bottom: 20px; }
+  .projects-section .section-heading { align-items: center; gap: 24px; margin-bottom: 14px; }
+  .projects-section .section-heading h2 { margin-top: 8px; font-size: clamp(30px, 2.8vw, 40px); line-height: 1.1; letter-spacing: -1.2px; }
+  .projects-section .section-heading h2 br { display: none; }
+  .projects-section .section-heading h2 i { margin-left: .2em; letter-spacing: -1.5px; }
+  .projects-section .section-intro { max-width: 31ch; font-size: 11px; line-height: 1.65; }
+  .projects-section .project-gallery { --pg-stage-height: clamp(260px, calc(100svh - 370px), 480px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(285px, .43fr); column-gap: 30px; align-items: center; }
+  .projects-section .pg-toolbar { grid-column: 1 / -1; gap: 16px; margin-bottom: 8px; }
+  .projects-section .pg-showcase { grid-column: 1; margin-bottom: 0; }
+  .projects-section .pg-details { grid-column: 2; align-self: center; min-height: 0; }
+  .projects-section .pg-details .pg-caption { gap: 10px; padding-top: 0; }
+  .projects-section .pg-title strong { font-size: 22px; line-height: 1.2; }
+  .projects-section .pg-title { gap: 5px; }
+  .projects-section .pg-body, .projects-section .pg-details .pg-body { display: block; padding-left: 0; }
+  .projects-section .pg-details .pg-description { margin-top: 14px; min-height: 0; font-size: 12px; line-height: 1.8; }
+  .projects-section .pg-details .pg-tags { justify-content: flex-start; max-width: none; margin-top: 12px; }
+  .projects-section .pg-details .pg-links { gap: 10px 16px; margin-top: 9px; }
+  .projects-section .pg-details .pg-empty-note { margin-top: 14px; }
+  .projects-section .pg-pagination { grid-column: 1; grid-row: 3; padding-top: 0; }
+  .projects-section .pg-footer { grid-column: 2; grid-row: 3; padding-top: 0; }
+  .projects-section .pg-progress-group { justify-content: space-between; gap: 12px; }
+  .projects-section .project-gallery[data-static-design] { --pg-stage-height: clamp(260px, calc(100svh - 370px), 480px); }
+  :root[data-design="neobrutalism"] .projects-section .pg-details { margin-top: 0; min-height: 0; }
+  :root[data-design="neobrutalism"] .projects-section .eyebrow { padding-block: 3px; }
 }
