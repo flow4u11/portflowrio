@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useIdleMotion } from './useIdleMotion';
 import { useMotionSettings } from './MotionSettings';
 import './idle-motion.css';
@@ -18,11 +18,15 @@ const idleInteraction: MarqueeInteraction = { hovered: false, pressed: false, ke
 /** Children are presentational chips without IDs or focusable controls. */
 export function LoopingMarquee({ children, label, className = '', contentClassName = '', direction = 'left', durationSeconds = 32 }: LoopingMarqueeProps) {
   const { ref, active, reduced } = useIdleMotion<HTMLDivElement>();
-  const { settings: { animationSpeed } } = useMotionSettings();
+  const { settings: { animationSpeed, marqueeEnabled } } = useMotionSettings();
+  const isStatic = reduced || !marqueeEnabled;
   const original = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const [setsPerGroup, setSetsPerGroup] = useState(1);
   const [ready, setReady] = useState(false);
+  const [distance, setDistance] = useState(0);
+  const timeline = useRef<Animation | null>(null);
+  const previousGeometry = useRef({ distance: 0, duration: 0, direction });
   const [interaction, setInteraction] = useState(idleInteraction);
   const interactionRef = useRef(idleInteraction);
   const keyboardInput = useRef(false);
@@ -32,14 +36,32 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
   const freshPointerMove = useRef<PointerEvent | null>(null);
   const navigatingRef = useRef(false);
   const [navigating, setNavigating] = useState(false);
-
+  const playback = useRef({ active, ready, isStatic });
+  playback.current = { active, ready, isStatic };
+  const syncPlayback = useCallback(() => {
+    const animation = timeline.current;
+    if (!animation) return;
+    const state = playback.current;
+    const pointer = interactionRef.current;
+    const running = state.active && state.ready && !state.isStatic && !document.hidden && !navigatingRef.current && !pointer.hovered && !pointer.pressed && !pointer.keyboard;
+    if (running) {
+      if (animation.playState !== 'running') animation.play();
+    } else if (animation.playState !== 'paused' || animation.pending) {
+      // Explicit holdTime freezes this exact sample immediately, including a
+      // pause that arrives before a pending play has reached the compositor.
+      const time = animation.currentTime;
+      animation.pause();
+      if (time !== null) animation.currentTime = time;
+    }
+  }, []);
   const updateInteraction = useCallback((patch: Partial<MarqueeInteraction>) => {
     const current = interactionRef.current;
     const next = { ...current, ...patch };
     if (current.hovered === next.hovered && current.pressed === next.pressed && current.keyboard === next.keyboard) return;
     interactionRef.current = next;
+    syncPlayback();
     setInteraction(next);
-  }, []);
+  }, [syncPlayback]);
   const clearPointer = useCallback(() => {
     heldPointer.current = null;
     if (!interactionRef.current.hovered && !interactionRef.current.pressed) return;
@@ -89,11 +111,17 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
       navigatingRef.current = true;
       setNavigating(true);
       clearPointer();
+      syncPlayback();
     };
     const onNavigationEnd = () => {
       navigatingRef.current = false;
       setNavigating(false);
       clearPointer();
+      syncPlayback();
+    };
+    const onVisibility = () => {
+      clearPointer();
+      syncPlayback();
     };
 
     document.addEventListener('keydown', onKeyboardInput, true);
@@ -101,7 +129,7 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
     document.addEventListener('pointermove', onPointerMovement, { capture: true, passive: true });
     document.addEventListener('pointerup', onPointerUp, true);
     document.addEventListener('pointercancel', clearPointer, true);
-    document.addEventListener('visibilitychange', clearPointer);
+    document.addEventListener('visibilitychange', onVisibility);
     // A scroll can move a transformed row away without a reliable pointerleave.
     // The ref guard makes this a single state transition, with no layout reads.
     window.addEventListener('scroll', clearPointer, { capture: true, passive: true });
@@ -117,7 +145,7 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
       document.removeEventListener('pointermove', onPointerMovement, true);
       document.removeEventListener('pointerup', onPointerUp, true);
       document.removeEventListener('pointercancel', clearPointer, true);
-      document.removeEventListener('visibilitychange', clearPointer);
+      document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('scroll', clearPointer, true);
       window.removeEventListener('resize', clearPointer);
       window.removeEventListener('blur', onWindowBlur);
@@ -126,43 +154,82 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
       window.removeEventListener('portfolio:navigation-end', onNavigationEnd);
       hoverPreference.removeEventListener('change', syncHoverSupport);
     };
-  }, [ref, clearPointer, updateInteraction]);
+  }, [ref, clearPointer, updateInteraction, syncPlayback]);
 
-  useLayoutEffect(() => {
-    if (!active) clearPointer();
-  }, [active, clearPointer]);
-
+  const duration = (Number.isFinite(durationSeconds) ? Math.max(8, durationSeconds) : 32) * 1000;
   const speed = Number.isFinite(animationSpeed) ? Math.min(2, Math.max(.5, animationSpeed)) : 1;
   useLayoutEffect(() => {
-    if (reduced) return;
-    // Changing CSS duration would remap progress and jump. Change the playback
-    // rate of the same animation instead, retaining its current time and phase.
-    for (const animation of track.current?.getAnimations?.() ?? []) {
-      if (typeof animation.updatePlaybackRate === 'function') animation.updatePlaybackRate(speed);
-      else animation.playbackRate = speed;
+    if (!active || isStatic) clearPointer();
+    syncPlayback();
+  }, [active, ready, isStatic, navigating, clearPointer, syncPlayback]);
+
+  useLayoutEffect(() => {
+    const node = track.current;
+    if (!node || isStatic || !distance || !ready) return;
+    const frames = direction === 'right'
+      ? [{ transform: `translate3d(${-distance}px, 0, 0)` }, { transform: 'translate3d(0, 0, 0)' }]
+      : [{ transform: 'translate3d(0, 0, 0)' }, { transform: `translate3d(${-distance}px, 0, 0)` }];
+    let animation = timeline.current;
+    if (!animation) {
+      animation = node.animate(frames, { duration, iterations: Infinity, easing: 'linear' });
+      animation.pause();
+      animation.currentTime = 0;
+      timeline.current = animation;
+    } else {
+      const previous = previousGeometry.current;
+      const oldTime = Number(animation.currentTime ?? 0);
+      const phase = previous.duration ? ((oldTime % previous.duration) + previous.duration) % previous.duration / previous.duration : 0;
+      const oldOffset = (previous.direction === 'right' ? 1 - phase : phase) * previous.distance;
+      const offset = ((oldOffset % distance) + distance) % distance;
+      const nextPhase = direction === 'right' ? (offset ? 1 - offset / distance : 0) : offset / distance;
+      const effect = animation.effect as KeyframeEffect;
+      effect.setKeyframes(frames);
+      effect.updateTiming({ duration });
+      // Copy counts may change on resize. Keep the same pixel offset modulo
+      // identical content, instead of remapping a percentage of a wider track.
+      animation.currentTime = nextPhase * duration;
     }
-  }, [speed, reduced]);
+    previousGeometry.current = { distance, duration, direction };
+    animation.playbackRate = speed;
+    syncPlayback();
+  }, [distance, duration, direction, ready, isStatic, syncPlayback]);
+
+  useLayoutEffect(() => {
+    const animation = timeline.current;
+    if (!animation) return;
+    animation.updatePlaybackRate(speed);
+    syncPlayback();
+  }, [speed, syncPlayback]);
+
+  useLayoutEffect(() => {
+    if (!isStatic) return;
+    timeline.current?.cancel();
+    timeline.current = null;
+  }, [isStatic]);
+  useEffect(() => () => { timeline.current?.cancel(); timeline.current = null; }, []);
 
   useLayoutEffect(() => {
     const viewport = ref.current;
     const set = original.current;
-    if (!viewport || !set || reduced) return;
+    if (!viewport || !set || isStatic) return;
     let disposed = false;
     const fonts = document.fonts;
     let fontsSettled = !fonts || fonts.status === 'loaded';
     let fontTimeout: number | undefined;
     const measure = () => {
       if (disposed) return;
-      // Fractional widths include the trailing gap. Ancestor scale affects both
-      // rectangles equally, so the number of copies also stays correct during reveals.
-      const width = set.getBoundingClientRect().width;
-      const viewportWidth = viewport.getBoundingClientRect().width;
+      // Computed layout width includes the trailing gap without any ancestor
+      // reveal transforms. Animation transforms never feed back into geometry.
+      const width = Number.parseFloat(getComputedStyle(set).width);
+      const viewportWidth = viewport.clientWidth;
       if (!width || !viewportWidth) {
         setReady(false);
         return;
       }
       // Each half must fill the viewport, including short technology groups.
-      setSetsPerGroup(Math.max(1, Math.ceil(viewportWidth / width)));
+      const count = Math.max(1, Math.ceil(viewportWidth / width));
+      setSetsPerGroup(count);
+      setDistance(width * count);
       setReady(fontsSettled);
     };
     const finishFonts = () => {
@@ -191,25 +258,23 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
       fonts?.removeEventListener('loadingdone', measure);
       fonts?.removeEventListener('loadingerror', measure);
     };
-  }, [ref, reduced]);
+  }, [ref, isStatic]);
 
-  const copies = reduced ? 0 : setsPerGroup - 1;
-  const duration = Number.isFinite(durationSeconds) ? Math.max(8, durationSeconds) : 32;
-  const style = { '--marquee-duration': `${duration}s` } as CSSProperties;
+  const copies = isStatic ? 0 : setsPerGroup - 1;
   const paused = interaction.hovered || interaction.pressed || interaction.keyboard;
 
-  return <div ref={ref} className={`looping-marquee ${className}`} role="group" aria-label={label} tabIndex={reduced ? undefined : 0}
-    data-running={active && ready && !navigating && !paused} data-direction={direction} data-static={reduced}
+  return <div ref={ref} className={`looping-marquee ${className}`} role="group" aria-label={label} tabIndex={isStatic ? undefined : 0}
+    data-running={active && ready && !isStatic && !navigating && !paused} data-direction={direction} data-static={isStatic}
     data-active={active} data-ready={ready} data-navigating={navigating}
-    data-pointer-hover={interaction.hovered} data-pointer-pressed={interaction.pressed} data-keyboard-focus={interaction.keyboard} style={style}
+    data-pointer-hover={interaction.hovered} data-pointer-pressed={interaction.pressed} data-keyboard-focus={interaction.keyboard}
     onPointerMove={event => {
       // Actual movement reacquires hover after a scroll/navigation. A cached
       // :hover or a geometry-only pointerenter cannot hold the row paused.
-      if (!active || navigatingRef.current || !hoverSupported.current || event.pointerType === 'touch' || interactionRef.current.hovered || freshPointerMove.current !== event.nativeEvent) return;
+      if (isStatic || !active || navigatingRef.current || !hoverSupported.current || event.pointerType === 'touch' || interactionRef.current.hovered || freshPointerMove.current !== event.nativeEvent) return;
       updateInteraction({ hovered: true });
     }}
     onPointerDown={event => {
-      if (!event.isPrimary || event.button !== 0 || !active || navigatingRef.current) return;
+      if (isStatic || !event.isPrimary || event.button !== 0 || !active || navigatingRef.current) return;
       heldPointer.current = event.pointerId;
       keyboardInput.current = false;
       updateInteraction({ pressed: true, keyboard: false, hovered: event.pointerType !== 'touch' && hoverSupported.current });
@@ -225,7 +290,7 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
         {/* aria-hidden avoids repeated announcements; copies still receive pointer hover/press. */}
         {Array.from({ length: copies }, (_, index) => <div key={index} className={`looping-marquee-set looping-marquee-copy ${contentClassName}`} aria-hidden="true">{children}</div>)}
       </div>
-      {!reduced && <div className="looping-marquee-group looping-marquee-clone" aria-hidden="true">
+      {!isStatic && <div className="looping-marquee-group looping-marquee-clone" aria-hidden="true">
         {Array.from({ length: setsPerGroup }, (_, index) => <div key={index} className={`looping-marquee-set ${contentClassName}`}>{children}</div>)}
       </div>}
     </div>

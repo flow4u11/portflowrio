@@ -51,8 +51,7 @@
 .looping-marquee-track {
   display: flex;
   width: max-content;
-  animation: idle-marquee-loop var(--marquee-duration, 32s) linear infinite;
-  animation-play-state: paused;
+  transform: translate3d(0, 0, 0);
 }
 .looping-marquee-group { display: flex; flex: 0 0 auto; }
 .looping-marquee .looping-marquee-set {
@@ -66,12 +65,8 @@
   margin: 0;
 }
 .looping-marquee-set > * { flex-shrink: 0; white-space: nowrap; }
-.looping-marquee[data-direction="right"] .looping-marquee-track { animation-direction: reverse; }
-/* One explicit state owns pausing. Browser hover/focus pseudo-classes can stay
-   cached after transformed rows leave view, so they never control this timeline. */
-.looping-marquee[data-running="true"] .looping-marquee-track { animation-play-state: running; }
-@keyframes idle-marquee-loop { to { transform: translateX(-50%); } }
-
+/* A single WAAPI timeline owns transforms and its exact hold time. CSS hover
+   never changes/restarts it; repeated groups stay fully pointer interactive. */
 .looping-marquee[data-static="true"] { overflow: visible; }
 .looping-marquee[data-static="true"] .looping-marquee-track { width: auto; animation: none; transform: none; }
 .looping-marquee[data-static="true"] .looping-marquee-group { display: block; min-width: 0; }

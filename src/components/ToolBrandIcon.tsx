@@ -35,6 +35,7 @@ import afterEffectsIcon from '../assets/icons/after-effects.svg';
 import substancePainterIcon from '../assets/icons/substance-painter.svg';
 import vsCodeIcon from '../assets/icons/vscode.svg';
 import motionIcon from '../assets/icons/motion.svg';
+import threeIcon from '../assets/icons/threejs.svg';
 import playwrightIcon from '../assets/icons/playwright.svg';
 import capCutIcon from '../assets/icons/capcut.ico';
 import fastworkIcon from '../assets/icons/fastwork.ico';
@@ -82,6 +83,7 @@ const brands: Record<string, BrandAsset> = {
   "substance painter": { src: substancePainterIcon },
   "vs code": { src: vsCodeIcon },
   "motion": { src: motionIcon },
+  "three.js": { src: threeIcon, monochrome: true },
   "playwright": { src: playwrightIcon },
   "capcut": { src: capCutIcon },
   "fastwork": { src: fastworkIcon },

@@ -5,6 +5,7 @@ import * as React from 'react';
 import { motion, useReducedMotion, type HTMLMotionProps, type SpringOptions, type Transition } from 'motion/react';
 import { cn } from '../../lib/utils';
 import { useMotionSettings } from '../MotionSettings';
+import { ThreeStarField } from '../ThreeStarField';
 
 type Star = { x: number; y: number; depth: number; opacity: number };
 type Offset = { x: number; y: number };
@@ -231,7 +232,7 @@ export function StarsBackground({
         offset.current.y = 0;
       }}
     >
-      <StarCanvas starColor={starColor} speed={speed} speedMultiplier={settings.starSpeed} count={starCount ?? settings.starCount} offset={offset} />
+      <ThreeStarField color={starColor} speed={settings.starSpeed} count={starCount ?? settings.starCount} fallback={<StarCanvas starColor={starColor} speed={speed} speedMultiplier={settings.starSpeed} count={starCount ?? settings.starCount} offset={offset} />} />
       {children}
     </div>
   );

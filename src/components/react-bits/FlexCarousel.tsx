@@ -604,6 +604,10 @@ const FlexCarousel = ({
     let resnap = false;
     let hover = '';
     let hoveredIndex = -1;
+    let hoverTimer: ReturnType<typeof setTimeout> | undefined;
+    let hoverCandidate = -1;
+    let hoverAnchor: { x: number; y: number } | null = null;
+    let lastHoverPointer = { x: NaN, y: NaN };
     let lift = 1;
     let energy = 0;
     let lastPos = 0;
@@ -1189,8 +1193,39 @@ const FlexCarousel = ({
       return true;
     };
 
+    const cancelHoverIntent = () => {
+      clearTimeout(hoverTimer);
+      hoverCandidate = -1;
+    };
+    const hoverToCenter = (e: PointerEvent, x: number, y: number) => {
+      const moved = !Number.isFinite(lastHoverPointer.x) || Math.hypot(x - lastHoverPointer.x, y - lastHoverPointer.y) >= 1;
+      lastHoverPointer = { x, y };
+      if (!moved) return;
+      if (e.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches || pointer.down || pointer.dragging || reducedMotion || !introState.done || focus.target > 0 || Math.abs(goal - pos) > 2 || Math.abs(vel) > 25) {
+        cancelHoverIntent();
+        return;
+      }
+      // A centered card can pass beneath the same pointer during its spring.
+      // Only fresh physical movement may choose another adjacent destination.
+      if (hoverAnchor && Math.hypot(x - hoverAnchor.x, y - hoverAnchor.y) < 14) { cancelHoverIntent(); return; }
+      const index = hitTest(x, y)?.index ?? -1;
+      if (index < 0 || Math.abs(index - activeIndex) !== 1) { cancelHoverIntent(); return; }
+      if (hoverCandidate === index) return;
+      cancelHoverIntent();
+      hoverCandidate = index;
+      hoverTimer = setTimeout(() => {
+        hoverCandidate = -1;
+        const s = settingsRef.current;
+        if (!s || !alive || !visible || document.hidden || scrolling || pointer.down || pointer.dragging || !pointer.over || focus.target > 0 || Math.abs(goal - pos) > 2 || Math.abs(vel) > 25 || Math.abs(index - activeIndex) !== 1 || hitTest(pointer.x, pointer.y)?.index !== index) return;
+        hoverAnchor = { x: pointer.x, y: pointer.y };
+        interactedAt = performance.now();
+        goTo(metrics(s), index);
+      }, 180);
+    };
+
     const onPointerDown = (e: PointerEvent) => {
       if (e.button !== undefined && e.button > 0) return;
+      cancelHoverIntent();
       // Pointer interaction does not inherit a keyboard-only focus decoration.
       container.removeAttribute('data-keyboard-focus');
       container.focus({ preventScroll: true });
@@ -1259,7 +1294,9 @@ const FlexCarousel = ({
           while (pointer.samples.length > 2 && now - pointer.samples[0].t > 100) pointer.samples.shift();
         }
       }
-      const changedHover = setHovered(!pointer.touch && !pointer.dragging ? hitTest(x, y)?.index ?? -1 : -1);
+      const canHover = e.pointerType === 'mouse' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      const changedHover = setHovered(canHover && !pointer.dragging ? hitTest(x, y)?.index ?? -1 : -1);
+      hoverToCenter(e, x, y);
       if (pointer.dragging || settingsRef.current?.followCursor || changedHover) {
         dirty = true;
         start();
@@ -1308,6 +1345,9 @@ const FlexCarousel = ({
     };
 
     const onPointerLeave = () => {
+      cancelHoverIntent();
+      hoverAnchor = null;
+      lastHoverPointer = { x: NaN, y: NaN };
       pointer.over = false;
       setHovered(-1);
       if (!pointer.dragging) pointer.down = false;
@@ -1316,6 +1356,7 @@ const FlexCarousel = ({
     };
 
     const onPointerCancel = () => {
+      cancelHoverIntent();
       if (!pointer.down && !pointer.dragging) return;
       pointer.down = false;
       pointer.dragging = false;
@@ -1328,6 +1369,7 @@ const FlexCarousel = ({
     };
 
     const onWheel = (e: WheelEvent) => {
+      cancelHoverIntent();
       const s = settingsRef.current;
       if (!s || e.ctrlKey) return;
       let dx = e.deltaX;
@@ -1352,6 +1394,7 @@ const FlexCarousel = ({
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
+      cancelHoverIntent();
       if (e.target !== container || e.altKey || e.ctrlKey || e.metaKey) return;
       const s = settingsRef.current;
       if (!s) return;
@@ -1392,10 +1435,12 @@ const FlexCarousel = ({
       if (container.matches(':focus-visible')) container.setAttribute('data-keyboard-focus', 'true');
     };
     const onBlur = () => {
+      cancelHoverIntent();
       hasFocus = false;
       container.removeAttribute('data-keyboard-focus');
     };
     const stop = () => {
+      cancelHoverIntent();
       cancelAnimationFrame(raf);
       raf = 0;
       pointer.down = false;
@@ -1410,6 +1455,7 @@ const FlexCarousel = ({
       else start();
     };
     const onPageScroll = () => {
+      cancelHoverIntent();
       if ((!visible && !prewarming) || pointer.dragging) return;
       scrolling = true;
       cancelAnimationFrame(raf);
@@ -1497,6 +1543,7 @@ const FlexCarousel = ({
       engineRef.current = null;
       cancelAnimationFrame(raf);
       clearTimeout(scrollTimer);
+      cancelHoverIntent();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       container.removeEventListener('pointerdown', onPointerDown);

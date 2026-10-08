@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type ComponentType, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ComponentType, type KeyboardEvent } from 'react';
 import { ArrowLeft, ArrowRight, ArrowUpRight, Plus } from 'lucide-react';
 import { ToolBrandIcon } from './ToolBrandIcon';
 import type { Language } from './LocalizedCopy';
 import { ProjectMotionCopy, ProjectMotionNumber } from './ProjectMotionText';
 import { useMotionSettings } from './MotionSettings';
+import { beginPortfolioReadiness, reportPortfolioReady } from './portfolioReadiness';
 import { useIdleMotion } from './useIdleMotion';
 import type { FlexCarouselHandle, FlexCarouselProps } from './react-bits/FlexCarousel';
 import './project-gallery.css';
@@ -50,8 +51,10 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
   const [webglUnavailable, setWebglUnavailable] = useState(false);
   const [presentationEnhanced, setPresentationEnhanced] = useState(false);
   const rendererReady = useRef(false);
+  const readinessGeneration = useRef(0);
   const galleryVisible = useRef(false);
-  const enhanced = presentationEnhanced && !reduced && !webglUnavailable && !staticDesign;
+  const animationAllowed = settings.galleryAnimated && !reduced && !staticDesign && !webglUnavailable;
+  const enhanced = presentationEnhanced && animationAllowed;
   const trackRef = useRef<HTMLDivElement>(null);
   const instructionId = useId();
   const trackId = useId();
@@ -67,28 +70,65 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
   // Resource loading starts with the page. Shader construction has its own
   // scroll-quiet idle gate, and an offscreen warmup paints the final image once.
   useEffect(() => {
-    if (reduced || staticDesign || webglUnavailable) return;
+    if (!animationAllowed) {
+      reportPortfolioReady('gallery', 'fallback');
+      return;
+    }
     let cancelled = false;
+    const generation = beginPortfolioReadiness('gallery');
+    readinessGeneration.current = generation;
+    const releaseImages: (() => void)[] = [];
+    const fallback = () => {
+      if (cancelled) return;
+      setWebglUnavailable(true);
+      reportPortfolioReady('gallery', 'fallback', generation);
+    };
+    // A missing cover or stalled decoder keeps the native gallery available
+    // instead of holding page entry or constructing an incomplete GPU scene.
+    const resourceTimeout = setTimeout(fallback, 3600);
+    let moduleReady = false;
+    let decodedCoversReady = false;
+    const completeResources = () => {
+      if (moduleReady && decodedCoversReady) clearTimeout(resourceTimeout);
+    };
     void import('./react-bits/FlexCarousel').then(module => {
-      if (!cancelled) setRenderer(() => module.default);
-    }).catch(() => { if (!cancelled) setWebglUnavailable(true); });
+      if (!cancelled) {
+        moduleReady = true;
+        setRenderer(() => module.default);
+        completeResources();
+      }
+    }).catch(fallback);
     const sources = coverKey.split('|');
-    void Promise.all(sources.map(src => new Promise<void>(resolve => {
-      if (preparedImages.current.has(src)) { resolve(); return; }
+    void Promise.all(sources.map(src => new Promise<boolean>(resolve => {
+      if (preparedImages.current.has(src)) { resolve(true); return; }
       const image = new Image();
       image.crossOrigin = 'anonymous';
       image.decoding = 'async';
+      releaseImages.push(() => { image.onload = null; image.onerror = null; });
       image.onload = () => {
-        void image.decode().catch(() => {}).then(() => {
+        void image.decode().then(() => {
+          if (cancelled) return;
           preparedImages.current.set(src, image);
-          resolve();
-        });
+          resolve(true);
+        }).catch(() => resolve(false));
       };
-      image.onerror = () => resolve();
+      image.onerror = () => resolve(false);
       image.src = src;
-    }))).then(() => { if (!cancelled) setCoversReady(true); });
-    return () => { cancelled = true; };
-  }, [coverKey, reduced, staticDesign, webglUnavailable]);
+    }))).then(results => {
+      if (cancelled) return;
+      if (results.every(Boolean)) {
+        decodedCoversReady = true;
+        setCoversReady(true);
+        completeResources();
+      }
+      else fallback();
+    });
+    return () => {
+      cancelled = true;
+      clearTimeout(resourceTimeout);
+      releaseImages.forEach(release => release());
+    };
+  }, [coverKey, animationAllowed]);
 
   useEffect(() => {
     const gallery = galleryRef.current;
@@ -107,11 +147,11 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
   }, [galleryRef]);
 
   useEffect(() => {
-    if (reduced || staticDesign) {
+    if (!animationAllowed) {
       rendererReady.current = false;
       setPresentationEnhanced(false);
     }
-  }, [reduced, staticDesign]);
+  }, [animationAllowed]);
 
   const updateActive = useCallback((index: number) => {
     const previous = positionRef.current;
@@ -122,27 +162,76 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
   }, [total]);
   const onRendererReady = useCallback(() => {
     rendererReady.current = true;
+    reportPortfolioReady('gallery', 'ready', readinessGeneration.current);
     if (!galleryVisible.current) setPresentationEnhanced(true);
   }, []);
   const onRendererUnavailable = useCallback(() => {
     rendererReady.current = false;
     setWebglUnavailable(true);
     setPresentationEnhanced(false);
+    reportPortfolioReady('gallery', 'fallback', readinessGeneration.current);
   }, []);
   const onRendererChange = useCallback((index: number) => {
     if (enhanced) updateActive(index);
   }, [enhanced, updateActive]);
 
   useEffect(() => {
+    if (!animationAllowed || !Renderer || !coversReady) return;
+    let quietTimer: ReturnType<typeof setTimeout> | undefined;
+    let watchdogTimer: ReturnType<typeof setTimeout> | undefined;
+    const clearTimers = () => {
+      clearTimeout(quietTimer);
+      clearTimeout(watchdogTimer);
+    };
+    const armWatchdog = () => {
+      clearTimers();
+      if (document.hidden || rendererReady.current) return;
+      // Match the renderer's quiet gate; user scrolling and background tabs
+      // defer healthy construction and do not consume its startup deadline.
+      quietTimer = setTimeout(() => {
+        if (document.hidden || rendererReady.current) return;
+        watchdogTimer = setTimeout(() => {
+          if (!document.hidden && !rendererReady.current) onRendererUnavailable();
+        }, 1800);
+      }, 220);
+    };
+    window.addEventListener('scroll', armWatchdog, { passive: true });
+    document.addEventListener('visibilitychange', armWatchdog);
+    armWatchdog();
+    return () => {
+      clearTimers();
+      window.removeEventListener('scroll', armWatchdog);
+      document.removeEventListener('visibilitychange', armWatchdog);
+    };
+  }, [animationAllowed, Renderer, coversReady, onRendererUnavailable]);
+
+  useEffect(() => {
     if (!enhanced && rendererReady.current) rendererRef.current?.syncTo(position.index);
   }, [enhanced, position.index]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const track = trackRef.current;
     if (!track || enhanced) return;
     let frame = 0;
+    let hoverTimer: ReturnType<typeof setTimeout> | undefined;
+    let scrollTimer: ReturnType<typeof setTimeout> | undefined;
+    let scrolling = false;
+    let hoverCandidate = -1;
+    let hoveredIndex = -1;
+    let lastPointer = { x: NaN, y: NaN };
+    let hoverAnchor: { x: number; y: number } | null = null;
     const cards = Array.from(track.querySelectorAll<HTMLElement>('.pg-art-card'));
     const targetLeft = (card: HTMLElement) => card.offsetLeft - (track.clientWidth - card.offsetWidth) / 2;
+    const cancelHover = () => {
+      clearTimeout(hoverTimer);
+      hoverCandidate = -1;
+    };
+    const setHovered = (index: number) => {
+      if (index === hoveredIndex) return;
+      hoveredIndex = index;
+      track.toggleAttribute('data-hovering', index >= 0);
+      cards.forEach((card, cardIndex) => card.toggleAttribute('data-hovered', cardIndex === index));
+    };
     const updatePosition = () => {
       frame = 0;
       let index = 0;
@@ -154,6 +243,48 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
       updateActive(index);
     };
     const scheduleUpdate = () => { if (!frame) frame = requestAnimationFrame(updatePosition); };
+    const onScroll = () => {
+      scrolling = true;
+      cancelHover();
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => { scrolling = false; }, 150);
+      scheduleUpdate();
+    };
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches || event.buttons) {
+        cancelHover();
+        setHovered(-1);
+        return;
+      }
+      const { clientX: x, clientY: y } = event;
+      const moved = !Number.isFinite(lastPointer.x) || Math.hypot(x - lastPointer.x, y - lastPointer.y) >= 1;
+      lastPointer = { x, y };
+      // Layout-induced enters and unchanged coordinates never choose a card.
+      if (!moved || scrolling) return;
+      if (hoverAnchor && Math.hypot(x - hoverAnchor.x, y - hoverAnchor.y) < 14) return;
+      const card = (event.target as Element).closest<HTMLElement>('.pg-art-card');
+      const index = card ? cards.indexOf(card) : -1;
+      setHovered(index);
+      if (!settings.galleryAnimated) { cancelHover(); return; }
+      if (index < 0 || Math.abs(index - positionRef.current.index) !== 1) { cancelHover(); return; }
+      if (hoverCandidate === index) return;
+      cancelHover();
+      hoverCandidate = index;
+      hoverTimer = setTimeout(() => {
+        hoverCandidate = -1;
+        if (scrolling || document.hidden || Math.abs(index - positionRef.current.index) !== 1) return;
+        const hit = document.elementFromPoint(lastPointer.x, lastPointer.y)?.closest('.pg-art-card');
+        if (hit !== cards[index]) return;
+        hoverAnchor = { ...lastPointer };
+        track.scrollTo({ left: targetLeft(cards[index]), behavior: reduced ? 'instant' : 'smooth' });
+      }, 180);
+    };
+    const onPointerLeave = () => {
+      cancelHover();
+      setHovered(-1);
+      hoverAnchor = null;
+      lastPointer = { x: NaN, y: NaN };
+    };
     const resize = () => {
       const showcase = track.parentElement;
       if (!showcase) return;
@@ -164,17 +295,32 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
       if (current) track.scrollLeft = targetLeft(current);
       scheduleUpdate();
     };
-    track.addEventListener('scroll', scheduleUpdate, { passive: true });
+    track.addEventListener('scroll', onScroll, { passive: true });
+    track.addEventListener('pointermove', onPointerMove, { passive: true });
+    track.addEventListener('pointerleave', onPointerLeave);
+    track.addEventListener('pointerdown', cancelHover);
+    track.addEventListener('pointercancel', onPointerLeave);
+    track.addEventListener('keydown', cancelHover);
+    window.addEventListener('scroll', onPointerLeave, { passive: true });
     const observer = new ResizeObserver(resize);
     observer.observe(track);
     resize();
     updatePosition();
     return () => {
-      track.removeEventListener('scroll', scheduleUpdate);
+      track.removeEventListener('scroll', onScroll);
+      track.removeEventListener('pointermove', onPointerMove);
+      track.removeEventListener('pointerleave', onPointerLeave);
+      track.removeEventListener('pointerdown', cancelHover);
+      track.removeEventListener('pointercancel', onPointerLeave);
+      track.removeEventListener('keydown', cancelHover);
+      window.removeEventListener('scroll', onPointerLeave);
+      cancelHover();
+      setHovered(-1);
+      clearTimeout(scrollTimer);
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [total, enhanced, staticDesign, updateActive]);
+  }, [total, enhanced, staticDesign, reduced, settings.galleryAnimated, updateActive]);
 
   const goTo = (index: number) => {
     const target = Math.max(0, Math.min(index, total - 1));
@@ -183,7 +329,7 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
     const card = track?.querySelectorAll<HTMLElement>('.pg-art-card')[target];
     if (!track || !card) return;
     const left = card.offsetLeft - (track.clientWidth - card.offsetWidth) / 2;
-    track.scrollTo({ left, behavior: reduced ? 'instant' : 'smooth' });
+    track.scrollTo({ left, behavior: reduced || !settings.galleryAnimated ? 'instant' : 'smooth' });
   };
 
   const moveBy = (delta: number) => {
@@ -214,7 +360,7 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
     {project ? <ArrowUpRight size={19} aria-hidden="true" /> : <Plus size={19} aria-hidden="true" />}
   </>;
 
-  return <div className="project-gallery" ref={galleryRef} data-enhanced={enhanced || undefined} data-static-design={staticDesign || undefined}>
+  return <div className="project-gallery" ref={galleryRef} data-enhanced={enhanced || undefined} data-animation-disabled={!settings.galleryAnimated || undefined} data-static-design={staticDesign || undefined}>
     <div className="pg-toolbar">
       <p className="pg-summary"><span>{String(projects.length).padStart(2, '0')} projects</span><span aria-hidden="true">/</span><span>03 open slots</span></p>
       <span className="pg-instruction" id={instructionId}>{thai ? 'ลากหรือใช้ลูกศรเพื่อสำรวจ' : 'Drag, swipe, or use the arrows to explore.'}<span className="pg-sr-only"> When the gallery is focused, use Left and Right arrow keys. Home goes to the first card and End goes to the last. Enter opens the selected project.</span></span>
@@ -252,7 +398,7 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
           </div>
         </article>)}
       </div>
-      {Renderer && coversReady && !reduced && !staticDesign && !webglUnavailable && <div className="pg-stage" aria-hidden={!enhanced || undefined} inert={!enhanced}>
+      {Renderer && coversReady && animationAllowed && <div className="pg-stage" aria-hidden={!enhanced || undefined} inert={!enhanced}>
         <Renderer
           ref={rendererRef}
           id={`${trackId}-visual`}

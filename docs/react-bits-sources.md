@@ -12,7 +12,9 @@ The carousel adds `ogl` 1.0.11 (Unlicense) as a dependency. OGL is included in t
 
 Local portrait/project assets and future-slot artwork are portfolio material. Upstream demo photographs are not included.
 
-Active-project details add a finite decorative erase-then-type transition and numbers that count from their previous visible value in `ProjectMotionText.tsx`. Complete text, emphasis, links and final numbers remain available to assistive technology, with static reduced-motion output and no animation-driven React renders.
+Active-project details add a finite decorative erase-then-type transition, a blinking caret only while characters change, and numbers that count from their previous visible value in `ProjectMotionText.tsx`. Complete text, emphasis, links and final numbers remain available to assistive technology, with static reduced-motion output and no animation-driven React renders.
+
+The gallery animation preference defaults on for desktop and off for mobile. Disabling it releases the WebGL renderer, stops automatic hover movement and keeps all five native cards, the selected position, immediate keyboard/button navigation and project dialogs. Neo Brutalism always uses native cards. When gallery animation is enabled, both presentations center an adjacent card after a short mouse dwell; the next move requires fresh pointer movement after settling, preventing stationary-pointer cascades. Touch remains swipe and button driven. Page entry waits for an actual prepared GPU paint or a bounded native fallback, with resource and renderer deadlines so preparation cannot restart visibly on arrival.
 
 The ReactBits source uses **MIT + Commons Clause**, rather than unmodified MIT. Its complete notice is retained in `src/components/react-bits/LICENSE.md` and reproduced below from the [pinned upstream license](https://github.com/DavidHDev/react-bits/blob/63a008de65732d73010bd219d25d15c47739bb31/LICENSE.md).
 

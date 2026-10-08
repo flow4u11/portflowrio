@@ -13,7 +13,7 @@
   position: absolute;
   inset: 0;
   color: transparent;
-  background-image: linear-gradient(112deg, var(--text, #050505) 12%, var(--muted, #606060) 38%, var(--text, #050505) 64%, var(--muted, #606060) 86%, var(--text, #050505));
+  background-image: var(--name-gradient-colors, linear-gradient(112deg, var(--text, #050505) 12%, var(--muted, #606060) 38%, var(--text, #050505) 64%, var(--muted, #606060) 86%, var(--text, #050505)));
   background-size: 240% 100%;
   background-position: 0% 50%;
   -webkit-background-clip: text;

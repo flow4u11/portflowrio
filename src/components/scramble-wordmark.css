@@ -1,0 +1,3 @@
+.scramble-wordmark--settings { min-width: 8.2em; }
+.scramble-wordmark--settings .scramble-wordmark-text { overflow: visible; }
+@media (max-width: 420px) { .wordmark-settings .scramble-wordmark--settings { font-size: 13px; min-width: 8em; } }

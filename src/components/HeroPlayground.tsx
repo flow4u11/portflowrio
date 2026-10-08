@@ -124,7 +124,11 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
     if (homeTarget.current) { homeTarget.current.dataset.active = 'false'; homeTarget.current.dataset.locked = 'false'; }
   }, []);
   const drawTether = useCallback((piece: Piece, from: PlaygroundPoint) => {
-    tether.current?.setAttribute('d', `M${from.x.toFixed(2)},${from.y.toFixed(2)} L${piece.home.x.toFixed(2)},${piece.home.y.toFixed(2)}`);
+    const bounds = session.current?.bounds;
+    if (!bounds) return;
+    // Preview the same gravity/capture trajectory used by the released piece.
+    const flight = playgroundShotFlight({ ...piece.pose, ...from }, piece.home, bounds, piece);
+    tether.current?.setAttribute('d', flight.frames.map((point, index) => `${index ? 'L' : 'M'}${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(' '));
     const held = drag.current;
     if (held && homeTarget.current) homeTarget.current.dataset.locked = String(playgroundAim(held.from, from, piece.home, piece).locked);
   }, []);

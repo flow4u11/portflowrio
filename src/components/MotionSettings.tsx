@@ -1,72 +1,17 @@
 import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Gauge, RotateCcw, X } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
+import { useIdleMotion } from './useIdleMotion';
+import { createDefaultSettings, NAME_PALETTES, nameGradientStyle, normalizeSettings, parseSettings, STORAGE_KEY, STORAGE_VERSION, type MotionSettings } from './motion-settings-model';
 import './motion-settings.css';
+import './animated-name.css';
+export type { MotionSettings } from './motion-settings-model';
 
-export type MotionSettings = {
-  starSpeed: number;
-  starCount: number;
-  showFps: boolean;
-  animationSpeed: number;
-  avatarGrid: number;
-  avatarDuration: number;
-  avatarStagger: number;
-  trailEnabled: boolean;
-  trailSize: number;
-  trailLifetime: number;
-  trailDensity: number;
-  galleryPreset: 'liquid' | 'ribbon' | 'vortex' | 'arch';
-  gallerySpeed: number;
-  galleryBend: number;
-};
-
-const STORAGE_KEY = 'portfolio-motion-settings';
-const STORAGE_VERSION = 2;
-const DEFAULT_SETTINGS: MotionSettings = {
-  starSpeed: 1, starCount: 120, showFps: false, animationSpeed: 1,
-  avatarGrid: 10, avatarDuration: 0.55, avatarStagger: 0.85,
-  trailEnabled: true, trailSize: 8, trailLifetime: 360, trailDensity: 0.75,
-  galleryPreset: 'liquid', gallerySpeed: 1, galleryBend: 0.34,
-};
-
-function boundedNumber(value: unknown, fallback: number, min: number, max: number, step: number) {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
-  const bounded = Math.min(max, Math.max(min, value));
-  return Number((Math.round(bounded / step) * step).toFixed(2));
-}
-
-function normalizeSettings(value: unknown): MotionSettings {
-  const source = value && typeof value === 'object' ? value as Partial<MotionSettings> : {};
-  return {
-    starSpeed: boundedNumber(source.starSpeed, DEFAULT_SETTINGS.starSpeed, 0.25, 2, 0.05),
-    starCount: boundedNumber(source.starCount, DEFAULT_SETTINGS.starCount, 20, 240, 1),
-    showFps: typeof source.showFps === 'boolean' ? source.showFps : DEFAULT_SETTINGS.showFps,
-    animationSpeed: boundedNumber(source.animationSpeed, DEFAULT_SETTINGS.animationSpeed, 0.5, 2, 0.05),
-    avatarGrid: boundedNumber(source.avatarGrid, DEFAULT_SETTINGS.avatarGrid, 4, 20, 1),
-    avatarDuration: boundedNumber(source.avatarDuration, DEFAULT_SETTINGS.avatarDuration, 0.2, 1.5, 0.05),
-    avatarStagger: boundedNumber(source.avatarStagger, DEFAULT_SETTINGS.avatarStagger, 0.25, 1, 0.05),
-    trailEnabled: typeof source.trailEnabled === 'boolean' ? source.trailEnabled : DEFAULT_SETTINGS.trailEnabled,
-    trailSize: boundedNumber(source.trailSize, DEFAULT_SETTINGS.trailSize, 4, 16, 1),
-    trailLifetime: boundedNumber(source.trailLifetime, DEFAULT_SETTINGS.trailLifetime, 120, 900, 20),
-    trailDensity: boundedNumber(source.trailDensity, DEFAULT_SETTINGS.trailDensity, 0.25, 1.5, 0.05),
-    galleryPreset: source.galleryPreset && ['liquid', 'ribbon', 'vortex', 'arch'].includes(source.galleryPreset) ? source.galleryPreset : DEFAULT_SETTINGS.galleryPreset,
-    gallerySpeed: boundedNumber(source.gallerySpeed, DEFAULT_SETTINGS.gallerySpeed, 0.5, 2, 0.05),
-    galleryBend: boundedNumber(source.galleryBend, DEFAULT_SETTINGS.galleryBend, 0, 0.65, 0.01),
-  };
-}
-
-function parseSettings(serialized: string | null): MotionSettings {
-  if (!serialized) return { ...DEFAULT_SETTINGS };
-  try {
-    const stored: unknown = JSON.parse(serialized);
-    if (!stored || typeof stored !== 'object' || !('version' in stored) || (stored.version !== 1 && stored.version !== STORAGE_VERSION)) return { ...DEFAULT_SETTINGS };
-    return normalizeSettings('settings' in stored ? stored.settings : undefined);
-  } catch { return { ...DEFAULT_SETTINGS }; }
-}
-
+const DEFAULT_SETTINGS = createDefaultSettings();
+function isMobileScreen() { return typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches; }
 function readSettings() {
-  try { return parseSettings(window.localStorage.getItem(STORAGE_KEY)); }
-  catch { return { ...DEFAULT_SETTINGS }; }
+  try { return parseSettings(window.localStorage.getItem(STORAGE_KEY), isMobileScreen()); }
+  catch { return createDefaultSettings(isMobileScreen()); }
 }
 
 function settingsEqual(a: MotionSettings, b: MotionSettings) {
@@ -92,7 +37,7 @@ export function MotionSettingsProvider({ children }: { children: ReactNode }) {
       return settingsEqual(previous, next) ? previous : next;
     });
   }, []);
-  const resetSettings = useCallback(() => updateSettings(DEFAULT_SETTINGS), [updateSettings]);
+  const resetSettings = useCallback(() => updateSettings(createDefaultSettings(isMobileScreen())), [updateSettings]);
 
   useEffect(() => {
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: STORAGE_VERSION, settings })); }
@@ -102,7 +47,7 @@ export function MotionSettingsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const syncSettings = (event: StorageEvent) => {
       if (event.key !== STORAGE_KEY && event.key !== null) return;
-      const next = parseSettings(event.newValue);
+      const next = parseSettings(event.newValue, isMobileScreen());
       setSettings(previous => settingsEqual(previous, next) ? previous : next);
     };
     window.addEventListener('storage', syncSettings);
@@ -138,6 +83,10 @@ const COPY = {
     trailSize: 'Pixel size', trailLifetime: 'Fade duration', trailDensity: 'Trail density',
     gallery: 'Project gallery', preset: 'Movement style', gallerySpeed: 'Gallery speed', galleryBend: 'Curve strength',
     liquid: 'Liquid', ribbon: 'Ribbon', vortex: 'Vortex', arch: 'Arch',
+    galleryAnimated: 'Animate gallery', galleryHint: 'On by default on desktop; off on mobile. Your choice is saved.',
+    marquee: 'Toolkit & technology', marqueeEnabled: 'Animate scrolling rows', marqueeHint: 'Turn off to show every item in wrapped rows.',
+    name: 'Name gradient', palette: 'Palette', monochrome: 'Monochrome', aurora: 'Aurora', sunrise: 'Sunrise', ocean: 'Ocean', custom: 'Custom',
+    stops: 'Color stops', twoStops: 'Two', threeStops: 'Three', startColor: 'First color', middleColor: 'Middle color', endColor: 'Last color', nameSpeed: 'Gradient speed', namePreview: 'Live name preview', nameHint: 'Colors blend with your theme to keep the name readable.',
   },
   th: {
     title: 'ตั้งค่าการเคลื่อนไหว', intro: 'เลือกจังหวะที่สบายตา การเปลี่ยนแปลงมีผลทันที',
@@ -151,10 +100,21 @@ const COPY = {
     trailSize: 'ขนาดพิกเซล', trailLifetime: 'เวลาจางหาย', trailDensity: 'ความหนาแน่น',
     gallery: 'แกลเลอรีโปรเจกต์', preset: 'รูปแบบการเคลื่อนไหว', gallerySpeed: 'ความเร็วแกลเลอรี', galleryBend: 'ความโค้ง',
     liquid: 'พลิ้วไหว', ribbon: 'ริบบิ้น', vortex: 'วนหมุน', arch: 'โค้ง',
+    galleryAnimated: 'เปิดแอนิเมชันแกลเลอรี', galleryHint: 'ค่าเริ่มต้นเปิดบนเดสก์ท็อปและปิดบนมือถือ ระบบจะจำค่าที่คุณเลือก',
+    marquee: 'เครื่องมือและเทคโนโลยี', marqueeEnabled: 'เปิดการเลื่อนแถว', marqueeHint: 'ปิดเพื่อแสดงทุกรายการในแถวที่ตัดบรรทัดได้',
+    name: 'สีไล่เฉดของชื่อ', palette: 'ชุดสี', monochrome: 'ขาวดำ', aurora: 'ออโรรา', sunrise: 'แสงอรุณ', ocean: 'มหาสมุทร', custom: 'กำหนดเอง',
+    stops: 'จำนวนสี', twoStops: 'สองสี', threeStops: 'สามสี', startColor: 'สีแรก', middleColor: 'สีกลาง', endColor: 'สีสุดท้าย', nameSpeed: 'ความเร็วสีไล่เฉด', namePreview: 'ตัวอย่างชื่อแบบสด', nameHint: 'สีจะผสมกับธีมเพื่อให้ชื่อยังอ่านได้ชัดเจน',
   },
 };
 
 function multiplier(value: number) { return `${Number(value.toFixed(2))}×`; }
+
+function NameGradientPreview({ settings, label, enabled }: { settings: MotionSettings; label: string; enabled: boolean }) {
+  const { ref, active } = useIdleMotion<HTMLSpanElement>();
+  return <div className="motion-settings-name-preview" role="img" aria-label={label}>
+    <span ref={ref} className="animated-name" data-running={enabled && active} style={nameGradientStyle(settings)} aria-hidden="true">flowrio.<span className="animated-name-gradient">flowrio.</span></span>
+  </div>;
+}
 
 function SettingRange({ id, label, value, min, max, step, display, disabled = false, onChange }: {
   id: string; label: string; value: number; min: number; max: number; step: number;
@@ -247,6 +207,23 @@ export function MotionSettingsDialog({ open, onClose, language }: { open: boolea
       <input id={`${id}-animation-speed`} type="range" min="0.5" max="2" step="0.05" value={settings.animationSpeed} aria-valuetext={multiplier(settings.animationSpeed)} onChange={event => updateSettings({ animationSpeed: event.currentTarget.valueAsNumber })} />
       <div className="motion-settings-scale" aria-hidden="true"><span>{text.slow}</span><span>{text.fast}</span></div>
     </div>
+    <details className="motion-settings-details"><summary>{text.marquee}</summary><div className="motion-settings-details-body">
+      <div className="motion-settings-toggle-row"><div><label htmlFor={`${id}-marquee-enabled`}>{text.marqueeEnabled}</label><p className="motion-settings-hint" id={`${id}-marquee-hint`}>{text.marqueeHint}</p></div><input id={`${id}-marquee-enabled`} type="checkbox" checked={settings.marqueeEnabled} aria-describedby={`${id}-marquee-hint`} onChange={event => updateSettings({ marqueeEnabled: event.currentTarget.checked })} /></div>
+    </div></details>
+    <details className="motion-settings-details"><summary>{text.name}</summary><div className="motion-settings-details-body">
+      <NameGradientPreview settings={settings} label={text.namePreview} enabled={open && !closing} />
+      <div className="motion-settings-select-row"><label htmlFor={`${id}-name-palette`}>{text.palette}</label><select id={`${id}-name-palette`} value={settings.nameGradientPreset} onChange={event => {
+        const nameGradientPreset = event.currentTarget.value as MotionSettings['nameGradientPreset'];
+        const palette = nameGradientPreset === 'custom' ? null : NAME_PALETTES[nameGradientPreset];
+        updateSettings({ nameGradientPreset, ...(palette ? { nameGradientStart: palette[0], nameGradientMiddle: palette[1], nameGradientEnd: palette[2] } : {}) });
+      }}>{(['monochrome', 'aurora', 'sunrise', 'ocean', 'custom'] as const).map(preset => <option key={preset} value={preset}>{text[preset]}</option>)}</select></div>
+      <div className="motion-settings-select-row"><label htmlFor={`${id}-name-stops`}>{text.stops}</label><select id={`${id}-name-stops`} value={settings.nameGradientStops} onChange={event => updateSettings({ nameGradientStops: Number(event.currentTarget.value) as 2 | 3 })}><option value="2">{text.twoStops}</option><option value="3">{text.threeStops}</option></select></div>
+      <div className="motion-settings-colors">
+        {([{ key: 'nameGradientStart', label: text.startColor }, ...(settings.nameGradientStops === 3 ? [{ key: 'nameGradientMiddle', label: text.middleColor }] : []), { key: 'nameGradientEnd', label: text.endColor }] as { key: 'nameGradientStart' | 'nameGradientMiddle' | 'nameGradientEnd'; label: string }[]).map(({ key, label }) => <div className="motion-settings-color" key={key}><label htmlFor={`${id}-${key}`}>{label}</label><input id={`${id}-${key}`} type="color" value={settings[key]} onChange={event => updateSettings({ nameGradientPreset: 'custom', [key]: event.currentTarget.value })} /></div>)}
+      </div>
+      <SettingRange id={`${id}-name-speed`} label={text.nameSpeed} value={settings.nameGradientSpeed} min={0.5} max={2} step={0.05} display={multiplier(settings.nameGradientSpeed)} onChange={nameGradientSpeed => updateSettings({ nameGradientSpeed })} />
+      <p className="motion-settings-hint">{text.nameHint}</p>
+    </div></details>
     <details className="motion-settings-details"><summary>{text.portrait}</summary><div className="motion-settings-details-body">
       <SettingRange id={`${id}-avatar-grid`} label={text.grid} value={settings.avatarGrid} min={4} max={20} step={1} display={`${settings.avatarGrid} × ${settings.avatarGrid}`} onChange={avatarGrid => updateSettings({ avatarGrid })} />
       <SettingRange id={`${id}-avatar-duration`} label={text.duration} value={settings.avatarDuration} min={0.2} max={1.5} step={0.05} display={`${settings.avatarDuration} s`} onChange={avatarDuration => updateSettings({ avatarDuration })} />
@@ -259,9 +236,10 @@ export function MotionSettingsDialog({ open, onClose, language }: { open: boolea
       <SettingRange id={`${id}-trail-density`} label={text.trailDensity} value={settings.trailDensity} min={0.25} max={1.5} step={0.05} display={multiplier(settings.trailDensity)} disabled={!settings.trailEnabled} onChange={trailDensity => updateSettings({ trailDensity })} />
     </div></details>
     <details className="motion-settings-details"><summary>{text.gallery}</summary><div className="motion-settings-details-body">
-      <div className="motion-settings-select-row"><label htmlFor={`${id}-gallery-preset`}>{text.preset}</label><select id={`${id}-gallery-preset`} value={settings.galleryPreset} onChange={event => updateSettings({ galleryPreset: event.currentTarget.value as MotionSettings['galleryPreset'] })}>{(['liquid', 'ribbon', 'vortex', 'arch'] as const).map(preset => <option key={preset} value={preset}>{text[preset]}</option>)}</select></div>
-      <SettingRange id={`${id}-gallery-speed`} label={text.gallerySpeed} value={settings.gallerySpeed} min={0.5} max={2} step={0.05} display={multiplier(settings.gallerySpeed)} onChange={gallerySpeed => updateSettings({ gallerySpeed })} />
-      <SettingRange id={`${id}-gallery-bend`} label={text.galleryBend} value={settings.galleryBend} min={0} max={0.65} step={0.01} display={`${Math.round(settings.galleryBend * 100)}%`} onChange={galleryBend => updateSettings({ galleryBend })} />
+      <div className="motion-settings-toggle-row"><div><label htmlFor={`${id}-gallery-animated`}>{text.galleryAnimated}</label><p className="motion-settings-hint" id={`${id}-gallery-hint`}>{text.galleryHint}</p></div><input id={`${id}-gallery-animated`} type="checkbox" checked={settings.galleryAnimated} aria-describedby={`${id}-gallery-hint`} onChange={event => updateSettings({ galleryAnimated: event.currentTarget.checked })} /></div>
+      <div className="motion-settings-select-row"><label htmlFor={`${id}-gallery-preset`}>{text.preset}</label><select id={`${id}-gallery-preset`} value={settings.galleryPreset} disabled={!settings.galleryAnimated} onChange={event => updateSettings({ galleryPreset: event.currentTarget.value as MotionSettings['galleryPreset'] })}>{(['liquid', 'ribbon', 'vortex', 'arch'] as const).map(preset => <option key={preset} value={preset}>{text[preset]}</option>)}</select></div>
+      <SettingRange id={`${id}-gallery-speed`} label={text.gallerySpeed} value={settings.gallerySpeed} disabled={!settings.galleryAnimated} min={0.5} max={2} step={0.05} display={multiplier(settings.gallerySpeed)} onChange={gallerySpeed => updateSettings({ gallerySpeed })} />
+      <SettingRange id={`${id}-gallery-bend`} label={text.galleryBend} value={settings.galleryBend} disabled={!settings.galleryAnimated} min={0} max={0.65} step={0.01} display={`${Math.round(settings.galleryBend * 100)}%`} onChange={galleryBend => updateSettings({ galleryBend })} />
     </div></details>
     <div className="motion-settings-fps-row"><div><label htmlFor={`${id}-fps`}>{text.fps}</label><p id={`${id}-fps-hint`} className="motion-settings-hint">{text.fpsHint}</p></div><input id={`${id}-fps`} type="checkbox" checked={settings.showFps} aria-describedby={`${id}-fps-hint`} onChange={event => updateSettings({ showFps: event.currentTarget.checked })} /></div>
     {reducedMotion && <p className="motion-settings-reduced">{text.reduced}</p>}

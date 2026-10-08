@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
-import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useSpring } from 'motion/react';
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useSpring, type Variants } from 'motion/react';
 import { ArrowDown, ArrowUp, ArrowUpRight, Check, Film, Gamepad2, Grid2X2, Lightbulb, X } from 'lucide-react';
 import { ThemeTogglerButton } from './components/animate-ui/theme-toggler';
 import { StarsBackground } from './components/animate-ui/stars-background';
@@ -28,6 +28,16 @@ import { PixelTrail } from './components/PixelTrail';
 import { HeroPlayground } from './components/HeroPlayground';
 
 type Theme = 'light' | 'dark';
+const heroPart: Variants = {
+  hidden: { opacity: 0, y: 48, rotateX: 28, rotateZ: -3, scale: .9 },
+  shown: ({ delay, speed, reduced }: { delay: number; speed: number; reduced: boolean }) => ({
+    opacity: 1, y: 0, rotateX: 0, rotateZ: 0, scale: 1,
+    transition: reduced ? { duration: 0 } : {
+      type: 'spring', stiffness: 105 * speed ** 2, damping: 16 * speed, mass: .85,
+      delay: delay / speed, opacity: { duration: .48 / speed, delay: delay / speed },
+    },
+  }),
+};
 const navigation = [{ id: 'home', label: 'Home' }, { id: 'about', label: 'About' }, { id: 'projects', label: 'Projects' }, { id: 'contact', label: 'Contact' }];
 
 export default function App() {
@@ -47,7 +57,9 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(() => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
   const [loading, setLoading] = useState(true);
   const [heroReady, setHeroReady] = useState(false);
-  const [loadProgress, setLoadProgress] = useState(0);
+  const [heroEntered, setHeroEntered] = useState(false);
+  const finishLoading = useCallback(() => setLoading(false), []);
+  const finishLoaderExit = useCallback(() => setHeroEntered(true), []);
   const [activeSection, setActiveSection] = useState('home');
   const [scrolled, setScrolled] = useState(false);
   const [modal, setModal] = useState<Project | 'contact' | null>(null);
@@ -75,40 +87,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    let complete = 0;
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    const markReady = () => { complete += 1; if (!cancelled) setLoadProgress(Math.round(complete / 3 * 92)); };
-    const images = ['/assets/profile-anime.png', '/assets/profile-photo.png'].map(src => new Promise<void>(resolve => {
-      const image = new Image();
-      let ready = false;
-      const finish = () => {
-        if (ready) return;
-        ready = true;
-        image.onload = image.onerror = null;
-        markReady();
-        resolve();
-      };
-      image.onload = image.onerror = finish;
-      timers.push(setTimeout(finish, 2200));
-      image.src = src;
-    }));
-    const wait = (milliseconds: number) => new Promise<void>(resolve => { timers.push(setTimeout(resolve, milliseconds)); });
-    const fonts = Promise.race([document.fonts.ready, wait(1400)]).then(markReady);
-    void Promise.all([...images, fonts, wait(700)]).then(async () => {
-      if (cancelled) return;
-      setLoadProgress(100);
-      // Keep the completed bar visible before the connected Hero entrance.
-      await wait(1700);
-      if (!cancelled) setLoading(false);
-    });
-    return () => { cancelled = true; timers.forEach(clearTimeout); };
-  }, [reduced]);
-
-  useEffect(() => {
-    document.body.classList.toggle('scroll-locked', loading || modal !== null);
+    document.body.classList.toggle('scroll-locked', loading || !heroEntered || modal !== null);
     return () => document.body.classList.remove('scroll-locked');
-  }, [loading, modal]);
+  }, [loading, heroEntered, modal]);
 
   useEffect(() => {
     const sections = navigation.map(item => document.getElementById(item.id)).filter((element): element is HTMLElement => Boolean(element));
@@ -153,13 +134,13 @@ export default function App() {
   };
 
   return <>
-    <AnimatePresence>{loading ? <PortfolioLoader progress={loadProgress} reduced={reduced} /> : null}</AnimatePresence>
-    <div className="portfolio-page" inert={loading || undefined}>
+    <AnimatePresence onExitComplete={finishLoaderExit}>{loading ? <PortfolioLoader reduced={reduced} onComplete={finishLoading} /> : null}</AnimatePresence>
+    <div className="portfolio-page" inert={loading || !heroEntered || undefined}>
       <StarsBackground className="page-stars" starColor={theme === 'dark' ? '#d5d8ed' : '#6d7b9c'} factor={0} pointerEvents={false}><div className="navigation-warp" aria-hidden="true">{[8, 20, 32, 44, 56, 68, 80, 92].map((left, index) => <i key={left} style={{ left: `${left}%`, top: `${24 + index % 3 * 25}%`, rotate: `${(left - 50) * -.5}deg` }} />)}</div></StarsBackground>
       <div id="header-sentinel" aria-hidden="true" />
       <a className="skip-link" href="#home">Skip to content</a>
       <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
-        <button type="button" className="wordmark wordmark-settings" onClick={() => setSettingsOpen(true)} aria-label={language === 'th' ? 'เปิดการตั้งค่า' : 'Open motion settings'} aria-haspopup="dialog"><ScrambleWordmark /></button>
+        <button type="button" className="wordmark wordmark-settings" onClick={() => setSettingsOpen(true)} aria-label={language === 'th' ? 'เปิดการตั้งค่า' : 'Open motion settings'} aria-haspopup="dialog"><ScrambleWordmark settingsHint /></button>
         <nav aria-label="Main navigation">{navigation.map(item => <a key={item.id} href={`#${item.id}`} className={item.id === 'home' ? 'nav-home' : undefined} onClick={event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); if (!transitioning) navigate({ ...item, keyboard: event.detail === 0 }); }} aria-current={activeSection === item.id ? 'location' : undefined}>{activeSection === item.id && <motion.span className="nav-indicator" layoutId="active-navigation" transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 160 * settings.animationSpeed ** 2, damping: 25 * settings.animationSpeed }} aria-hidden="true" />}<span className="nav-label">{item.label}</span></a>)}</nav>
         <div className="header-controls"><LanguageControl language={language} onChange={setLanguage} /><SpecialThemeControl active={specialTheme} onExit={exitSpecial} language={language} disabled={transitioning || navigating}><ThemeTogglerButton theme={theme} onThemeChange={setTheme} disabled={transitioning || navigating} className="theme-control" aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} /></SpecialThemeControl></div>
         <motion.div className="page-progress" style={{ scaleX: pageProgress }} aria-hidden="true" />
@@ -167,14 +148,14 @@ export default function App() {
 
       <main>
         <section className="hero" id="home" aria-labelledby="hero-title">
-          <HeroPlayground enabled={!loading && heroReady} language={language}>
-          <motion.div ref={heroRef} className="hero-profile" initial={false} onAnimationComplete={() => { if (!loading) setHeroReady(true); }} animate={!loading && (heroVisible || reduced) ? { opacity: 1, y: 0, rotateX: 0, z: 0, scale: 1 } : { opacity: 0, y: 50, rotateX: 14, z: -100, scale: .92 }} transition={{ duration: reduced ? 0 : 1.15 / settings.animationSpeed, delay: reduced ? 0 : .12, ease: [0.22, 1, 0.36, 1] }}>
-            <div className="profile-frame"><PixelAvatar className="profile-avatar" defaultSrc="/assets/profile-anime.png" hoverSrc="/assets/profile-photo.png" /><ProfileCheck /><span className="profile-corner profile-corner--one" aria-hidden="true">+</span><span className="profile-corner profile-corner--two" aria-hidden="true">+</span></div>
-            <h1 id="hero-title"><AnimatedName>Chayathorn Chianpolsane</AnimatedName></h1>
-            <p className="hero-role"><Typewriter /></p>
-            <div className="hero-tags"><span>UX/UI</span><span className="tag-dot" aria-hidden="true">·</span><span>Game design</span><span className="tag-dot" aria-hidden="true">·</span><span>Visual craft</span></div>
+          <HeroPlayground enabled={heroEntered && heroReady} language={language}>
+          <motion.div ref={heroRef} className="hero-profile" inert={!heroReady} initial="hidden" animate={heroEntered && (heroVisible || reduced) ? 'shown' : 'hidden'}>
+            <motion.div variants={heroPart} custom={{ delay: .16, speed: settings.animationSpeed, reduced }} className="profile-frame"><PixelAvatar className="profile-avatar" defaultSrc="/assets/profile-anime.png" hoverSrc="/assets/profile-photo.png" /><ProfileCheck /><span className="profile-corner profile-corner--one" aria-hidden="true">+</span><span className="profile-corner profile-corner--two" aria-hidden="true">+</span></motion.div>
+            <motion.h1 variants={heroPart} custom={{ delay: .38, speed: settings.animationSpeed, reduced }} id="hero-title"><AnimatedName>Chayathorn Chianpolsane</AnimatedName></motion.h1>
+            <motion.p variants={heroPart} custom={{ delay: .62, speed: settings.animationSpeed, reduced }} className="hero-role"><Typewriter /></motion.p>
+            <motion.div variants={heroPart} custom={{ delay: .82, speed: settings.animationSpeed, reduced }} className="hero-tags"><span>UX/UI</span><span className="tag-dot" aria-hidden="true">·</span><span>Game design</span><span className="tag-dot" aria-hidden="true">·</span><span>Visual craft</span></motion.div>
           </motion.div>
-          <a href="#about" className="explore-button" onClick={event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate({ id: 'about', label: 'About', keyboard: event.detail === 0 }); }}><span>Explore my world</span><ArrowDown aria-hidden="true" size={15} /><IdleGlare /></a>
+          <motion.a variants={heroPart} initial="hidden" animate={heroEntered && (heroVisible || reduced) ? 'shown' : 'hidden'} custom={{ delay: 1.02, speed: settings.animationSpeed, reduced }} onAnimationComplete={() => { if (heroEntered) setHeroReady(true); }} href="#about" className="explore-button" inert={!heroReady} onClick={event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate({ id: 'about', label: 'About', keyboard: event.detail === 0 }); }}><span>Explore my world</span><ArrowDown aria-hidden="true" size={15} /><IdleGlare /></motion.a>
           </HeroPlayground>
         </section>
 
@@ -198,9 +179,9 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="site-footer"><div className="footer-brand"><a className="wordmark" href="#home" aria-label="flowrio, back to home"><ScrambleWordmark /></a><p>© {new Date().getFullYear()} · Made with curiosity.</p><p className="design-credit"><LocalizedCopy text={text.footer} language={language} /></p></div>{!loading && <FooterConfetti />}<a className="back-to-top" href="#home">Back to top <ArrowUp size={13} aria-hidden="true" /></a></footer>
+      <footer className="site-footer"><div className="footer-brand"><a className="wordmark" href="#home" aria-label="flowrio, back to home"><ScrambleWordmark /></a><p>© {new Date().getFullYear()} · Made with curiosity.</p><p className="design-credit"><LocalizedCopy text={text.footer} language={language} /></p></div>{!loading && <FooterConfetti />}<a className="back-to-top" href="#home" onClick={event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate({ id: 'home', label: 'Home', keyboard: event.detail === 0 }); }}>Back to top <ArrowUp size={13} aria-hidden="true" /></a></footer>
     </div>
-    <PixelTrail enabled={!loading} />
+    <PixelTrail enabled={heroEntered} />
     <FpsOverlay />
     <MotionSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} language={language} />
 

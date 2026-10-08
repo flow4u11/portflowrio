@@ -478,6 +478,18 @@
       "name": "ExcelJS",
       "source": "https://github.com/exceljs/exceljs",
       "note": "No independent official app logo found. Organization avatar is an identicon; render text only."
+    },
+    {
+      "name": "Three.js",
+      "file": "threejs.svg",
+      "provider": "three.js authors",
+      "version": "r186",
+      "download": "https://raw.githubusercontent.com/mrdoob/three.js/r186/files/icon.svg",
+      "source": "https://github.com/mrdoob/three.js/blob/r186/files/icon.svg",
+      "guidelines": "https://threejs.org/",
+      "logoLicense": "MIT",
+      "packageLicense": "MIT",
+      "sha256": "fe160e715ebdbed862f4a3f3633320cd5081b8de4e95818d429b3d295a71a9e8"
     }
   ]
 }

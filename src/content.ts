@@ -43,7 +43,7 @@ export const toolkitItems = [
 export const technologyItems = [
   // Frontend, motion, backend, then shipping and testing.
   'React', 'Next.js', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Tailwind CSS', 'Vite',
-  'Motion', 'GSAP', 'Radix UI', 'Node.js',
+  'Motion', 'GSAP', 'Radix UI', 'Three.js', 'Node.js',
   'Supabase', 'PostgreSQL', 'Supabase Auth', 'Zod', 'ExcelJS', 'Git', 'GitHub',
   'Vercel', 'Vitest', 'Playwright',
 ];
@@ -52,10 +52,10 @@ export const toolkitRows = [
   toolkitItems.slice(0, 6),
   toolkitItems.slice(6),
 ];
-// Frontend/motion, then backend/shipping; each technology row has 11 items.
+// Frontend/motion, then backend/shipping; categories remain together.
 export const technologyRows = [
-  technologyItems.slice(0, 11),
-  technologyItems.slice(11),
+  technologyItems.slice(0, 12),
+  technologyItems.slice(12),
 ];
 
 export function getProjects(language: Language): Project[] {

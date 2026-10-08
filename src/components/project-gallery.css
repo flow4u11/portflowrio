@@ -112,6 +112,7 @@
 .pg-art-card { flex: 0 0 var(--pg-art-width, 90%); height: var(--pg-art-height, 79%); scroll-snap-align: center; transition: opacity calc(.24s * var(--motion-duration-factor, 1)) var(--ease); }
 .pg-art-card .pg-project-trigger, .pg-art-card .pg-cover { height: 100%; }
 .pg-art-card .pg-cover { aspect-ratio: auto; }
+.project-gallery[data-animation-disabled] .pg-art-card .pg-project-trigger .pg-cover img, .project-gallery[data-animation-disabled] .pg-art-card.pg-card--future .pg-future-art { transform: none; transition: none; }
 .pg-showcase[data-ready] .pg-art-track { visibility: hidden; pointer-events: none; }
 .pg-showcase .pg-controls { position: absolute; z-index: 2; inset: 50% 0 auto; justify-content: space-between; padding: 0 3px; transform: translateY(-50%); pointer-events: none; }
 .pg-showcase .pg-nav { width: 46px; height: 46px; pointer-events: auto; background: color-mix(in srgb, var(--bg) 85%, transparent); }
@@ -124,7 +125,11 @@
 .pg-details .pg-tags { grid-column: 2; grid-row: 1; justify-content: flex-end; max-width: 220px; }
 .pg-details .pg-links, .pg-details .pg-empty-note { grid-column: 1 / -1; }
 @media (hover: hover) and (pointer: fine) {
-  .pg-art-track:has(.pg-art-card:hover) .pg-art-card:not(:hover) { opacity: .6; }
+  .pg-art-track[data-hovering] .pg-art-card:not([data-hovered]) { opacity: .6; }
+  .pg-art-card .pg-project-trigger:hover .pg-cover img { transform: none; }
+  .pg-art-card[data-hovered] .pg-project-trigger .pg-cover img { transform: scale(1.035); }
+  .pg-art-card.pg-card--future .pg-future-art { transform: none; }
+  .pg-art-card.pg-card--future[data-hovered] .pg-future-art { transform: translateY(-3px); }
 }
 .pg-pagination { display: flex; justify-content: center; gap: 2px; padding-top: 12px; }
 .pg-dot { display: grid; place-items: center; width: 34px; min-height: 44px; border: 0; padding: 0; color: var(--muted); background: transparent; }
@@ -152,7 +157,12 @@
 .pg-motion-copy-visual { display: none; position: absolute; inset: 0; pointer-events: none; overflow-wrap: anywhere; }
 .pg-motion-copy[data-typing] .pg-motion-copy-full { opacity: 0; }
 .pg-motion-copy[data-typing] .pg-motion-copy-visual { display: block; }
+.pg-motion-copy[data-typing] .pg-motion-copy-visual::after { content: ''; display: inline-block; width: 1px; height: .95em; margin-inline-start: 2px; background: currentColor; vertical-align: -.12em; animation: pg-caret-blink .72s steps(1, end) infinite; }
+@keyframes pg-caret-blink { 0%, 49% { opacity: .85; } 50%, 100% { opacity: 0; } }
 .pg-motion-number { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  .pg-motion-copy[data-typing] .pg-motion-copy-visual::after { display: none; animation: none; }
+}
 
 
 /* Neo Brutalism uses native scrolling with five distinct ink-framed covers. */

@@ -44,3 +44,5 @@ they appear in this folder. Check the recorded source guidelines when changing
 their use. The component deliberately returns no mark for unknown products.
 
 - **Instagram:** Unmodified brand silhouette from [Simple Icons](https://github.com/simple-icons/simple-icons/blob/develop/icons/instagram.svg), CC0 icon data; the Instagram trademark remains Meta's.
+
+- **Three.js r186:** `threejs.svg` is the official logo from https://github.com/mrdoob/three.js/blob/r186/files/icon.svg . Retrieved2026-10-08; three.js MIT notice retained in `three-LICENSE.md`. Used only as a decorative brand identifier.
