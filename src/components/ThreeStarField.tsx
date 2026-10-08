@@ -3,13 +3,13 @@ import { useReducedMotion } from 'motion/react';
 import { beginPortfolioReadiness, reportPortfolioReady } from './portfolioReadiness';
 import type { createSpatialStars } from './three-star-renderer';
 
-export function ThreeStarField({ color, count, speed, fallback }: { color: string; count: number; speed: number; fallback: ReactNode }) {
+export function ThreeStarField({ color, count, speed, scale, fallback }: { color: string; count: number; speed: number; scale: number; fallback: ReactNode }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const engine = useRef<ReturnType<typeof createSpatialStars> | null>(null);
   const reduced = useReducedMotion() ?? false;
   const [failed, setFailed] = useState(false);
-  const config = useRef({ color, count, speed, reduced });
-  config.current = { color, count, speed, reduced };
+  const config = useRef({ color, count, speed, scale, reduced });
+  config.current = { color, count, speed, scale, reduced };
   const useFallback = failed || reduced;
 
   useEffect(() => {
@@ -37,6 +37,6 @@ export function ThreeStarField({ color, count, speed, fallback }: { color: strin
     return () => { cancelled = true; clearTimeout(deadline); engine.current?.dispose(); engine.current = null; };
   }, [useFallback]);
 
-  useEffect(() => { engine.current?.update(config.current); }, [color, count, speed, reduced]);
+  useEffect(() => { engine.current?.update(config.current); }, [color, count, speed, scale, reduced]);
   return useFallback ? fallback : <canvas ref={canvas} aria-hidden="true" className="pointer-events-none absolute inset-0 size-full" />;
 }

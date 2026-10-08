@@ -1,6 +1,6 @@
 import { BufferAttribute, BufferGeometry, Color, PerspectiveCamera, Points, Scene, ShaderMaterial, WebGLRenderer } from 'three';
 
-export type SpatialStarConfig = { color: string; count: number; speed: number; reduced: boolean };
+export type SpatialStarConfig = { color: string; count: number; speed: number; scale: number; reduced: boolean };
 
 /** One point cloud, one draw call, no textures, postprocessing or frame React work. */
 export function createSpatialStars(canvas: HTMLCanvasElement, initial: SpatialStarConfig, onFailure: () => void) {
@@ -21,14 +21,14 @@ export function createSpatialStars(canvas: HTMLCanvasElement, initial: SpatialSt
   geometry.setAttribute('aSeed', new BufferAttribute(seeds, 1));
   const material = new ShaderMaterial({
     transparent: true, depthWrite: false, depthTest: false,
-    uniforms: { uColor: { value: new Color(initial.color) }, uTime: { value: 0 }, uDensity: { value: 1 } },
-    vertexShader: `attribute float aSeed; uniform float uTime; uniform float uDensity; varying float vAlpha;
+    uniforms: { uColor: { value: new Color(initial.color) }, uTime: { value: 0 }, uDensity: { value: 1 }, uScale: { value: initial.scale } },
+    vertexShader: `attribute float aSeed; uniform float uTime; uniform float uDensity; uniform float uScale; varying float vAlpha;
       void main() {
         vec3 p = position;
         p.z = -mod(-p.z - uTime * 1.15, 58.0) - 2.0;
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
         gl_Position = projectionMatrix * mv;
-        gl_PointSize = clamp(65.0 / -mv.z, 1.0, 3.4) * uDensity;
+        gl_PointSize = clamp(65.0 / -mv.z, 1.0, 3.4) * mix(0.65, 1.5, aSeed) * uScale * uDensity;
         vAlpha = aSeed * smoothstep(2.0, 10.0, -p.z) * (1.0 - smoothstep(46.0, 60.0, -p.z));
       }`,
     fragmentShader: `uniform vec3 uColor; varying float vAlpha;
@@ -78,6 +78,8 @@ export function createSpatialStars(canvas: HTMLCanvasElement, initial: SpatialSt
   };
   const update = (next: SpatialStarConfig) => {
     config = next;
+    material.uniforms.uScale.value = next.scale;
+    canvas.dataset.starScale = String(next.scale);
     material.uniforms.uColor.value.set(next.color);
     const count = Math.min(mobile || innerWidth < 600 ? 120 : 240, Math.max(20, next.count));
     geometry.setDrawRange(0, count);

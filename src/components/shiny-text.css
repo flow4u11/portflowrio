@@ -1,0 +1,5 @@
+.shiny-text { display: inline-block; color: var(--text); }
+.shiny-text[data-shiny] { color: transparent; background-image: var(--shine-band); background-size: 250% 100%; background-position: 0% 50%; background-repeat: no-repeat; background-clip: text; -webkit-background-clip: text; }
+.shiny-text--overlay { position: absolute; inset: 0; display: block; pointer-events: none; opacity: .75; font: inherit; letter-spacing: inherit; line-height: inherit; text-shadow: none; }
+.shiny-text--overlay:not([data-shiny]) { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .shiny-text { background: none !important; color: var(--text) !important; } .shiny-text--overlay { visibility: hidden; } }

@@ -137,6 +137,7 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
     const saved = session.current?.hidden.find(item => item.element === source);
     if (!saved) return;
     source.style.opacity = saved.opacity;
+    source.removeAttribute('data-playground-hidden');
     source.style.pointerEvents = saved.pointerEvents;
     source.inert = saved.inert;
   }, []);
@@ -173,6 +174,7 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
     current.observers.forEach(observer => observer.disconnect());
     current.hidden.forEach(saved => {
       saved.element.style.opacity = saved.opacity;
+      saved.element.removeAttribute('data-playground-hidden');
       saved.element.style.pointerEvents = saved.pointerEvents;
       saved.element.inert = saved.inert;
     });
@@ -322,6 +324,7 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
     const hide = (element: HTMLElement, inert = true) => {
       hidden.push({ element, opacity: element.style.opacity, pointerEvents: element.style.pointerEvents, inert: element.inert });
       element.style.opacity = '0';
+      element.setAttribute('data-playground-hidden', 'true');
       element.style.pointerEvents = 'none';
       if (inert) element.inert = true;
     };

@@ -11,7 +11,7 @@ test('first initialization and reset use adaptive gallery defaults', () => {
 });
 
 test('legacy storage keeps existing controls and migrates new settings', () => {
-  for (const version of [1, 2, 3]) {
+  for (const version of [1, 2, 3, 4]) {
     const migrated = parseSettings(JSON.stringify({ version, settings: {
       starSpeed: 1.4, starCount: 197, showFps: true, animationSpeed: 0.75,
       avatarGrid: 14, avatarDuration: 0.8, avatarStagger: 0.45,
@@ -96,18 +96,63 @@ test('normalization bounds values and rejects color CSS injection', () => {
   assert.equal(settings.nameGradientStart, '#aabbcc');
   assert.equal(settings.nameGradientMiddle, '#df80bf');
   assert.equal(settings.nameGradientEnd, '#59c6b5');
-  assert.equal(settings.nameGradientStops, 3);
+  assert.equal(settings.nameGradientStops, 5);
   assert.equal(settings.nameGradientSpeed, 1);
 });
 
 test('gradient styles are scoped, respect selected stops and retain theme contrast', () => {
   const base = createDefaultSettings();
-  assert.equal(nameGradientStyle(base)['--name-gradient-colors'], undefined);
+  assert.match(nameGradientStyle(base)['--name-gradient-colors'], /var\(--muted/);
   const colored = nameGradientStyle({ ...base, nameGradientPreset: 'custom', nameGradientStart: '#111111', nameGradientMiddle: '#222222', nameGradientEnd: '#333333', nameGradientStops: 2, nameGradientSpeed: 2 });
   assert.equal(colored['--name-gradient-duration'], '6s');
-  assert.match(colored['--name-gradient-colors'], /var\(--text, #050505\) 60%/);
+  assert.match(colored['--name-gradient-colors'], /var\(--text, #050505\) 35%/);
   assert.match(colored['--name-gradient-colors'], /#111111/);
   assert.match(colored['--name-gradient-colors'], /#333333/);
   assert.doesNotMatch(colored['--name-gradient-colors'], /#222222/);
-  assert.ok(nameGradientStyle({ ...base, nameGradientPreset: 'ocean', nameGradientStops: 3 })['--name-gradient-colors'].includes('#5cc9b7'));
+  assert.ok(nameGradientStyle({ ...base, nameGradientPreset: 'ocean', nameGradientStops: 3 })['--name-gradient-colors'].includes('#6ce0e2'));
+});
+
+
+test('version four custom colors and background choices survive new controls', () => {
+  const migrated = parseSettings(JSON.stringify({ version: 4, settings: {
+    nameGradientPreset: 'custom', nameGradientStart: '#123456', nameGradientMiddle: '#345678', nameGradientEnd: '#abcdef', nameGradientStops: 3,
+    backgroundStyle: 'snow', snowDensity: .45, nameGradientSpeed: 1.4,
+  } }));
+  assert.equal(migrated.nameGradientStart, '#123456');
+  assert.equal(migrated.nameGradientMiddle, '#345678');
+  assert.equal(migrated.nameGradientEnd, '#abcdef');
+  assert.equal(migrated.nameGradientStops, 3);
+  assert.equal(migrated.backgroundStyle, 'snow');
+  assert.equal(migrated.snowDensity, .45);
+  assert.equal(migrated.starScale, 1);
+  assert.equal(migrated.nameShineEnabled, true);
+});
+
+test('new controls bound rendering costs and reject malformed stored colors', () => {
+  const bounded = normalizeSettings({ starScale: 100, nameGradientDirection: -90, nameShineSpeed: Infinity,
+    nameShineDelay: -9, nameShineWidth: 200, nameShineSoftness: 4, nameShineAngle: 900,
+    nameShineDirection: 'up', nameShineEnabled: false, nameShineColor: 'url(secret)', nameGradientSecond: '#ABCDEF', nameGradientFourth: 'red' });
+  assert.equal(bounded.starScale, 3);
+  assert.equal(bounded.nameGradientDirection, 0);
+  assert.equal(bounded.nameShineSpeed, 2.4);
+  assert.equal(bounded.nameShineDelay, 0);
+  assert.equal(bounded.nameShineWidth, 80);
+  assert.equal(bounded.nameShineSoftness, 1);
+  assert.equal(bounded.nameShineAngle, 180);
+  assert.equal(bounded.nameShineDirection, 'left');
+  assert.equal(bounded.nameShineEnabled, false);
+  assert.equal(bounded.nameShineColor, '#ffffff');
+  assert.equal(bounded.nameGradientSecond, '#abcdef');
+  assert.equal(bounded.nameGradientFourth, '#a4b5c0');
+});
+
+test('five custom stops and gradient direction persist with shine overrides', () => {
+  const settings = { ...createDefaultSettings(), nameGradientPreset: 'custom', nameGradientStops: 5,
+    nameGradientStart: '#111111', nameGradientSecond: '#222222', nameGradientMiddle: '#333333', nameGradientFourth: '#444444', nameGradientEnd: '#555555',
+    nameGradientDirection: 270, nameShineEnabled: false, nameShineDirection: 'right', nameShineAutoColor: false, nameShineColor: '#654321', starScale: 1.75 };
+  const saved = parseSettings(JSON.stringify({ version: STORAGE_VERSION, settings }));
+  assert.deepEqual(saved, settings);
+  const gradient = nameGradientStyle(saved)['--name-gradient-colors'];
+  assert.match(gradient, /^linear-gradient\(270deg/);
+  for (const color of ['#111111', '#222222', '#333333', '#444444', '#555555']) assert.ok(gradient.includes(color));
 });

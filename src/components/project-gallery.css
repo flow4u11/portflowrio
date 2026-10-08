@@ -191,7 +191,7 @@
   .projects-section .section-heading h2 br { display: none; }
   .projects-section .section-heading h2 i { margin-left: .2em; letter-spacing: -1.5px; }
   .projects-section .section-intro { max-width: 31ch; font-size: 11px; line-height: 1.65; }
-  .projects-section .project-gallery { --pg-stage-height: clamp(260px, calc(100svh - 370px), 480px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(285px, .43fr); column-gap: 30px; align-items: center; }
+  .projects-section .project-gallery { --pg-stage-height: clamp(290px, calc(100svh - 280px), 760px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(285px, .43fr); column-gap: 30px; align-items: center; }
   .projects-section .pg-toolbar { grid-column: 1 / -1; gap: 16px; margin-bottom: 8px; }
   .projects-section .pg-showcase { grid-column: 1; margin-bottom: 0; }
   .projects-section .pg-details { grid-column: 2; align-self: center; min-height: 0; }
@@ -206,7 +206,7 @@
   .projects-section .pg-pagination { grid-column: 1; grid-row: 3; padding-top: 0; }
   .projects-section .pg-footer { grid-column: 2; grid-row: 3; padding-top: 0; }
   .projects-section .pg-progress-group { justify-content: space-between; gap: 12px; }
-  .projects-section .project-gallery[data-static-design] { --pg-stage-height: clamp(260px, calc(100svh - 370px), 480px); }
+  .projects-section .project-gallery[data-static-design] { --pg-stage-height: clamp(290px, calc(100svh - 280px), 760px); }
   :root[data-design="neobrutalism"] .projects-section .pg-details { margin-top: 0; min-height: 0; }
   :root[data-design="neobrutalism"] .projects-section .eyebrow { padding-block: 3px; }
 }

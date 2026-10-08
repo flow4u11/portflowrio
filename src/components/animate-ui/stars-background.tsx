@@ -15,6 +15,7 @@ type StarCanvasProps = {
   speedMultiplier?: number;
   count?: number;
   size?: number;
+  scale?: number;
   offset?: React.RefObject<Offset>;
 };
 
@@ -22,19 +23,19 @@ const MAX_STARS = 240;
 const MOBILE_STAR_CAP = 120;
 const FRAME_INTERVAL = 1000 / 30;
 
-function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, offset }: StarCanvasProps) {
+function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, scale = 1, offset }: StarCanvasProps) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const starsRef = React.useRef<Star[]>([]);
   const phaseRef = React.useRef(0);
   const colorRef = React.useRef(starColor);
   const repaintRef = React.useRef<(() => void) | null>(null);
-  const configRef = React.useRef({ speed, speedMultiplier, count, size });
+  const configRef = React.useRef({ speed, speedMultiplier, count, size, scale });
   const reduceMotion = useReducedMotion();
 
   React.useLayoutEffect(() => {
-    configRef.current = { speed, speedMultiplier, count, size };
+    configRef.current = { speed, speedMultiplier, count, size, scale };
     repaintRef.current?.();
-  }, [speed, speedMultiplier, count, size]);
+  }, [speed, speedMultiplier, count, size, scale]);
 
   React.useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -96,7 +97,7 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, offset
         const x = star.x * width + currentOffset.x * star.depth;
         const y = ((star.y * fieldHeight - drift) % fieldHeight + fieldHeight) % fieldHeight - 24
           + currentOffset.y * star.depth;
-        const diameter = config.size ?? (0.85 + star.depth * 1.35);
+        const diameter = (config.size ?? (0.65 + star.depth * 1.7)) * config.scale;
         context.globalAlpha = star.opacity;
         // Small rects avoid hundreds of paths, shadows, and full-page CSS paints.
         context.fillRect(x, y, diameter, diameter);
@@ -232,7 +233,7 @@ export function StarsBackground({
         offset.current.y = 0;
       }}
     >
-      <ThreeStarField color={starColor} speed={settings.starSpeed} count={starCount ?? settings.starCount} fallback={<StarCanvas starColor={starColor} speed={speed} speedMultiplier={settings.starSpeed} count={starCount ?? settings.starCount} offset={offset} />} />
+      <ThreeStarField color={starColor} speed={settings.starSpeed} scale={settings.starScale} count={starCount ?? settings.starCount} fallback={<StarCanvas starColor={starColor} speed={speed} speedMultiplier={settings.starSpeed} scale={settings.starScale} count={starCount ?? settings.starCount} offset={offset} />} />
       {children}
     </div>
   );

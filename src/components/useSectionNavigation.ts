@@ -79,10 +79,10 @@ export function useSectionNavigation({ reduced, speed = 1 }: { reduced: boolean;
 
     // Keep marquee hover state fresh across travel, without a curtain overlay.
     document.documentElement.dataset.navigating = 'true';
-    if (Math.abs(distance) > innerHeight * 1.4) document.documentElement.dataset.navWarp = 'true';
+    if (Math.abs(distance) > 180) document.documentElement.dataset.navWarp = 'true';
     document.documentElement.dataset.navDirection = distance > 0 ? 'down' : 'up';
     document.documentElement.style.setProperty('--nav-travel-duration', `${duration}ms`);
-    window.dispatchEvent(new CustomEvent('portfolio:navigation-start'));
+    window.dispatchEvent(new CustomEvent('portfolio:navigation-start', { detail: { duration, direction: distance > 0 ? 1 : -1, warp: Math.abs(distance) > 180 } }));
     setNavigating(true);
     cancelRef.current = interrupt;
     window.addEventListener('wheel', onUserInput, { passive: true });

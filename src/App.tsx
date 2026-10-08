@@ -26,6 +26,8 @@ import { ExperienceStatus, GraduationYears } from './components/InformationMotio
 import { SectionTitle } from './components/SectionTitle';
 import { PixelTrail } from './components/PixelTrail';
 import { HeroPlayground } from './components/HeroPlayground';
+import { useActiveSection } from './components/useActiveSection';
+import { NavigationWarp } from './components/NavigationWarp';
 
 type Theme = 'light' | 'dark';
 const heroPart: Variants = {
@@ -60,7 +62,7 @@ export default function App() {
   const [heroEntered, setHeroEntered] = useState(false);
   const finishLoading = useCallback(() => setLoading(false), []);
   const finishLoaderExit = useCallback(() => setHeroEntered(true), []);
-  const [activeSection, setActiveSection] = useState('home');
+  const activeSection = useActiveSection();
   const [scrolled, setScrolled] = useState(false);
   const [modal, setModal] = useState<Project | 'contact' | null>(null);
   const [dialogClosing, setDialogClosing] = useState(false);
@@ -92,15 +94,10 @@ export default function App() {
   }, [loading, heroEntered, modal]);
 
   useEffect(() => {
-    const sections = navigation.map(item => document.getElementById(item.id)).filter((element): element is HTMLElement => Boolean(element));
-    const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) if (entry.isIntersecting) setActiveSection(entry.target.id);
-    }, { rootMargin: '-20% 0px -65% 0px' });
-    sections.forEach(section => observer.observe(section));
     const sentinel = document.getElementById('header-sentinel');
     const headerObserver = new IntersectionObserver(([entry]) => setScrolled(!entry.isIntersecting));
     if (sentinel) headerObserver.observe(sentinel);
-    return () => { observer.disconnect(); headerObserver.disconnect(); };
+    return () => { headerObserver.disconnect(); };
   }, []);
 
   useEffect(() => {
@@ -136,7 +133,8 @@ export default function App() {
   return <>
     <AnimatePresence onExitComplete={finishLoaderExit}>{loading ? <PortfolioLoader reduced={reduced} onComplete={finishLoading} /> : null}</AnimatePresence>
     <div className="portfolio-page" inert={loading || !heroEntered || undefined}>
-      <PortfolioBackground className="page-stars" starColor={theme === 'dark' ? '#d5d8ed' : '#6d7b9c'} factor={0} pointerEvents={false}><div className="navigation-warp" aria-hidden="true">{[8, 20, 32, 44, 56, 68, 80, 92].map((left, index) => <i key={left} style={{ left: `${left}%`, top: `${24 + index % 3 * 25}%`, rotate: `${(left - 50) * -.5}deg` }} />)}</div></PortfolioBackground>
+      <PortfolioBackground className="page-stars" starColor={theme === 'dark' ? '#d5d8ed' : '#6d7b9c'} factor={0} pointerEvents={false} />
+      <NavigationWarp />
       <div id="header-sentinel" aria-hidden="true" />
       <a className="skip-link" href="#home">Skip to content</a>
       <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>

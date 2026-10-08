@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { useMotionSettings } from './MotionSettings';
 import { getPortfolioReadiness, subscribePortfolioReadiness, type PortfolioReadinessStatus } from './portfolioReadiness';
 import './portfolio-loader.css';
+import { ShinyText } from './ShinyText';
 
 type LoaderPhase = 'entry' | 'loading' | 'complete';
 type Resource = 'portrait' | 'portraitAlternate' | 'fonts' | 'gallery' | 'background';
@@ -224,7 +225,7 @@ export function PortfolioLoader({ reduced, onComplete }: { reduced: boolean; onC
       initial={false} animate={phase === 'entry' ? { opacity: 0, y: 18 } : { opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: reduced ? 0 : -18, transition: { duration: reduced ? .1 : .38 / settings.animationSpeed, ease: [.22, 1, .36, 1] } }}
       transition={{ duration: reduced ? 0 : .52 / settings.animationSpeed, ease: [.22, 1, .36, 1] }}>
-      <span ref={labelRef} className="portfolio-loader-label">Loading...</span>
+      <ShinyText contentRef={labelRef} className="portfolio-loader-label" text="Loading..." speed={1.8 / settings.animationSpeed} delay={.3} disabled={reduced} />
       <div className="portfolio-loader-meter"><div className="portfolio-loader-track"><motion.span ref={barRef} style={{ transform: 'scaleX(0)' }} exit={{ scaleX: 0, transition: { duration: reduced ? .1 : .28 / settings.animationSpeed, ease: [.22, 1, .36, 1] } }} /></div></div>
       <motion.span ref={invitationRef} className="portfolio-loader-invitation" animate={{ opacity: complete ? 1 : 0, y: complete ? 0 : 6 }} transition={{ duration: reduced ? 0 : .3 / settings.animationSpeed }}>Dive it to flow(rio)</motion.span>
     </motion.div>

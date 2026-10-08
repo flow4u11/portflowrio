@@ -992,13 +992,19 @@ const FlexCarousel = ({
       const push = Math.max(-1, Math.min(1, vel / 2200));
       const deformStiffness = 120;
       const deformDamping = 2 * Math.sqrt(deformStiffness) * 0.32;
-      deformVel += (deformStiffness * (push - deform) - deformDamping * deformVel) * dt;
-      deform += deformVel * dt;
+      const springSteps = Math.ceil(dt * 240);
+      const springStep = dt / springSteps;
+      for (let step = 0; step < springSteps; step++) {
+        deformVel += (deformStiffness * (push - deform) - deformDamping * deformVel) * springStep;
+        deform += deformVel * springStep;
+      }
       if (Math.abs(deform) > 0.0005 || Math.abs(deformVel) > 0.005) animating = true;
 
       const focusStiffness = 64;
-      focus.v += (focusStiffness * (focus.target - focus.t) - 2 * Math.sqrt(focusStiffness) * focus.v) * dt;
-      focus.t += focus.v * dt;
+      for (let step = 0; step < springSteps; step++) {
+        focus.v += (focusStiffness * (focus.target - focus.t) - 2 * Math.sqrt(focusStiffness) * focus.v) * springStep;
+        focus.t += focus.v * springStep;
+      }
       if (Math.abs(focus.target - focus.t) < 0.0005 && Math.abs(focus.v) < 0.001) {
         focus.t = focus.target;
         focus.v = 0;
@@ -1029,10 +1035,12 @@ const FlexCarousel = ({
       }
       const lensK = 110;
       const lensC = 2 * Math.sqrt(lensK) * 0.8;
-      lens.vx += (lensK * (aimX - lens.x) - lensC * lens.vx) * dt;
-      lens.vy += (lensK * (aimY - lens.y) - lensC * lens.vy) * dt;
-      lens.x += lens.vx * dt;
-      lens.y += lens.vy * dt;
+      for (let step = 0; step < springSteps; step++) {
+        lens.vx += (lensK * (aimX - lens.x) - lensC * lens.vx) * springStep;
+        lens.vy += (lensK * (aimY - lens.y) - lensC * lens.vy) * springStep;
+        lens.x += lens.vx * springStep;
+        lens.y += lens.vy * springStep;
+      }
       if (Math.abs(aimX - lens.x) + Math.abs(aimY - lens.y) > 0.2 || Math.abs(lens.vx) + Math.abs(lens.vy) > 0.5)
         animating = true;
 
@@ -1050,7 +1058,10 @@ const FlexCarousel = ({
           slot.ready = Math.min(1, slot.ready + dt / 0.45);
           animating = true;
         }
-        const hoverTarget = !reducedMotion && i === hoveredIndex && !pointer.dragging && focus.target === 0 ? 1 : 0;
+        // Keep the small hover lift while the larger focus spring takes over.
+        // Dropping it at focus start used to shrink the card before enlarging it.
+        const ownsHover = i === hoveredIndex || (s.focusOnHover && i === focus.index && (focus.target > 0 || focus.t > .001));
+        const hoverTarget = !reducedMotion && ownsHover && !pointer.dragging ? 1 : 0;
         slot.hover += (hoverTarget - slot.hover) * (1 - Math.exp(-dt / 0.12));
         if (Math.abs(hoverTarget - slot.hover) < 0.001) slot.hover = hoverTarget;
         else animating = true;
@@ -1207,9 +1218,10 @@ const FlexCarousel = ({
       const s = settingsRef.current;
       const index = hitTest(x, y)?.index ?? -1;
       if (s?.focusOnHover && focus.target > 0) {
-        if (index !== focus.index) closeFocus();
-        cancelHoverIntent();
-        return;
+        // Lens deformation can briefly leave a gap beneath a stationary pointer.
+        // Only another real card or leaving the stage should reverse focus.
+        if (index < 0 || index === focus.index) { cancelHoverIntent(); return; }
+        closeFocus();
       }
       if (!s || e.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches || pointer.down || pointer.dragging || reducedMotion || !introState.done || focus.target > 0 || Math.abs(goal - pos) > 2 || Math.abs(vel) > 25) {
         cancelHoverIntent();

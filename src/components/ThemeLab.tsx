@@ -28,6 +28,24 @@ const normalizeKeyword = (value: string) => value.trim().toLowerCase().replace(/
 const themeKeywords = new Set(['neo', 'neobrutalism', 'neobrutalist', 'neobrutal', 'brutalism', 'brutalist', 'brutal', 'nb']);
 const themeSuggestions = ['neobrutalism', 'brutalism', 'neo'];
 
+/** Streams only the suggested suffix; accepting with Tab always fills the complete word. */
+function GhostCompletion({ prefix, suffix }: { prefix: string; suffix: string }) {
+  const [visible, setVisible] = useState(0);
+  useEffect(() => {
+    setVisible(0);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setVisible(suffix.length); return; }
+    let timer: ReturnType<typeof setTimeout>;
+    let count = 0;
+    const type = () => {
+      count++; setVisible(count);
+      if (count < suffix.length) timer = setTimeout(type, 42 + (count % 3) * 18);
+    };
+    timer = setTimeout(type, 240);
+    return () => clearTimeout(timer);
+  }, [suffix]);
+  return <span className="theme-lab-completion" aria-hidden="true"><span>{prefix}</span><span className="theme-lab-ghost-letters">{suffix.slice(0, visible)}</span><i className="theme-lab-ghost-caret" /><kbd>Tab</kbd></span>;
+}
+
 /** An inline word for an About sentence; the dialog is portalled to avoid clipping. */
 export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
   const text = copy[language];
@@ -37,6 +55,7 @@ export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [value, setValue] = useState('');
   const [error, setError] = useState(false);
+  const [accepted, setAccepted] = useState(false);
   const [position, setPosition] = useState<CSSProperties>({ visibility: 'hidden' });
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -131,6 +150,7 @@ export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
         if (open) { close(); return; }
         setClosing(false);
         setValue('');
+        setAccepted(false);
         setError(false);
         setPosition({ visibility: 'hidden' });
         setOpen(true);
@@ -163,17 +183,17 @@ export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
         onActivate(origin);
       }}>
         <label className="theme-lab-label" htmlFor={`${id}-input`}>{text.label}</label>
-        <div className="theme-lab-entry"><div className="theme-lab-input-wrap">
-          {suggestion && <span className="theme-lab-completion" aria-hidden="true"><span>{value}</span>{suggestion.slice(keyword.length)}</span>}
+        <div className="theme-lab-entry"><div className="theme-lab-input-wrap" data-accepted={accepted || undefined} onAnimationEnd={() => setAccepted(false)}>
+          {suggestion && <GhostCompletion prefix={value} suffix={suggestion.slice(keyword.length)} />}
           <input
           ref={inputRef}
           id={`${id}-input`}
           className="theme-lab-input"
           value={value}
-          onChange={event => { setValue(event.target.value); setError(false); }}
+          onChange={event => { setValue(event.target.value); setError(false); setAccepted(false); }}
           onKeyDown={event => {
             if (event.key === 'Tab' && !event.shiftKey && suggestion) {
-              event.preventDefault(); setValue(suggestion); setError(false);
+              event.preventDefault(); setValue(suggestion); setError(false); setAccepted(true);
             }
           }}
           autoComplete="off"

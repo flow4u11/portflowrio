@@ -77,3 +77,55 @@ body.motion-settings-locked { overflow: hidden; }
 .motion-settings-select-row:has(select:disabled) { opacity: .45; }
 .motion-settings-select-row select:disabled { cursor: default; }
 :root[data-design="neobrutalism"] .motion-settings-name-preview { border: 2px solid var(--text); border-radius: 0; background: var(--neo-lilac); }
+
+/* A full workspace for motion controls, with the palette visible on entry. */
+.motion-settings-dialog { width: min(1440px, calc(100vw - 48px)); height: calc(100dvh - 48px); max-height: none; padding: 28px; scrollbar-gutter: stable; }
+.motion-settings-heading { position: sticky; top: -28px; z-index: 30; margin: -2px 0 0; padding: 16px 0; background: var(--bg); border-bottom: 1px solid var(--line); }
+.motion-settings-heading h2 { font-size: 24px; letter-spacing: -.7px; }
+.motion-settings-close { margin: 0 0 0 auto; }
+.motion-settings-intro { font-size: 13px; }
+.motion-settings-content { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 20px; }
+.motion-settings-content > :is(fieldset, details, .motion-settings-component-speed, .motion-settings-fps-row, .motion-settings-name-panel) { min-width: 0; margin: 0; padding: 22px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.motion-settings-group { order: -1; }
+.motion-settings-group legend { padding: 0 8px; font-size: 11px; color: var(--text); }
+.motion-settings-name-panel { order: -1; grid-column: span 2; }
+.motion-settings-name-panel h3 { margin: 0 0 16px; font-size: 15px; font-weight: 600; }
+.motion-settings-content details { padding-block: 0; }
+.motion-settings-details summary { min-height: 62px; font-size: 14px; }
+.motion-settings-details-body { padding-bottom: 22px; }
+.motion-settings-label, .motion-settings-toggle-row label, .motion-settings-select-row, .motion-settings-fps-row label { font-size: 13px; }
+.motion-settings-hint { font-size: 11px; }
+.motion-settings-name-preview { min-height: 110px; background: var(--bg); font-size: clamp(40px, 5vw, 64px); }
+.motion-settings-palette-heading { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; font-size: 13px; font-weight: 500; }
+.motion-settings-palette-heading button { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 50%; background: var(--bg); color: var(--text); }
+.motion-settings-color-chooser { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(100px, 1fr); align-items: center; gap: 18px; margin-bottom: 25px; }
+.motion-settings-color-rail { display: flex; align-items: center; justify-content: space-between; gap: 5px; padding: 12px; border-radius: 8px; min-height: 85px; }
+.motion-settings-color-stop { position: relative; display: grid; place-items: center; width: clamp(32px, 4vw, 58px); aspect-ratio: 1; border: 2px solid white; border-radius: 50%; color: white; background: rgb(0 0 0 / 8%); box-shadow: 0 1px 4px rgb(0 0 0 / 12%); cursor: pointer; }
+.motion-settings-color-stop input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border-radius: inherit; cursor: pointer; }
+.motion-settings-color-stop:focus-within { outline: 3px solid var(--text); outline-offset: 4px; }
+.motion-settings-presets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.motion-settings-presets button { min-height: 34px; border: 0; border-radius: 14px; transition: transform .2s var(--ease); }
+.motion-settings-presets button:hover { transform: translateY(-2px); }
+.motion-settings-presets button[aria-pressed="true"] { outline: 2px solid var(--text); outline-offset: 3px; }
+.motion-settings-footer { position: sticky; bottom: -28px; z-index: 20; padding: 12px 0; margin: 22px 0 -16px; border-top: 1px solid var(--line); background: var(--bg); }
+.motion-settings-reset { font-size: 12px; }
+.motion-settings-footer > span { font-size: 11px; }
+.settings-select { position: relative; flex: 0 1 57%; min-width: 0; }
+.settings-select > button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 40px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); color: var(--text); font: inherit; text-align: left; }
+.settings-select > button > svg { flex-shrink: 0; }
+.settings-select button:hover { background: color-mix(in srgb, var(--text) 7%, var(--bg)); }
+.settings-select button:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+.settings-select-menu { position: absolute; z-index: 25; top: calc(100% + 6px); left: 0; right: 0; min-width: 150px; max-height: 220px; overflow-y: auto; overscroll-behavior: contain; padding: 5px; background: var(--bg); border: 1px solid var(--line); border-radius: 7px; box-shadow: 0 12px 30px rgb(0 0 0 / 20%); }
+.settings-select-menu[data-above="true"] { top: auto; bottom: calc(100% + 6px); }
+.settings-select-menu button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 38px; padding: 8px; border: 0; border-radius: 4px; background: transparent; color: var(--text); font: inherit; text-align: left; }
+.settings-select-menu button[data-active="true"] { background: var(--surface); }
+.motion-settings-select-row[data-disabled="true"] { opacity: .45; }
+:root[data-design="neobrutalism"] .motion-settings-content > :is(fieldset, details, .motion-settings-component-speed, .motion-settings-fps-row, .motion-settings-name-panel) { border: 2px solid var(--text); border-radius: 0; }
+:root[data-design="neobrutalism"] .settings-select :is(button, .settings-select-menu) { border-radius: 0; }
+:root[data-design="neobrutalism"] .settings-select-menu { border: 2px solid var(--text); box-shadow: 4px 4px 0 var(--text); }
+:root[data-design="neobrutalism"] .settings-select-menu button[data-active="true"] { background: var(--neo-mint); }
+@media (max-width: 1050px) { .motion-settings-content { grid-template-columns: repeat(2, minmax(0, 1fr)); } .motion-settings-name-panel { grid-column: 2; grid-row: 1; } .motion-settings-color-chooser { grid-template-columns: 1fr; } .motion-settings-color-stop { width: 40px; } }
+@media (max-width: 700px) { .motion-settings-dialog { width: calc(100vw - 20px); height: calc(100dvh - 20px); padding: 18px; } .motion-settings-heading { top: -18px; } .motion-settings-heading h2 { font-size: 20px; } .motion-settings-content { grid-template-columns: minmax(0, 1fr); gap: 14px; } .motion-settings-name-panel { grid-column: auto; grid-row: auto; } .motion-settings-content > :is(fieldset, details, .motion-settings-component-speed, .motion-settings-fps-row, .motion-settings-name-panel) { padding-inline: 16px; } .motion-settings-color-chooser { grid-template-columns: 1fr; gap: 16px; } .motion-settings-color-stop { width: min(44px, 12vw); } .motion-settings-footer { bottom: -18px; } }
+.motion-settings-heading { top: 0; }
+.motion-settings-footer { bottom: 0; }
+@media (max-width: 700px) { .motion-settings-color-stop { width: min(44px, 10vw); flex: 0 1 44px; min-width: 0; } }

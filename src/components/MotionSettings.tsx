@@ -1,8 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Gauge, RotateCcw, X } from 'lucide-react';
+import { Gauge, Pipette, RotateCcw, X } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
+import { SettingsSelect } from './SettingsSelect';
+import { ShinyText } from './ShinyText';
 import { useIdleMotion } from './useIdleMotion';
-import { createDefaultSettings, NAME_PALETTES, nameGradientStyle, normalizeSettings, parseSettings, STORAGE_KEY, STORAGE_VERSION, type MotionSettings } from './motion-settings-model';
+import { createDefaultSettings, NAME_PALETTES, namePalette, nameGradientStyle, normalizeSettings, parseSettings, STORAGE_KEY, STORAGE_VERSION, type MotionSettings } from './motion-settings-model';
 import './motion-settings.css';
 import './animated-name.css';
 export type { MotionSettings } from './motion-settings-model';
@@ -75,7 +77,7 @@ const COPY = {
     background: 'Background', backgroundStyle: 'Background style', starsStyle: 'Three stars', snowStyle: 'Pixel snow',
     snowSpeed: 'Snow speed', snowDensity: 'Snow density', snowFlakeSize: 'Flake size', snowPixelResolution: 'Pixel detail', snowDirection: 'Wind direction', snowVariant: 'Flake shape', snowBrightness: 'Brightness', snowDepth: 'Depth', square: 'Square', round: 'Round', snowflake: 'Snowflake', snowHint: 'Colors follow your theme. Reduced motion keeps the snow still.',
     title: 'Motion settings', intro: 'Find a pace that feels right. Changes apply as you adjust them.',
-    close: 'Close motion settings', stars: 'Background stars', starSpeed: 'Star speed', starCount: 'Number of stars',
+    close: 'Close motion settings', starScale: 'Star scale', direction: 'Gradient direction', fiveStops: 'Five', spectrum: 'Spectrum', ember: 'Ember', pastel: 'Pastel', secondColor: 'Second color', fourthColor: 'Fourth color', shine: 'Name shine', shineEnabled: 'Show shiny text', shineSpeed: 'Sweep duration', shineDelay: 'Pause between sweeps', shineWidth: 'Shine width', shineSoftness: 'Softness', shineAngle: 'Shine angle', shineDirection: 'Sweep direction', left: 'Left', right: 'Right', shineAuto: 'Match theme color', shineColor: 'Shine color', stars: 'Background stars', starSpeed: 'Star speed', starCount: 'Number of stars',
     mobile: 'Mobile screens show up to 120 stars.', components: 'Component animation speed',
     fps: 'Show FPS', fpsHint: 'Browser frame rate, including idle frames. This is a live estimate.',
     reset: 'Reset to defaults', saved: 'Saved on this browser', reduced: 'Your device prefers reduced motion. Animation stays reduced.',
@@ -94,7 +96,7 @@ const COPY = {
     background: 'พื้นหลัง', backgroundStyle: 'รูปแบบพื้นหลัง', starsStyle: 'ดาวสามมิติ', snowStyle: 'หิมะพิกเซล',
     snowSpeed: 'ความเร็วหิมะ', snowDensity: 'ความหนาแน่น', snowFlakeSize: 'ขนาดเกล็ด', snowPixelResolution: 'ความละเอียดพิกเซล', snowDirection: 'ทิศทางลม', snowVariant: 'รูปทรงเกล็ด', snowBrightness: 'ความสว่าง', snowDepth: 'ระยะลึก', square: 'สี่เหลี่ยม', round: 'วงกลม', snowflake: 'เกล็ดหิมะ', snowHint: 'สีเปลี่ยนตามธีม และหยุดนิ่งเมื่อเลือกการลดการเคลื่อนไหว',
     title: 'ตั้งค่าการเคลื่อนไหว', intro: 'เลือกจังหวะที่สบายตา การเปลี่ยนแปลงมีผลทันที',
-    close: 'ปิดการตั้งค่าการเคลื่อนไหว', stars: 'ดาวพื้นหลัง', starSpeed: 'ความเร็วของดาว', starCount: 'จำนวนดาว',
+    close: 'ปิดการตั้งค่าการเคลื่อนไหว', starScale: 'ขนาดดาว', direction: 'ทิศทางสีไล่เฉด', fiveStops: 'ห้าสี', spectrum: 'สเปกตรัม', ember: 'เปลวไฟ', pastel: 'พาสเทล', secondColor: 'สีที่สอง', fourthColor: 'สีที่สี่', shine: 'ประกายแสงบนชื่อ', shineEnabled: 'เปิด Shiny Text', shineSpeed: 'ระยะเวลากวาดแสง', shineDelay: 'เวลาพักระหว่างรอบ', shineWidth: 'ความกว้างแสง', shineSoftness: 'ความนุ่มของแสง', shineAngle: 'มุมแสง', shineDirection: 'ทิศทางกวาดแสง', left: 'ซ้าย', right: 'ขวา', shineAuto: 'ใช้สีตามธีม', shineColor: 'สีประกายแสง', stars: 'ดาวพื้นหลัง', starSpeed: 'ความเร็วของดาว', starCount: 'จำนวนดาว',
     mobile: 'หน้าจอมือถือแสดงดาวสูงสุด 120 ดวง', components: 'ความเร็วแอนิเมชันขององค์ประกอบ',
     fps: 'แสดง FPS', fpsHint: 'อัตราเฟรมของเบราว์เซอร์ รวมเฟรมขณะไม่มีการเคลื่อนไหว เป็นค่าประมาณแบบสด',
     reset: 'คืนค่าเริ่มต้น', saved: 'บันทึกในเบราว์เซอร์นี้', reduced: 'อุปกรณ์ของคุณเลือกให้ลดการเคลื่อนไหว แอนิเมชันจะยังคงลดลง',
@@ -116,7 +118,7 @@ function multiplier(value: number) { return `${Number(value.toFixed(2))}×`; }
 function NameGradientPreview({ settings, label, enabled }: { settings: MotionSettings; label: string; enabled: boolean }) {
   const { ref, active } = useIdleMotion<HTMLSpanElement>();
   return <div className="motion-settings-name-preview" role="img" aria-label={label}>
-    <span ref={ref} className="animated-name" data-running={enabled && active} style={nameGradientStyle(settings)} aria-hidden="true">flowrio.<span className="animated-name-gradient">flowrio.</span></span>
+    <span ref={ref} className="animated-name" data-running={enabled && active} style={nameGradientStyle(settings)} aria-hidden="true">flowrio.<span className="animated-name-gradient">flowrio.</span><ShinyText overlay text="flowrio." disabled={!enabled || !settings.nameShineEnabled} speed={settings.nameShineSpeed / settings.animationSpeed} delay={settings.nameShineDelay / settings.animationSpeed} angle={settings.nameShineAngle} shineWidth={settings.nameShineWidth} softness={settings.nameShineSoftness} direction={settings.nameShineDirection} shineColor={settings.nameShineAutoColor ? 'var(--text)' : settings.nameShineColor} /></span>
   </div>;
 }
 
@@ -193,8 +195,9 @@ export function MotionSettingsDialog({ open, onClose, language }: { open: boolea
   >
     <div className="motion-settings-heading"><Gauge size={18} aria-hidden="true" /><h2 id={`${id}-title`}>{text.title}</h2><button ref={closeRef} type="button" className="motion-settings-close" onClick={requestClose} aria-label={text.close}><X size={18} aria-hidden="true" /></button></div>
     <p id={`${id}-intro`} className="motion-settings-intro">{text.intro}</p>
+    <div className="motion-settings-content">
     <fieldset className="motion-settings-group"><legend>{text.background}</legend>
-      <div className="motion-settings-select-row"><label htmlFor={`${id}-background-style`}>{text.backgroundStyle}</label><select id={`${id}-background-style`} value={settings.backgroundStyle} onChange={event => updateSettings({ backgroundStyle: event.currentTarget.value as MotionSettings['backgroundStyle'] })}><option value="stars">{text.starsStyle}</option><option value="snow">{text.snowStyle}</option></select></div>
+      <SettingsSelect id={`${id}-background-style`} label={text.backgroundStyle} value={settings.backgroundStyle} options={[{ value: 'stars', label: text.starsStyle }, { value: 'snow', label: text.snowStyle }]} onChange={backgroundStyle => updateSettings({ backgroundStyle: backgroundStyle as MotionSettings['backgroundStyle'] })} />
       {settings.backgroundStyle === 'stars' ? <div>
       <div className="motion-settings-range">
         <div className="motion-settings-label"><label htmlFor={`${id}-star-speed`}>{text.starSpeed}</label><output htmlFor={`${id}-star-speed`}>{multiplier(settings.starSpeed)}</output></div>
@@ -207,8 +210,9 @@ export function MotionSettingsDialog({ open, onClose, language }: { open: boolea
         <div className="motion-settings-scale" aria-hidden="true"><span>{text.fewer}</span><span>{text.more}</span></div>
         <p id={`${id}-mobile`} className="motion-settings-hint">{text.mobile}</p>
       </div>
+      <SettingRange id={`${id}-star-scale`} label={text.starScale} value={settings.starScale} min={0.5} max={3} step={0.05} display={multiplier(settings.starScale)} onChange={starScale => updateSettings({ starScale })} />
       </div> : <div className="motion-settings-snow-controls">
-        <div className="motion-settings-select-row"><label htmlFor={`${id}-snow-variant`}>{text.snowVariant}</label><select id={`${id}-snow-variant`} value={settings.snowVariant} onChange={event => updateSettings({ snowVariant: event.currentTarget.value as MotionSettings['snowVariant'] })}>{(['square', 'round', 'snowflake'] as const).map(shape => <option key={shape} value={shape}>{text[shape]}</option>)}</select></div>
+        <SettingsSelect id={`${id}-snow-variant`} label={text.snowVariant} value={settings.snowVariant} options={(['square', 'round', 'snowflake'] as const).map(value => ({ value, label: text[value] }))} onChange={snowVariant => updateSettings({ snowVariant: snowVariant as MotionSettings['snowVariant'] })} />
         <SettingRange id={`${id}-snow-speed`} label={text.snowSpeed} value={settings.snowSpeed} min={0.25} max={2} step={0.05} display={multiplier(settings.snowSpeed)} onChange={snowSpeed => updateSettings({ snowSpeed })} />
         <SettingRange id={`${id}-snow-density`} label={text.snowDensity} value={settings.snowDensity} min={0.1} max={0.6} step={0.05} display={`${Math.round(settings.snowDensity * 100)}%`} onChange={snowDensity => updateSettings({ snowDensity })} />
         <SettingRange id={`${id}-snow-size`} label={text.snowFlakeSize} value={settings.snowFlakeSize} min={0.005} max={0.04} step={0.005} display={`${Math.round(settings.snowFlakeSize * 1000)}`} onChange={snowFlakeSize => updateSettings({ snowFlakeSize })} />
@@ -227,19 +231,35 @@ export function MotionSettingsDialog({ open, onClose, language }: { open: boolea
     <details className="motion-settings-details"><summary>{text.marquee}</summary><div className="motion-settings-details-body">
       <div className="motion-settings-toggle-row"><div><label htmlFor={`${id}-marquee-enabled`}>{text.marqueeEnabled}</label><p className="motion-settings-hint" id={`${id}-marquee-hint`}>{text.marqueeHint}</p></div><input id={`${id}-marquee-enabled`} type="checkbox" checked={settings.marqueeEnabled} aria-describedby={`${id}-marquee-hint`} onChange={event => updateSettings({ marqueeEnabled: event.currentTarget.checked })} /></div>
     </div></details>
-    <details className="motion-settings-details"><summary>{text.name}</summary><div className="motion-settings-details-body">
+    <section className="motion-settings-name-panel"><h3>{text.name}</h3>
       <NameGradientPreview settings={settings} label={text.namePreview} enabled={open && !closing} />
-      <div className="motion-settings-select-row"><label htmlFor={`${id}-name-palette`}>{text.palette}</label><select id={`${id}-name-palette`} value={settings.nameGradientPreset} onChange={event => {
-        const nameGradientPreset = event.currentTarget.value as MotionSettings['nameGradientPreset'];
-        const palette = nameGradientPreset === 'custom' ? null : NAME_PALETTES[nameGradientPreset];
-        updateSettings({ nameGradientPreset, ...(palette ? { nameGradientStart: palette[0], nameGradientMiddle: palette[1], nameGradientEnd: palette[2] } : {}) });
-      }}>{(['monochrome', 'aurora', 'sunrise', 'ocean', 'custom'] as const).map(preset => <option key={preset} value={preset}>{text[preset]}</option>)}</select></div>
-      <div className="motion-settings-select-row"><label htmlFor={`${id}-name-stops`}>{text.stops}</label><select id={`${id}-name-stops`} value={settings.nameGradientStops} onChange={event => updateSettings({ nameGradientStops: Number(event.currentTarget.value) as 2 | 3 })}><option value="2">{text.twoStops}</option><option value="3">{text.threeStops}</option></select></div>
-      <div className="motion-settings-colors">
-        {([{ key: 'nameGradientStart', label: text.startColor }, ...(settings.nameGradientStops === 3 ? [{ key: 'nameGradientMiddle', label: text.middleColor }] : []), { key: 'nameGradientEnd', label: text.endColor }] as { key: 'nameGradientStart' | 'nameGradientMiddle' | 'nameGradientEnd'; label: string }[]).map(({ key, label }) => <div className="motion-settings-color" key={key}><label htmlFor={`${id}-${key}`}>{label}</label><input id={`${id}-${key}`} type="color" value={settings[key]} onChange={event => updateSettings({ nameGradientPreset: 'custom', [key]: event.currentTarget.value })} /></div>)}
+      <div className="motion-settings-palette-heading"><span>{text.palette}</span><button type="button" aria-label={text.monochrome} title={text.monochrome} onClick={() => updateSettings({ nameGradientPreset: 'monochrome' })}><RotateCcw size={15} aria-hidden="true" /></button></div>
+      <div className="motion-settings-color-chooser">
+        <div className="motion-settings-color-rail" style={{ background: `linear-gradient(90deg, ${namePalette(settings).join(', ')})` }}>
+          {(['nameGradientStart', 'nameGradientSecond', 'nameGradientMiddle', 'nameGradientFourth', 'nameGradientEnd'] as const).map((key, index) => <label className="motion-settings-color-stop" key={key} title={[text.startColor, text.secondColor, text.middleColor, text.fourthColor, text.endColor][index]}>
+            <Pipette size={20} aria-hidden="true" /><input type="color" aria-label={[text.startColor, text.secondColor, text.middleColor, text.fourthColor, text.endColor][index]} value={namePalette(settings)[index]} onChange={event => {
+              const palette = namePalette(settings);
+              updateSettings({ nameGradientPreset: 'custom', nameGradientStart: palette[0], nameGradientSecond: palette[1], nameGradientMiddle: palette[2], nameGradientFourth: palette[3], nameGradientEnd: palette[4], [key]: event.currentTarget.value, nameGradientStops: 5 });
+            }} />
+          </label>)}
+        </div>
+        <div className="motion-settings-presets" role="group" aria-label={text.palette}>{(['spectrum', 'sunrise', 'ember', 'ocean', 'aurora', 'pastel'] as const).map(preset => <button key={preset} type="button" aria-label={text[preset]} title={text[preset]} aria-pressed={settings.nameGradientPreset === preset} style={{ background: `linear-gradient(90deg, ${NAME_PALETTES[preset].join(', ')})` }} onClick={() => updateSettings({ nameGradientPreset: preset, nameGradientStops: 5 })} />)}</div>
       </div>
+      <SettingsSelect id={`${id}-name-stops`} label={text.stops} value={settings.nameGradientStops} options={[{ value: '2', label: text.twoStops }, { value: '3', label: text.threeStops }, { value: '5', label: text.fiveStops }]} onChange={value => updateSettings({ nameGradientStops: Number(value) as 2 | 3 | 5 })} />
       <SettingRange id={`${id}-name-speed`} label={text.nameSpeed} value={settings.nameGradientSpeed} min={0.5} max={2} step={0.05} display={multiplier(settings.nameGradientSpeed)} onChange={nameGradientSpeed => updateSettings({ nameGradientSpeed })} />
+      <SettingRange id={`${id}-name-direction`} label={text.direction} value={settings.nameGradientDirection} min={0} max={360} step={5} display={`${settings.nameGradientDirection}°`} onChange={nameGradientDirection => updateSettings({ nameGradientDirection })} />
       <p className="motion-settings-hint">{text.nameHint}</p>
+    </section>
+    <details className="motion-settings-details"><summary>{text.shine}</summary><div className="motion-settings-details-body">
+      <div className="motion-settings-toggle-row"><label htmlFor={`${id}-shine-enabled`}>{text.shineEnabled}</label><input id={`${id}-shine-enabled`} type="checkbox" checked={settings.nameShineEnabled} onChange={event => updateSettings({ nameShineEnabled: event.currentTarget.checked })} /></div>
+      <SettingRange id={`${id}-shine-speed`} label={text.shineSpeed} value={settings.nameShineSpeed} min={0.5} max={6} step={0.1} display={`${settings.nameShineSpeed} s`} disabled={!settings.nameShineEnabled} onChange={nameShineSpeed => updateSettings({ nameShineSpeed })} />
+      <SettingRange id={`${id}-shine-delay`} label={text.shineDelay} value={settings.nameShineDelay} min={0} max={5} step={0.1} display={`${settings.nameShineDelay} s`} disabled={!settings.nameShineEnabled} onChange={nameShineDelay => updateSettings({ nameShineDelay })} />
+      <SettingRange id={`${id}-shine-width`} label={text.shineWidth} value={settings.nameShineWidth} min={5} max={80} step={1} display={`${settings.nameShineWidth}%`} disabled={!settings.nameShineEnabled} onChange={nameShineWidth => updateSettings({ nameShineWidth })} />
+      <SettingRange id={`${id}-shine-softness`} label={text.shineSoftness} value={settings.nameShineSoftness} min={0} max={1} step={0.05} display={`${Math.round(settings.nameShineSoftness * 100)}%`} disabled={!settings.nameShineEnabled} onChange={nameShineSoftness => updateSettings({ nameShineSoftness })} />
+      <SettingRange id={`${id}-shine-angle`} label={text.shineAngle} value={settings.nameShineAngle} min={0} max={180} step={5} display={`${settings.nameShineAngle}°`} disabled={!settings.nameShineEnabled} onChange={nameShineAngle => updateSettings({ nameShineAngle })} />
+      <SettingsSelect id={`${id}-shine-direction`} label={text.shineDirection} value={settings.nameShineDirection} disabled={!settings.nameShineEnabled} options={(['left', 'right'] as const).map(value => ({ value, label: text[value] }))} onChange={nameShineDirection => updateSettings({ nameShineDirection: nameShineDirection as 'left' | 'right' })} />
+      <div className="motion-settings-toggle-row"><label htmlFor={`${id}-shine-auto`}>{text.shineAuto}</label><input id={`${id}-shine-auto`} type="checkbox" checked={settings.nameShineAutoColor} disabled={!settings.nameShineEnabled} onChange={event => updateSettings({ nameShineAutoColor: event.currentTarget.checked })} /></div>
+      {!settings.nameShineAutoColor && <div className="motion-settings-color"><label htmlFor={`${id}-shine-color`}>{text.shineColor}</label><input id={`${id}-shine-color`} type="color" value={settings.nameShineColor} disabled={!settings.nameShineEnabled} onChange={event => updateSettings({ nameShineColor: event.currentTarget.value })} /></div>}
     </div></details>
     <details className="motion-settings-details"><summary>{text.portrait}</summary><div className="motion-settings-details-body">
       <SettingRange id={`${id}-avatar-grid`} label={text.grid} value={settings.avatarGrid} min={4} max={20} step={1} display={`${settings.avatarGrid} × ${settings.avatarGrid}`} onChange={avatarGrid => updateSettings({ avatarGrid })} />
@@ -254,12 +274,13 @@ export function MotionSettingsDialog({ open, onClose, language }: { open: boolea
     </div></details>
     <details className="motion-settings-details"><summary>{text.gallery}</summary><div className="motion-settings-details-body">
       <div className="motion-settings-toggle-row"><div><label htmlFor={`${id}-gallery-animated`}>{text.galleryAnimated}</label><p className="motion-settings-hint" id={`${id}-gallery-hint`}>{text.galleryHint}</p></div><input id={`${id}-gallery-animated`} type="checkbox" checked={settings.galleryAnimated} aria-describedby={`${id}-gallery-hint`} onChange={event => updateSettings({ galleryAnimated: event.currentTarget.checked })} /></div>
-      <div className="motion-settings-select-row"><label htmlFor={`${id}-gallery-preset`}>{text.preset}</label><select id={`${id}-gallery-preset`} value={settings.galleryPreset} disabled={!settings.galleryAnimated} onChange={event => updateSettings({ galleryPreset: event.currentTarget.value as MotionSettings['galleryPreset'] })}>{(['liquid', 'ribbon', 'vortex', 'arch'] as const).map(preset => <option key={preset} value={preset}>{text[preset]}</option>)}</select></div>
+      <SettingsSelect id={`${id}-gallery-preset`} label={text.preset} value={settings.galleryPreset} disabled={!settings.galleryAnimated} options={(['liquid', 'ribbon', 'vortex', 'arch'] as const).map(value => ({ value, label: text[value] }))} onChange={galleryPreset => updateSettings({ galleryPreset: galleryPreset as MotionSettings['galleryPreset'] })} />
       <SettingRange id={`${id}-gallery-speed`} label={text.gallerySpeed} value={settings.gallerySpeed} disabled={!settings.galleryAnimated} min={0.5} max={2} step={0.05} display={multiplier(settings.gallerySpeed)} onChange={gallerySpeed => updateSettings({ gallerySpeed })} />
       <SettingRange id={`${id}-gallery-bend`} label={text.galleryBend} value={settings.galleryBend} disabled={!settings.galleryAnimated} min={0} max={0.65} step={0.01} display={`${Math.round(settings.galleryBend * 100)}%`} onChange={galleryBend => updateSettings({ galleryBend })} />
     </div></details>
     <div className="motion-settings-fps-row"><div><label htmlFor={`${id}-fps`}>{text.fps}</label><p id={`${id}-fps-hint`} className="motion-settings-hint">{text.fpsHint}</p></div><input id={`${id}-fps`} type="checkbox" checked={settings.showFps} aria-describedby={`${id}-fps-hint`} onChange={event => updateSettings({ showFps: event.currentTarget.checked })} /></div>
     {reducedMotion && <p className="motion-settings-reduced">{text.reduced}</p>}
+    </div>
     <div className="motion-settings-footer"><button type="button" className="motion-settings-reset" onClick={resetSettings}><RotateCcw size={13} aria-hidden="true" />{text.reset}</button><span>{text.saved}</span></div>
   </dialog>;
 }
