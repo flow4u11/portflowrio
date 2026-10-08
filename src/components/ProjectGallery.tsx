@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ComponentType, type KeyboardEvent } from 'react';
 import { ArrowLeft, ArrowRight, ArrowUpRight, Plus } from 'lucide-react';
 import { ToolBrandIcon } from './ToolBrandIcon';
-import { LocalizedCopy, type Language } from './LocalizedCopy';
+import type { Language } from './LocalizedCopy';
+import { ProjectMotionCopy, ProjectMotionNumber } from './ProjectMotionText';
 import { useMotionSettings } from './MotionSettings';
 import { useIdleMotion } from './useIdleMotion';
 import type { FlexCarouselHandle, FlexCarouselProps } from './react-bits/FlexCarousel';
@@ -60,10 +61,35 @@ export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGal
   useEffect(() => {
     if (!active || Renderer || webglUnavailable) return;
     let cancelled = false;
-    void import('./react-bits/FlexCarousel').then(module => {
-      if (!cancelled) setRenderer(() => module.default);
-    }).catch(() => { if (!cancelled) setWebglUnavailable(true); });
-    return () => { cancelled = true; };
+    let quietTimer: ReturnType<typeof setTimeout> | undefined;
+    let lastScroll = performance.now();
+    let loaded: ComponentType<FlexCarouselProps> | undefined;
+    let importing = false;
+    const initialise = () => {
+      if (cancelled || document.hidden) return;
+      if (loaded) { setRenderer(() => loaded!); return; }
+      if (importing) return;
+      importing = true;
+      void import('./react-bits/FlexCarousel').then(module => {
+        if (cancelled || document.hidden) return;
+        loaded = module.default;
+        // A resource response may arrive during another scroll; mounting the
+        // renderer still waits for the same quiet period before shader setup.
+        arm();
+      }).catch(() => { if (!cancelled) setWebglUnavailable(true); });
+    };
+    const arm = () => {
+      clearTimeout(quietTimer);
+      quietTimer = setTimeout(initialise, Math.max(0, 220 - (performance.now() - lastScroll)));
+    };
+    const onScroll = () => { lastScroll = performance.now(); arm(); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    arm();
+    return () => {
+      cancelled = true;
+      clearTimeout(quietTimer);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, [active, Renderer, webglUnavailable]);
 
   useEffect(() => { if (reduced) setWebglReady(false); }, [reduced]);
@@ -171,10 +197,10 @@ export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGal
           speed={settings.gallerySpeed * settings.animationSpeed}
           bend={settings.galleryBend}
           intro="bloom"
-          cardHeight={0.76}
+          cardHeight={0.79}
           fit="landscape"
           gap={24}
-          radius={8}
+          radius={16}
           liquid={0.28}
           focusOnClick={false}
           captureWheel={false}
@@ -186,6 +212,10 @@ export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGal
           onSelect={(index, _item, trigger) => { const project = projects[index]; if (project) onOpen(project, trigger); }}
         />
       </div>}
+      <div className="pg-controls" aria-label="Gallery controls">
+        <button className="pg-nav" type="button" aria-label="Previous project" aria-controls={enhanced ? `${trackId}-visual` : trackId} disabled={position.atStart} onClick={() => moveBy(-1)}><ArrowLeft size={18} aria-hidden="true" /></button>
+        <button className="pg-nav" type="button" aria-label="Next project" aria-controls={enhanced ? `${trackId}-visual` : trackId} disabled={position.atEnd} onClick={() => moveBy(1)}><ArrowRight size={18} aria-hidden="true" /></button>
+      </div>
     </div>
 
     <div
@@ -207,13 +237,13 @@ export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGal
             <span className="pg-view" aria-hidden="true"><ArrowUpRight size={20} /></span>
           </span>
           <span className="pg-caption">
-            <span className="pg-number">{String(index + 1).padStart(2, '0')}</span>
+            <span className="pg-number"><ProjectMotionNumber value={index + 1} enabled={!enhanced || position.index === index} /></span>
             <span className="pg-title"><strong>{project.title}</strong><span>{project.category}</span></span>
             <ArrowUpRight size={19} aria-hidden="true" />
           </span>
         </button>
         <div className="pg-body">
-          <p className="pg-description"><LocalizedCopy text={project.description} language={language} /></p>
+          <p className="pg-description"><ProjectMotionCopy text={project.description} language={language} enabled={!enhanced || position.index === index} /></p>
           <div className="pg-tags">{project.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
           {(project.liveUrl || project.sourceUrl || project.videoUrl) && <div className="pg-links">
             {project.videoUrl && <a href={project.videoUrl} target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="YouTube" />{thai ? 'ชมเกมเพลย์' : 'Watch gameplay'}<ArrowUpRight size={13} aria-hidden="true" /></a>}
@@ -231,12 +261,12 @@ export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGal
           <span className="pg-future-cover-number">{String(projects.length + index + 1).padStart(2, '0')}</span>
         </div>
         <div className="pg-caption">
-          <span className="pg-number">{String(projects.length + index + 1).padStart(2, '0')}</span>
+          <span className="pg-number"><ProjectMotionNumber value={projects.length + index + 1} enabled={!enhanced || position.index === projects.length + index} /></span>
           <span className="pg-title"><strong>Future project</strong><span>Empty slot · Coming later</span></span>
           <Plus size={19} aria-hidden="true" />
         </div>
         <div className="pg-body">
-          <p className="pg-description"><LocalizedCopy language={language} text={thai ? 'พื้นที่สำหรับไอเดียถัดไป โปรเจกต์ เรื่องราว และรายละเอียดใหม่ ๆ จะอยู่ที่นี่เมื่อพร้อม' : 'A little space for what comes next. A new project, its story, and the details will live here when they’re ready.'} /></p>
+          <p className="pg-description"><ProjectMotionCopy language={language} enabled={!enhanced || position.index === projects.length + index} text={thai ? 'พื้นที่สำหรับไอเดียถัดไป โปรเจกต์ เรื่องราว และรายละเอียดใหม่ ๆ จะอยู่ที่นี่เมื่อพร้อม' : 'A little space for what comes next. A new project, its story, and the details will live here when they’re ready.'} /></p>
           <p className="pg-empty-note"><span aria-hidden="true" />No project added yet</p>
         </div>
       </article>)}
@@ -248,12 +278,8 @@ export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGal
 
     <div className="pg-footer">
       <div className="pg-progress-group">
-        <span className="pg-position" role="status" aria-live="polite" aria-atomic="true"><span className="pg-sr-only">{currentLabel}. Gallery position </span><strong>{String(position.index + 1).padStart(2, '0')}</strong><span aria-hidden="true"> / </span><span className="pg-sr-only">of </span>{String(total).padStart(2, '0')}</span>
+        <span className="pg-position" role="status" aria-live="polite" aria-atomic="true"><span className="pg-sr-only">{currentLabel}. Gallery position </span><strong><ProjectMotionNumber value={position.index + 1} /></strong><span aria-hidden="true"> / </span><span className="pg-sr-only">of </span>{String(total).padStart(2, '0')}</span>
         <progress className="pg-progress" value={position.index + 1} max={total} aria-label="Project gallery position" />
-      </div>
-      <div className="pg-controls" aria-label="Gallery controls">
-        <button className="pg-nav" type="button" aria-label="Previous project" aria-controls={enhanced ? `${trackId}-visual` : trackId} disabled={position.atStart} onClick={() => moveBy(-1)}><ArrowLeft size={17} aria-hidden="true" /></button>
-        <button className="pg-nav" type="button" aria-label="Next project" aria-controls={enhanced ? `${trackId}-visual` : trackId} disabled={position.atEnd} onClick={() => moveBy(1)}><ArrowRight size={17} aria-hidden="true" /></button>
       </div>
     </div>
   </div>;

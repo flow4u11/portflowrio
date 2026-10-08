@@ -1,30 +1,42 @@
 import { useEffect, useRef } from 'react';
 import { useIdleMotion } from './useIdleMotion';
 import { LocalizedCopy, type Language } from './LocalizedCopy';
+import { useMotionSettings } from './MotionSettings';
 import './information-motion.css';
 
 export function GraduationYears() {
   const { ref, active, reduced } = useIdleMotion<HTMLSpanElement>();
-  const number = useRef<HTMLSpanElement>(null);
-  const played = useRef(false);
+  const first = useRef<HTMLSpanElement>(null);
+  const last = useRef<HTMLSpanElement>(null);
+  const { settings } = useMotionSettings();
+  const speed = useRef(settings.animationSpeed);
+  speed.current = settings.animationSpeed;
   useEffect(() => {
-    if (reduced) { if (number.current) number.current.textContent = '2023'; return; }
-    if (!active || played.current) return;
-    played.current = true;
+    const finish = () => { if (first.current) first.current.textContent = '2016'; if (last.current) last.current.textContent = '2023'; };
+    if (reduced || !active) { finish(); return; }
+    if (first.current) first.current.textContent = '1940';
+    if (last.current) last.current.textContent = '1940';
     let frame = 0;
-    let previous = 2016;
-    const start = performance.now();
+    let previous = -1;
+    const start = performance.now() + 280 / speed.current;
+    const duration = 1450 / speed.current;
     const tick = (time: number) => {
-      const progress = Math.min(1, (time - start) / 1100);
-      const value = Math.round(2016 + 7 * (1 - (1 - progress) ** 3));
-      if (number.current && previous !== value) number.current.textContent = String(value);
-      previous = value;
+      if (time < start) { frame = requestAnimationFrame(tick); return; }
+      const progress = Math.min(1, (time - start) / duration);
+      const step = Math.floor(progress * 44);
+      if (step !== previous) {
+        const ease = 1 - (1 - progress) ** 3;
+        if (first.current) first.current.textContent = String(Math.round(1940 + 76 * ease));
+        if (last.current) last.current.textContent = String(Math.round(1940 + 83 * ease));
+        previous = step;
+      }
       if (progress < 1) frame = requestAnimationFrame(tick);
+      else finish();
     };
     frame = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(frame); if (number.current) number.current.textContent = '2023'; };
+    return () => { cancelAnimationFrame(frame); finish(); };
   }, [active, reduced]);
-  return <span ref={ref} className="graduation-years" aria-label="2016–2023"><span aria-hidden="true">2016–<span ref={number}>{reduced ? 2023 : 2016}</span></span></span>;
+  return <span ref={ref} className="graduation-years" aria-label="2016–2023"><span aria-hidden="true"><span ref={first}>2016</span>–<span ref={last}>2023</span></span></span>;
 }
 
 export function ExperienceStatus({ language }: { language: Language }) {

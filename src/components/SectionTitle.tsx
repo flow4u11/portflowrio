@@ -7,6 +7,6 @@ export function SectionTitle({ id, first, last }: { id: string; first: string; l
   const words = first.split(' ');
   return <h2 ref={ref} id={id} className="section-word-title" data-visible={active || reduced}>
     <span className="idle-motion-sr-only">{first} {last}</span>
-    <span aria-hidden="true">{words.map((word, index) => <span className="section-title-word" key={word} style={{ transitionDelay: `${index * 65}ms` }}>{word}{index < words.length - 1 ? '\u00a0' : ''}</span>)}<br /><i className="section-title-word" style={{ transitionDelay: `${words.length * 65}ms` }}>{last}</i></span>
+    <span aria-hidden="true">{words.map((word, index) => <span className="section-title-word" key={word} style={{ transitionDelay: `${240 + index * 85}ms` }}>{word}{index < words.length - 1 ? '\u00a0' : ''}</span>)}<br /><i className="section-title-word" style={{ transitionDelay: `${240 + words.length * 85}ms` }}>{last}</i></span>
   </h2>;
 }

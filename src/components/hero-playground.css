@@ -1,98 +1,43 @@
 .hero-playground-host { display: contents; }
-.hero-playground-host .animated-name { cursor: pointer; touch-action: manipulation; }
+.hero-playground-host .animated-name { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 .hero-playground-host[data-play-active="true"] .animated-name-gradient { animation-play-state: paused; }
-.hero-playground-start {
-  position: absolute; z-index: 4; left: 50%; bottom: 35px; translate: -50% 0;
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 36px; padding: 8px 12px; color: var(--muted); font-size: 9px;
-  letter-spacing: .02em; white-space: nowrap; border-radius: 24px;
-  transition: color .2s, background .2s;
-}
-.hero-playground-start:hover { color: var(--text); background: color-mix(in srgb, var(--text) 5%, transparent); }
-.hero-playground-start[hidden], .hero-playground-home[hidden] { display: none; }
-.hero-playground-touch-hint { display: none; }
-.hero-playground-start:focus-visible, .hero-playground-reset:focus-visible { outline: 2px solid var(--text); outline-offset: 5px; }
 .hero-playground-layer { position: absolute; z-index: 6; inset: 0; pointer-events: none; overflow: hidden; perspective: 1100px; isolation: isolate; }
-.hero-playground-atmosphere { position: absolute; inset: 12% 0 8%; background: radial-gradient(ellipse 29% 27% at 50% 48%, color-mix(in srgb, #a7b9f4 10%, transparent), transparent 100%); opacity: 0; animation: playground-atmosphere .8s ease-out forwards; }
-.hero-playground-burst { position: absolute; z-index: 1; left: var(--play-burst-x); top: var(--play-burst-y); width: 28px; height: 28px; border: 1px solid color-mix(in srgb, var(--text) 45%, transparent); border-radius: 50%; transform: translate(-50%, -50%); animation: playground-burst 1s cubic-bezier(.1,.65,.2,1) both; }
-.hero-playground-toolbar { position: absolute; z-index: 12; left: var(--page-pad, 32px); right: var(--page-pad, 32px); top: 105px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-.hero-playground-toolbar > div { display: flex; align-items: center; gap: 12px; }
-.hero-playground-score { font: 30px/.9 "Space Mono", monospace; letter-spacing: -2px; color: var(--text); }
-.hero-playground-score > span { padding-left: 7px; color: var(--muted); font-size: 12px; letter-spacing: -1px; }
-.hero-playground-score-label { max-width: 70px; font-size: 9px; line-height: 1.5; color: var(--muted); }
+.hero-playground-toolbar { position: absolute; z-index: 12; right: var(--page-pad, 32px); top: 105px; }
 .hero-playground-reset { pointer-events: auto; display: inline-flex; gap: 7px; align-items: center; min-height: 36px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 22px; font-size: 10px; color: var(--text); background: var(--bg); transition: border-color .2s, transform .2s; }
 .hero-playground-reset:hover { border-color: var(--muted); transform: translateY(-2px); }
 .hero-playground-reset:disabled { opacity: .5; cursor: default; }
-.hero-playground-instructions { position: absolute; z-index: 12; left: 50%; bottom: 24px; translate: -50% 0; width: min(450px, calc(100% - 36px)); text-align: center; font-size: 10px; color: var(--text); line-height: 1.6; }
-.hero-playground-instructions > p + p { margin-top: 3px; color: var(--muted); font-size: 9px; }
-.hero-playground-hoop { position: absolute; z-index: 5; overflow: visible; filter: drop-shadow(8px 14px 12px color-mix(in srgb, var(--text) 7%, transparent)); animation: playground-hoop-enter .65s cubic-bezier(.22,1,.36,1) both; }
-.hero-hoop-support { fill: none; stroke: var(--muted); stroke-width: 3; opacity: .25; stroke-linejoin: round; }
-.hero-hoop-board-edge { fill: color-mix(in srgb, var(--text) 10%, var(--bg)); stroke: color-mix(in srgb, var(--text) 17%, transparent); stroke-width: 1; }
-.hero-hoop-board { stroke: color-mix(in srgb, var(--text) 45%, transparent); stroke-width: 1.5; }
-.hero-hoop-square { fill: none; stroke: color-mix(in srgb, var(--text) 40%, transparent); stroke-width: 2; }
-.hero-hoop-rim-back { fill: color-mix(in srgb, var(--bg) 80%, transparent); stroke: #d97952; stroke-width: 3; }
-.hero-hoop-rim-front { fill: none; stroke: #f49a71; stroke-width: 4; stroke-linecap: round; }
-.hero-hoop-net { fill: none; stroke: color-mix(in srgb, var(--text) 45%, transparent); stroke-width: 1.25; stroke-linejoin: round; }
-.hero-playground-trajectory { position: absolute; z-index: 10; inset: 0; width: 100%; height: 100%; overflow: hidden; }
-.hero-playground-trajectory path { fill: none; stroke: #d88c68; stroke-width: 1.5; stroke-dasharray: 3 7; stroke-linecap: round; opacity: .85; }
-.hero-playground-trajectory path[data-score="true"] { stroke: #5cac89; }
-.hero-playground-trajectory circle { fill: var(--bg); stroke: #d88c68; stroke-width: 1.5; }
-.hero-playground-trajectory circle[data-score="true"] { stroke: #5cac89; }
-.hero-playground-homes { position: absolute; z-index: 2; inset: 0; }
-.hero-playground-home { position: absolute; display: flex; align-items: center; justify-content: center; transform-origin: center; }
-.hero-playground-home--letter { color: var(--text); opacity: .1; white-space: pre; line-height: 1; }
-.hero-playground-home--letter[data-returned="true"] { opacity: 1; }
-.hero-playground-home--part { border: 1px dashed color-mix(in srgb, var(--text) 27%, transparent); border-radius: 8px; color: var(--muted); background: color-mix(in srgb, var(--bg) 35%, transparent); transition: border-color .2s, background .2s; }
-.hero-playground-home--part > span { font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
-.hero-playground-home--part[data-near="true"] { border-color: #5cac89; background: color-mix(in srgb, #5cac89 10%, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, #5cac89 6%, transparent); }
+.hero-playground-reset:focus-visible { outline: 2px solid var(--text); outline-offset: 5px; }
+.hero-playground-tether { position: absolute; z-index: 6; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+.hero-playground-tether path { fill: none; stroke: var(--muted); stroke-width: 1; stroke-linecap: round; opacity: .65; }
 .hero-playground-piece { position: absolute; z-index: 7; left: 0; top: 0; pointer-events: auto; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; transform-origin: center; outline: none; will-change: transform; -webkit-tap-highlight-color: transparent; }
-.hero-playground-piece--letter { border-radius: 9px; }
-.hero-playground-piece:focus-visible { outline: 2px solid #7c9dd0; outline-offset: 5px; background: color-mix(in srgb, var(--bg) 70%, transparent); }
+.hero-playground-piece:focus-visible { outline: 1px solid var(--muted); outline-offset: 5px; }
 .hero-playground-piece[data-motion="dragging"] { z-index: 11; cursor: grabbing; }
-.hero-playground-piece[data-motion="flying"], .hero-playground-piece[data-motion="returning"] { pointer-events: none; }
-.hero-playground-piece-float { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; transform-origin: center; animation: playground-float calc(var(--piece-float-duration) * var(--motion-duration-factor, 1)) ease-in-out var(--piece-float-delay) infinite alternate; animation-play-state: paused; }
+.hero-playground-piece[data-motion="returning"], .hero-playground-piece[data-motion="home"] { pointer-events: none; }
+.hero-playground-piece-float { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; transform-origin: center; animation: playground-float calc(var(--piece-float-duration) * var(--motion-duration-factor, 1)) ease-in-out infinite; animation-play-state: paused; }
 .hero-playground-piece[data-motion="idle"] .hero-playground-piece-float { animation-play-state: running; }
-.hero-playground-piece:not([data-motion="idle"]) .hero-playground-piece-float { animation: none; transform: none; }
-.hero-playground-piece--letter .hero-playground-glyph { display: block; color: var(--text); line-height: 1; text-shadow: 1px 1px 0 color-mix(in srgb, var(--text) 17%, transparent), 2px 2px 0 color-mix(in srgb, var(--text) 13%, transparent), 4px 5px 8px color-mix(in srgb, var(--text) 10%, transparent); }
-.hero-playground-copy { width: 100%; height: 100%; pointer-events: none; opacity: .9; filter: drop-shadow(3px 5px 7px color-mix(in srgb, var(--text) 7%, transparent)); }
-.hero-playground-copy *, .hero-playground-copy *::before, .hero-playground-copy *::after { animation: none !important; transition: none !important; pointer-events: none !important; }
-.hero-playground-copy .profile-frame,
-.hero-playground-copy .hero-role,
-.hero-playground-copy .hero-tags,
-.hero-playground-copy .explore-button {
+.hero-playground-piece--letter .hero-playground-glyph { display: block; color: var(--text); line-height: 1; text-shadow: 1px 1px 0 color-mix(in srgb, var(--text) 13%, transparent), 3px 4px 7px color-mix(in srgb, var(--text) 8%, transparent); }
+.hero-playground-copy { position: absolute; left: 50%; top: 50%; translate: -50% -50%; pointer-events: none; }
+.hero-playground-copy *, .hero-playground-copy *::before, .hero-playground-copy *::after { pointer-events: none !important; }
+.hero-playground-copy > :is(.profile-frame, .hero-role, .hero-tags, .explore-button) {
   position: relative !important; inset: auto !important; margin: 0 !important;
   width: 100% !important; height: 100% !important;
+  /* A variable identity survives the production CSS optimizer. */
   translate: var(--playground-copy-translate, 0px 0px) !important; transform: none !important;
 }
-.hero-playground-copy > .hero-role { display: flex; align-items: center; justify-content: center; font-size: 13px; line-height: 1.7; }
 .hero-playground-copy > .hero-tags { justify-content: center; white-space: nowrap; }
-.hero-playground-copy .typewriter-caret { opacity: 0; }
 .hero-playground-copy .profile-avatar { width: 100%; height: 100%; }
-.hero-playground-copy > .explore-button { color: var(--text); background: var(--bg); }
-.hero-playground-layer[data-phase="assembling"] .hero-playground-piece-float { animation-play-state: paused; }
-.hero-playground-layer[data-phase="assembling"] :is(.hero-playground-hoop, .hero-playground-toolbar, .hero-playground-instructions, .hero-playground-atmosphere) { animation: playground-fade .35s ease-in forwards; }
+.hero-playground-copy > .explore-button { color: var(--text); }
+.hero-playground-layer[data-phase="assembling"] .hero-playground-toolbar { animation: playground-fade .25s ease-in forwards; }
 @keyframes playground-float {
-  0% { transform: translate3d(-2px, -5px, 0) rotateX(-9deg) rotateY(11deg) rotateZ(-2deg); }
-  50% { transform: translate3d(3px, 2px, 7px) rotateX(5deg) rotateY(-7deg) rotateZ(1deg); }
-  100% { transform: translate3d(-1px, 6px, 0) rotateX(10deg) rotateY(-12deg) rotateZ(3deg); }
+  0%, 100% { transform: translate3d(0, 0, 0) rotateX(0) rotateY(0) rotateZ(0); }
+  25% { transform: translate3d(-2px, -4px, 4px) rotateX(-6deg) rotateY(8deg) rotateZ(-1deg); }
+  75% { transform: translate3d(2px, 4px, -3px) rotateX(7deg) rotateY(-8deg) rotateZ(1deg); }
 }
-@keyframes playground-burst { from { opacity: .45; transform: translate(-50%, -50%) scale(.4); } to { opacity: 0; transform: translate(-50%, -50%) scale(24); } }
-@keyframes playground-hoop-enter { from { opacity: 0; transform: translateY(25px) rotateX(-22deg) scale(.9); } to { opacity: 1; transform: translateY(0) rotateX(0) scale(1); } }
-@keyframes playground-atmosphere { to { opacity: 1; } }
 @keyframes playground-fade { to { opacity: 0; } }
 @media (max-width: 600px) {
-  .hero-playground-start { bottom: 42px; font-size: 9px; }
-  .hero-playground-toolbar { top: 102px; left: 22px; right: 22px; }
-  .hero-playground-toolbar > div { gap: 8px; }
-  .hero-playground-score { font-size: 25px; }
+  .hero-playground-toolbar { top: 102px; right: 22px; }
   .hero-playground-reset { padding: 8px 10px; font-size: 9px; }
-  .hero-playground-instructions { bottom: 25px; font-size: 9px; }
-  .hero-playground-instructions > p + p { font-size: 8px; }
-  .hero-playground-copy > .hero-role { font-size: 12px; }
 }
-@media (hover: none), (pointer: coarse) { .hero-playground-hint { display: none; } .hero-playground-touch-hint { display: inline; } }
 @media (prefers-reduced-motion: reduce) {
-  .hero-playground-start { display: none; }
-  .hero-playground-host .animated-name { cursor: inherit; }
   .hero-playground-layer *, .hero-playground-layer *::before, .hero-playground-layer *::after { animation: none !important; }
 }

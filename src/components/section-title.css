@@ -1,4 +1,4 @@
 .section-word-title { perspective: 800px; }
-.section-title-word { display: inline-block; opacity: 0; transform: translate3d(0, 22px, 0) rotateX(-12deg); transform-origin: center bottom; transition: transform calc(.65s * var(--motion-duration-factor, 1)) var(--ease), opacity calc(.45s * var(--motion-duration-factor, 1)) ease; }
+.section-title-word { display: inline-block; opacity: 0; transform: translate3d(0, 22px, 0) rotateX(-12deg); transform-origin: center bottom; transition: transform calc(.85s * var(--motion-duration-factor, 1)) var(--ease), opacity calc(.65s * var(--motion-duration-factor, 1)) ease; }
 .section-word-title[data-visible="true"] .section-title-word, .section-word-title:focus .section-title-word { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .section-title-word { opacity: 1; transform: none; transition: none; } }

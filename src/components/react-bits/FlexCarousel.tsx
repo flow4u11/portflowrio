@@ -81,6 +81,7 @@ interface Slot {
   loaded: boolean;
   failed: boolean;
   ready: number;
+  hover: number;
   color: number[];
   image: number[];
   dispose: () => void;
@@ -197,8 +198,11 @@ const BEND_PRESETS: Record<BendPreset, PresetValues> = {
 };
 
 const FIT_ASPECT: Record<string, number> = { portrait: 0.75, square: 1, landscape: 4 / 3 };
-const TAPS = 12;
-const PIXEL_BUDGET = 1.5e6;
+// The lens stays interactive without competing with page-scroll compositing.
+const TAPS = 6;
+const PIXEL_BUDGET = 9e5;
+const MAX_DPR = 1.25;
+const FRAME_INTERVAL = 1000 / 60;
 const INTRO_DURATION: Record<string, number> = { rise: 2.1, bloom: 1.6, spin: 2.2, deal: 1.5, fade: 0.35 };
 
 const clamp01 = (value: number) => Math.min(Math.max(value, 0), 1);
@@ -246,7 +250,7 @@ float roundedBox(vec2 p, vec2 b, float r) {
 
 void main() {
   float sd = roundedBox(vLocal, uSize * 0.5, min(uRadius, min(uSize.x, uSize.y) * 0.5));
-  float mask = clamp(0.5 - sd * uDpr, 0.0, 1.0);
+  float mask = 1.0 - smoothstep(-1.5, 1.5, sd);
   vec2 local = vLocal / uSize + 0.5;
   float cardAspect = uSize.x / uSize.y;
   float imageAspect = uImage.x / max(uImage.y, 1.0);
@@ -337,7 +341,10 @@ void main() {
     color.rgb = mix(color.rgb, clamp(split, 0.0, 1.0) * color.a, smoothstep(0.25, 1.5, spreadPx));
   }
 
-  fragColor = color * uSceneAlpha;
+  // Fade into the page at the stage edges instead of outlining a canvas box.
+  float edgeX = smoothstep(0.0, 0.075, uv.x) * smoothstep(0.0, 0.075, 1.0 - uv.x);
+  float edgeY = smoothstep(0.0, 0.025, uv.y) * smoothstep(0.0, 0.025, 1.0 - uv.y);
+  fragColor = color * uSceneAlpha * edgeX * edgeY;
 }
 `;
 
@@ -444,7 +451,7 @@ const FlexCarousel = ({
     try {
       renderer = new Renderer({
         canvas: canvasElement,
-        dpr: Math.min(window.devicePixelRatio || 1, 1.5),
+        dpr: Math.min(window.devicePixelRatio || 1, MAX_DPR),
         alpha: true,
         premultipliedAlpha: true,
         antialias: false,
@@ -495,7 +502,8 @@ const FlexCarousel = ({
       width: 2,
       height: 2,
       depth: false,
-      minFilter: gl.LINEAR_MIPMAP_LINEAR,
+      // A live render target needs no new mipmap pyramid on every animation frame.
+      minFilter: gl.LINEAR,
       magFilter: gl.LINEAR
     });
 
@@ -539,6 +547,9 @@ const FlexCarousel = ({
     let wheelAt = 0;
     let raf = 0;
     let last = performance.now();
+    let lastRender = 0;
+    let scrolling = false;
+    let scrollTimer: ReturnType<typeof setTimeout> | undefined;
     let visible = false;
     let ready = false;
     let alive = true;
@@ -552,6 +563,7 @@ const FlexCarousel = ({
     let layout: Metrics | null = null;
     let resnap = false;
     let hover = '';
+    let hoveredIndex = -1;
     let lift = 1;
     let energy = 0;
     let lastPos = 0;
@@ -597,6 +609,7 @@ const FlexCarousel = ({
         loaded: false,
         failed: false,
         ready: 0,
+        hover: 0,
         color: [0.5, 0.5, 0.5],
         image: [1, 1],
         dispose: () => {}
@@ -666,8 +679,9 @@ const FlexCarousel = ({
     };
 
     const metrics = (s: Settings): Metrics => {
-      const cardH = Math.max(24, s.cardHeight * height);
       const fixed = FIT_ASPECT[s.fit];
+      const largestAspect = fixed || Math.max(...slots.map(slot => slot.aspect), 1);
+      const cardH = Math.max(24, Math.min(s.cardHeight * height, width * 0.9 / largestAspect));
       const widths = slots.map(slot => (fixed || slot.aspect) * cardH);
       const centers: number[] = [];
       let cursor = 0;
@@ -797,7 +811,8 @@ const FlexCarousel = ({
     const resize = () => {
       width = Math.max(1, container.clientWidth);
       height = Math.max(1, container.clientHeight);
-      renderer.dpr = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(PIXEL_BUDGET / (width * height)));
+      const pixelBudget = width < 640 ? PIXEL_BUDGET * 0.7 : PIXEL_BUDGET;
+      renderer.dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR, Math.sqrt(pixelBudget / (width * height)));
       renderer.setSize(width, height);
       target.setSize(Math.max(2, Math.round(width * renderer.dpr)), Math.max(2, Math.round(height * renderer.dpr)));
       lensUniforms.tScene.value = target.texture;
@@ -807,7 +822,14 @@ const FlexCarousel = ({
 
     const frame = (now: number) => {
       raf = 0;
-      if (!alive || !visible || document.hidden) return;
+      if (!alive || !visible || document.hidden || scrolling) return;
+      // OGL physics and GPU draws share a 60 Hz ceiling; the rest of the page
+      // can still animate at the display's native refresh rate.
+      if (now - lastRender < FRAME_INTERVAL - 1) {
+        raf = requestAnimationFrame(frame);
+        return;
+      }
+      lastRender = now;
       const s = settingsRef.current;
       const dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000) * (s?.speed ?? 1));
       last = now;
@@ -977,6 +999,10 @@ const FlexCarousel = ({
           slot.ready = Math.min(1, slot.ready + dt / 0.45);
           animating = true;
         }
+        const hoverTarget = !reducedMotion && i === hoveredIndex && !pointer.dragging && focus.target === 0 ? 1 : 0;
+        slot.hover += (hoverTarget - slot.hover) * (1 - Math.exp(-dt / 0.12));
+        if (Math.abs(hoverTarget - slot.hover) < 0.001) slot.hover = hoverTarget;
+        else animating = true;
       }
 
       const waiting = !introState.done;
@@ -998,6 +1024,10 @@ const FlexCarousel = ({
             const fx = effects.card ? effects.card(rel) : null;
             let x = homeX + rel + (fx ? fx.x : 0);
             let scale = shrink * (fx ? fx.scale : 1);
+            // Scale only the hit image in the actual WebGL scene. The canvas,
+            // adjacent images, lens, controls and details keep their own size.
+            const hoverScale = Math.max(1, Math.min(1.085, height * 0.9 / cardH, width * 0.97 / w));
+            scale *= 1 + (hoverScale - 1) * slots[i].hover;
             let alpha = fx ? fx.alpha : 1;
             if (focusAmount > 0) {
               if (i === focus.index && Math.abs(rel) < w) {
@@ -1014,12 +1044,12 @@ const FlexCarousel = ({
             draws.push({ i, rel, x, y: homeY + (fx ? fx.y : 0), cw, ch: cardH * scale, alpha });
           }
         }
-        draws.sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel));
+        draws.sort((a, b) => slots[a.i].hover - slots[b.i].hover || Math.abs(b.rel) - Math.abs(a.rel));
         let first = true;
         for (const draw of draws) {
           const slot = slots[draw.i];
           cardProgram.uniforms.tMap.value = slot.texture;
-          cardProgram.uniforms.uRect.value = [draw.x, draw.y, draw.cw + 2, draw.ch + 2];
+          cardProgram.uniforms.uRect.value = [draw.x, draw.y, draw.cw + 4, draw.ch + 4];
           cardProgram.uniforms.uSize.value = [draw.cw, draw.ch];
           cardProgram.uniforms.uImage.value = slot.image;
           cardProgram.uniforms.uAlpha.value = draw.alpha;
@@ -1042,8 +1072,6 @@ const FlexCarousel = ({
           gl.clear(gl.COLOR_BUFFER_BIT);
         }
         renderer.bindFramebuffer();
-        target.texture.bind();
-        gl.generateMipmap(gl.TEXTURE_2D);
 
         lensUniforms.uResolution.value = [width, height];
         lensUniforms.uDpr.value = dpr;
@@ -1065,10 +1093,8 @@ const FlexCarousel = ({
       }
 
       let nextHover = '';
-      if (pointer.over && !pointer.dragging && introState.done && s.focusOnClick) {
-        const hit = instances.find(
-          inst => pointer.x >= inst.x0 && pointer.x <= inst.x1 && pointer.y >= inst.y0 && pointer.y <= inst.y1
-        );
+      if (pointer.over && !pointer.dragging && introState.done) {
+        const hit = hitTest(pointer.x, pointer.y);
         if (focus.target > 0) nextHover = 'close';
         else if (hit) nextHover = 'open';
       }
@@ -1082,7 +1108,7 @@ const FlexCarousel = ({
     };
 
     const start = () => {
-      if (raf || !visible || !alive || document.hidden) return;
+      if (raf || !visible || !alive || document.hidden || scrolling) return;
       last = performance.now();
       raf = requestAnimationFrame(frame);
     };
@@ -1092,14 +1118,35 @@ const FlexCarousel = ({
       return [e.clientX - rect.left, e.clientY - rect.top];
     };
 
+    const hitTest = (x: number, y: number) => {
+      // The image drawn last is on top, including an enlarged hovered image.
+      for (let i = instances.length - 1; i >= 0; i--) {
+        const inst = instances[i];
+        if (x >= inst.x0 && x <= inst.x1 && y >= inst.y0 && y <= inst.y1) return inst;
+      }
+      return undefined;
+    };
+
+    const setHovered = (index: number) => {
+      if (index === hoveredIndex) return false;
+      hoveredIndex = index;
+      if (index >= 0) container.setAttribute('data-hovered-card', String(index));
+      else container.removeAttribute('data-hovered-card');
+      dirty = true;
+      return true;
+    };
+
     const onPointerDown = (e: PointerEvent) => {
       if (e.button !== undefined && e.button > 0) return;
+      // Pointer interaction does not inherit a keyboard-only focus decoration.
+      container.removeAttribute('data-keyboard-focus');
       container.focus({ preventScroll: true });
       skipIntro();
       const [x, y] = localPoint(e);
       pointer.down = true;
       pointer.id = e.pointerId;
       pointer.touch = e.pointerType === 'touch';
+      if (pointer.touch) setHovered(-1);
       pointer.startX = x;
       pointer.startY = y;
       pointer.x = x;
@@ -1118,6 +1165,7 @@ const FlexCarousel = ({
 
     const onPointerMove = (e: PointerEvent) => {
       const [x, y] = localPoint(e);
+      pointer.touch = e.pointerType === 'touch';
       pointer.x = x;
       pointer.y = y;
       pointer.over = true;
@@ -1132,6 +1180,7 @@ const FlexCarousel = ({
           }
           if (Math.abs(dx) > slop) {
             pointer.dragging = true;
+            setHovered(-1);
             pointer.startX = x;
             pointer.startPos = pos;
             closeFocus();
@@ -1157,8 +1206,11 @@ const FlexCarousel = ({
           while (pointer.samples.length > 2 && now - pointer.samples[0].t > 100) pointer.samples.shift();
         }
       }
-      dirty = true;
-      start();
+      const changedHover = setHovered(!pointer.touch && !pointer.dragging ? hitTest(x, y)?.index ?? -1 : -1);
+      if (pointer.dragging || settingsRef.current?.followCursor || changedHover) {
+        dirty = true;
+        start();
+      }
     };
 
     const onPointerUp = (e: PointerEvent) => {
@@ -1188,7 +1240,7 @@ const FlexCarousel = ({
       }
       if (closeFocus()) return;
       const [x, y] = localPoint(e);
-      const hit = instances.find(inst => x >= inst.x0 && x <= inst.x1 && y >= inst.y0 && y <= inst.y1);
+      const hit = hitTest(x, y);
       if (!hit) return;
       if (hit.index === activeIndex && Math.abs(goal - pos) < 2) {
         callbacksRef.current.onSelect?.(hit.index, itemsRef.current[hit.index], container);
@@ -1204,6 +1256,7 @@ const FlexCarousel = ({
 
     const onPointerLeave = () => {
       pointer.over = false;
+      setHovered(-1);
       if (!pointer.dragging) pointer.down = false;
       dirty = true;
       start();
@@ -1250,6 +1303,7 @@ const FlexCarousel = ({
       const s = settingsRef.current;
       if (!s) return;
       const m = metrics(s);
+      container.setAttribute('data-keyboard-focus', 'true');
       if (e.key === 'ArrowRight') {
         e.preventDefault();
         skipIntro();
@@ -1282,9 +1336,11 @@ const FlexCarousel = ({
 
     const onFocus = () => {
       hasFocus = true;
+      if (container.matches(':focus-visible')) container.setAttribute('data-keyboard-focus', 'true');
     };
     const onBlur = () => {
       hasFocus = false;
+      container.removeAttribute('data-keyboard-focus');
     };
     const stop = () => {
       cancelAnimationFrame(raf);
@@ -1292,12 +1348,28 @@ const FlexCarousel = ({
       pointer.down = false;
       pointer.dragging = false;
       pointer.over = false;
+      setHovered(-1);
       container.removeAttribute('data-dragging');
       if (settingsRef.current && slots.length) goal = snapPoint(metrics(settingsRef.current), pos);
     };
     const onVisibility = () => {
       if (document.hidden) stop();
       else start();
+    };
+    const onPageScroll = () => {
+      if (!visible || pointer.dragging) return;
+      scrolling = true;
+      cancelAnimationFrame(raf);
+      raf = 0;
+      pointer.over = false;
+      pointer.down = false;
+      setHovered(-1);
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        scrolling = false;
+        dirty = true;
+        start();
+      }, 140);
     };
     const onContextLost = (event: Event) => {
       event.preventDefault();
@@ -1317,6 +1389,7 @@ const FlexCarousel = ({
     container.addEventListener('focus', onFocus);
     container.addEventListener('blur', onBlur);
     document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('scroll', onPageScroll, { passive: true });
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
@@ -1357,6 +1430,7 @@ const FlexCarousel = ({
       visible = false;
       engineRef.current = null;
       cancelAnimationFrame(raf);
+      clearTimeout(scrollTimer);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       container.removeEventListener('pointerdown', onPointerDown);
@@ -1371,6 +1445,7 @@ const FlexCarousel = ({
       container.removeEventListener('focus', onFocus);
       container.removeEventListener('blur', onBlur);
       document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('scroll', onPageScroll);
       slots.forEach(slot => slot.dispose());
       slots = [];
       gl.getExtension('WEBGL_lose_context')?.loseContext();

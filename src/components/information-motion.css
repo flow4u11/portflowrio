@@ -1,4 +1,5 @@
 .graduation-years { display: inline-block; font-variant-numeric: tabular-nums; color: var(--muted); margin-top: 5px; font-size: 11px; }
+.graduation-years > span > span { display: inline-block; min-width: 4ch; }
 .experience-status { display: inline-flex; align-items: center; color: var(--muted); font-size: 11px; line-height: 1.8; margin-top: 16px; }
 .experience-dot { width: 5px; height: 5px; border-radius: 50%; background: #37a978; margin-right: 8px; }
 .experience-ellipsis { display: inline-flex; min-width: 13px; }

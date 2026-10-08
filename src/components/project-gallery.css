@@ -59,7 +59,7 @@
 .pg-progress::-webkit-progress-bar { background: var(--line); }
 .pg-progress::-webkit-progress-value { background: var(--text); }
 .pg-progress::-moz-progress-bar { background: var(--text); }
-.pg-controls { display: flex; gap: 8px; }
+.pg-controls { display: flex; justify-content: flex-end; gap: 8px; padding-bottom: 12px; }
 .pg-nav { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; padding: 0; color: var(--text); background: var(--bg); transition: opacity calc(.2s * var(--motion-duration-factor, 1)), transform calc(.25s * var(--motion-duration-factor, 1)) var(--ease); }
 .pg-nav:disabled { cursor: default; opacity: .3; }
 .pg-nav > svg { stroke-width: 1.4; }
@@ -103,13 +103,20 @@
 
 /* The real ReactBits lens renderer is lazy-loaded above the semantic details. */
 .pg-showcase { position: relative; }
-.pg-stage { position: absolute; inset: 0; height: clamp(280px, 40vw, 430px); opacity: 0; pointer-events: none; }
+.pg-stage { position: absolute; inset: 0; height: clamp(350px, 46vw, 570px); opacity: 0; pointer-events: none; }
 .pg-showcase[data-ready] .pg-stage { position: relative; opacity: 1; pointer-events: auto; }
 .pg-stage .flex-carousel { width: 100%; height: 100%; }
+.pg-stage .flex-carousel:focus, .pg-stage .flex-carousel:focus-visible { outline: none; box-shadow: none; }
+.pg-showcase[data-ready] .pg-controls { position: absolute; z-index: 2; inset: 30% 0 auto; justify-content: space-between; padding: 0 3px; transform: translateY(-50%); pointer-events: none; }
+.pg-showcase[data-ready] .pg-nav { width: 46px; height: 46px; pointer-events: auto; background: color-mix(in srgb, var(--bg) 85%, transparent); }
+.pg-showcase[data-ready] .pg-nav:disabled { pointer-events: none; opacity: .22; }
+.pg-showcase[data-ready] { margin-bottom: 8px; }
 .pg-track--enhanced { display: block; overflow: visible; padding: 0; scroll-snap-type: none; }
 .pg-track--enhanced .pg-card { width: 100%; }
 .pg-track--enhanced .pg-cover { display: none; }
 .pg-track--enhanced .pg-caption { padding-top: 12px; }
+.pg-track--enhanced .pg-card:not([hidden]) .pg-caption { animation: pg-detail-enter calc(.58s * var(--motion-duration-factor, 1)) var(--ease) both; }
+.pg-track--enhanced .pg-card:not([hidden]) .pg-body { animation: pg-detail-enter calc(.65s * var(--motion-duration-factor, 1)) var(--ease) calc(.12s * var(--motion-duration-factor, 1)) both; }
 .pg-track--enhanced .pg-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 0 32px; }
 .pg-track--enhanced .pg-description { grid-column: 1; max-width: 650px; }
 .pg-track--enhanced .pg-tags { grid-column: 2; grid-row: 1; justify-content: flex-end; max-width: 220px; }
@@ -121,14 +128,25 @@
 .pg-dot[aria-current="true"] { color: var(--text); }
 .pg-dot[aria-current="true"] > span { background: currentColor; transform: scale(1.35); }
 .pg-dot:focus-visible { outline-offset: -4px; border-radius: 5px; }
-:root[data-design="neobrutalism"] .pg-stage { border: 2px solid var(--text); background: var(--bg); box-shadow: var(--neo-shadow); }
+:root[data-design="neobrutalism"] .pg-stage { border: 0; background: transparent; box-shadow: none; }
 :root[data-design="neobrutalism"] .pg-dot > span { border-radius: 0; border-width: 2px; width: 7px; height: 7px; }
 @media (max-width: 640px) {
-  .pg-stage { height: 280px; }
+  .pg-stage { height: clamp(265px, 78vw, 375px); }
+  .pg-showcase[data-ready] .pg-controls { inset-inline: -4px; }
+  .pg-showcase[data-ready] .pg-nav { width: 40px; height: 40px; }
   .pg-track--enhanced .pg-body { display: block; }
   .pg-track--enhanced .pg-tags { justify-content: flex-start; max-width: none; }
   .pg-track--enhanced .pg-caption { padding-top: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .pg-dot > span { transition: none; }
+  .pg-track--enhanced .pg-card:not([hidden]) :is(.pg-caption, .pg-body) { animation: none; }
 }
+
+.pg-motion-copy { position: relative; display: inline-block; max-width: 100%; vertical-align: baseline; }
+.pg-motion-copy strong { color: var(--text); font-weight: 650; }
+.pg-motion-copy-visual { display: none; position: absolute; inset: 0; pointer-events: none; overflow-wrap: anywhere; }
+.pg-motion-copy[data-typing] .pg-motion-copy-full { opacity: 0; }
+.pg-motion-copy[data-typing] .pg-motion-copy-visual { display: block; }
+.pg-motion-number { font-variant-numeric: tabular-nums; }
+@keyframes pg-detail-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }

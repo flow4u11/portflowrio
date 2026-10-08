@@ -1,6 +1,6 @@
-.portfolio-loader.loading-screen { display: grid; place-items: center; padding: 24px; background: var(--bg); color: var(--text); transform-origin: 50% 0%; backface-visibility: hidden; }
+.portfolio-loader.loading-screen { display: grid; place-items: center; place-content: center; width: 100%; height: 100dvh; padding: 24px; background: var(--bg); color: var(--text); transform-origin: 50% 0%; backface-visibility: hidden; }
 .portfolio-loader-center { width: min(260px, 64vw); text-align: center; }
-.portfolio-loader-label { display: block; height: 1.5em; margin-bottom: 22px; font: 400 clamp(24px, 4vw, 34px)/1.5 "DM Sans", sans-serif; letter-spacing: -.055em; }
+.portfolio-loader-label { display: block; height: 1.5em; margin-bottom: 22px; font: 400 clamp(24px, 4vw, 34px)/1.5 var(--font-sans); letter-spacing: -.055em; }
 .portfolio-loader-label i { display: inline-block; width: 1px; height: .85em; margin-left: 5px; background: currentColor; vertical-align: -.04em; animation: loading-caret .7s steps(1) infinite; }
 .portfolio-loader-track { height: 2px; overflow: hidden; border-radius: 2px; background: var(--line); }
 .portfolio-loader-track > span { display: block; height: 100%; background: currentColor; transform-origin: left; }

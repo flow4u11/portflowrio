@@ -163,7 +163,9 @@ export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
         onActivate(origin);
       }}>
         <label className="theme-lab-label" htmlFor={`${id}-input`}>{text.label}</label>
-        <div className="theme-lab-entry"><input
+        <div className="theme-lab-entry"><div className="theme-lab-input-wrap">
+          {suggestion && <span className="theme-lab-completion" aria-hidden="true"><span>{value}</span>{suggestion.slice(keyword.length)}</span>}
+          <input
           ref={inputRef}
           id={`${id}-input`}
           className="theme-lab-input"
@@ -179,16 +181,11 @@ export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
           spellCheck={false}
           placeholder="neobrutalism"
           maxLength={48}
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded={Boolean(suggestion)}
-          aria-controls={`${id}-suggestions`}
+          aria-autocomplete="inline"
           aria-invalid={error || undefined}
           aria-describedby={error ? `${id}-error` : `${id}-hint`}
-        /><button className="theme-lab-submit" type="submit"><span>{text.submit}</span><ArrowUpRight size={16} aria-hidden="true" /></button></div>
-        <div className="theme-lab-suggestions" id={`${id}-suggestions`} role="listbox" aria-label={language === 'th' ? 'ธีมที่แนะนำ' : 'Theme suggestions'}>
-          {suggestion && <button type="button" role="option" aria-selected="true" tabIndex={-1} onMouseDown={event => event.preventDefault()} onClick={() => { setValue(suggestion); setError(false); inputRef.current?.focus({ preventScroll: true }); }}><span>{suggestion}</span><kbd>Tab</kbd></button>}
-        </div>
+        /></div><button className="theme-lab-submit" type="submit"><span>{text.submit}</span><ArrowUpRight size={16} aria-hidden="true" /></button></div>
+        <span className="idle-motion-sr-only" role="status">{suggestion ? `${suggestion}. ${language === 'th' ? 'กด Tab เพื่อเติมคำ' : 'Press Tab to complete'}` : ''}</span>
         <p className="theme-lab-error theme-lab-message" id={`${id}-error`} role="alert">{error ? text.error : '\u00a0'}</p>
       </form>
     </div>, document.body)}

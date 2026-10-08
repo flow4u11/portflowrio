@@ -7,6 +7,7 @@
   letter-spacing: inherit;
   overflow-wrap: anywhere;
   color: var(--text, #050505);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--text) 12%, transparent);
 }
 .animated-name-gradient {
   position: absolute;
