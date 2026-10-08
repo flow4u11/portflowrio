@@ -1,0 +1,43 @@
+# ReactBits component provenance
+
+This portfolio adapts official [ReactBits](https://reactbits.dev) component source by David Haz, fetched on 8 October 2026 from [DavidHDev/react-bits](https://github.com/DavidHDev/react-bits), pinned to revision `63a008de65732d73010bd219d25d15c47739bb31`. The source remains local and editable.
+
+| Portfolio component | Official source | Retained behavior and portfolio adaptations |
+| --- | --- | --- |
+| `src/components/react-bits/FlexCarousel.tsx` and `.css`, integrated by `ProjectGallery.tsx` | [FlexCarousel TSX](https://github.com/DavidHDev/react-bits/blob/63a008de65732d73010bd219d25d15c47739bb31/src/ts-default/Components/FlexCarousel/FlexCarousel.tsx), [CSS](https://github.com/DavidHDev/react-bits/blob/63a008de65732d73010bd219d25d15c47739bb31/src/ts-default/Components/FlexCarousel/FlexCarousel.css), [demo](https://reactbits.dev/components/flex-carousel) | Retains the actual OGL WebGL2 image and lens shaders, four lens presets, spring navigation, drag momentum, image parallax, movement squeeze, chromatic dispersion and reveal animation. The renderer loads only when the gallery enters view. The portfolio uses its own two project covers and three original future-slot covers, bounded first/last navigation, keyboard and external controls, and semantic active-project details. Project selection opens the existing accessible dialog. Vertical wheel scrolling remains native. Rendering stops when hidden, offscreen or settled; resolution is capped at 1.5 DPR and 1.5 million pixels. Reduced motion, unavailable WebGL2, image failure or context loss preserves the semantic native-scroll gallery. |
+| `src/components/PixelAvatar.tsx` and `pixel-avatar.css` | [PixelTransition TSX](https://github.com/DavidHDev/react-bits/blob/63a008de65732d73010bd219d25d15c47739bb31/src/ts-default/Animations/PixelTransition/PixelTransition.tsx), [CSS](https://github.com/DavidHDev/react-bits/blob/63a008de65732d73010bd219d25d15c47739bb31/src/ts-default/Animations/PixelTransition/PixelTransition.css), [demo](https://reactbits.dev/animations/pixel-transition) | Adapts the randomized square-mask cover, image swap and uncover sequence to the existing portrait and keyboard/touch interaction, with bounded DOM animation and browser preference controls. |
+| `src/components/PixelTrail.tsx` and `pixel-trail.css` | [PixelTrail TSX](https://github.com/DavidHDev/react-bits/blob/63a008de65732d73010bd219d25d15c47739bb31/src/ts-default/Animations/PixelTrail/PixelTrail.tsx), [CSS](https://github.com/DavidHDev/react-bits/blob/63a008de65732d73010bd219d25d15c47739bb31/src/ts-default/Animations/PixelTrail/PixelTrail.css), [demo](https://reactbits.dev/animations/pixel-trail) | Adapts the source's snapped pixel grid and age-based trail fade to a bounded Canvas2D layer. It avoids the source's Three.js rendering dependency while retaining the pointer trail behavior, with settings and reduced/hidden/offscreen safeguards. |
+
+The carousel adds `ogl` 1.0.11 (Unlicense) as a dependency. OGL is included in the gallery's separate dynamic-import chunk. Source: [oframe/ogl](https://github.com/oframe/ogl). React is an existing application dependency. The avatar and trail adaptations do not add GSAP or Three.js.
+
+Local portrait/project assets and future-slot artwork are portfolio material. Upstream demo photographs are not included.
+
+The ReactBits source uses **MIT + Commons Clause**, rather than unmodified MIT. Its complete notice is retained in `src/components/react-bits/LICENSE.md` and reproduced below from the [pinned upstream license](https://github.com/DavidHDev/react-bits/blob/63a008de65732d73010bd219d25d15c47739bb31/LICENSE.md).
+
+---
+
+MIT + Commons Clause License Condition v1.0
+
+Copyright (c) 2026 David Haz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, and distribute the Software **as part of an application, website, or product**, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+## Commons Clause Restriction
+
+You may use this Software, including for any commercial purpose, **so long as you do not sell, sublicense, or redistribute the components themselves-whether alone, in a bundle, or as a ported version.**
+
+## No Warranty
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

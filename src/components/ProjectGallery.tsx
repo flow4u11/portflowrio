@@ -1,7 +1,10 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ComponentType, type KeyboardEvent } from 'react';
 import { ArrowLeft, ArrowRight, ArrowUpRight, Plus } from 'lucide-react';
 import { ToolBrandIcon } from './ToolBrandIcon';
 import { LocalizedCopy, type Language } from './LocalizedCopy';
+import { useMotionSettings } from './MotionSettings';
+import { useIdleMotion } from './useIdleMotion';
+import type { FlexCarouselHandle, FlexCarouselProps } from './react-bits/FlexCarousel';
 import './project-gallery.css';
 
 export type Project = {
@@ -36,16 +39,48 @@ type GalleryPosition = { index: number; atStart: boolean; atEnd: boolean };
 
 export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGalleryProps) {
   const thai = language === 'th';
+  const { settings } = useMotionSettings();
+  const { ref: galleryRef, active, reduced } = useIdleMotion<HTMLDivElement>();
+  const rendererRef = useRef<FlexCarouselHandle>(null);
+  const [Renderer, setRenderer] = useState<ComponentType<FlexCarouselProps> | null>(null);
+  const [webglReady, setWebglReady] = useState(false);
+  const [webglUnavailable, setWebglUnavailable] = useState(false);
+  const enhanced = webglReady && !reduced && !webglUnavailable;
   const trackRef = useRef<HTMLDivElement>(null);
   const instructionId = useId();
   const trackId = useId();
   const total = projects.length + futureSlots.length;
   const [position, setPosition] = useState<GalleryPosition>({ index: 0, atStart: true, atEnd: false });
   const positionRef = useRef(position);
+  const items = useMemo(() => [
+    ...projects.map(project => ({ src: project.image, alt: project.alt, title: project.title, subtitle: project.category })),
+    ...futureSlots.map(slot => ({ src: `/assets/project-future-${slot.cover}.svg`, alt: slot.caption, title: thai ? 'โปรเจกต์ในอนาคต' : 'Future project' })),
+  ], [projects, thai]);
+
+  useEffect(() => {
+    if (!active || Renderer || webglUnavailable) return;
+    let cancelled = false;
+    void import('./react-bits/FlexCarousel').then(module => {
+      if (!cancelled) setRenderer(() => module.default);
+    }).catch(() => { if (!cancelled) setWebglUnavailable(true); });
+    return () => { cancelled = true; };
+  }, [active, Renderer, webglUnavailable]);
+
+  useEffect(() => { if (reduced) setWebglReady(false); }, [reduced]);
+
+  const updateActive = useCallback((index: number) => {
+    const previous = positionRef.current;
+    const next = { index, atStart: index === 0, atEnd: index === total - 1 };
+    if (previous.index === next.index && previous.atStart === next.atStart && previous.atEnd === next.atEnd) return;
+    positionRef.current = next;
+    setPosition(next);
+  }, [total]);
+  const onRendererReady = useCallback(() => setWebglReady(true), []);
+  const onRendererUnavailable = useCallback(() => { setWebglUnavailable(true); setWebglReady(false); }, []);
 
   useEffect(() => {
     const track = trackRef.current;
-    if (!track) return;
+    if (!track || enhanced) return;
     let frame = 0;
 
     const updatePosition = () => {
@@ -79,15 +114,18 @@ export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGal
     track.addEventListener('scroll', scheduleUpdate, { passive: true });
     const observer = new ResizeObserver(scheduleUpdate);
     observer.observe(track);
+    const current = track.querySelectorAll<HTMLElement>('.pg-card')[positionRef.current.index];
+    if (current) track.scrollLeft = Math.min(current.offsetLeft, Math.max(0, track.scrollWidth - track.clientWidth));
     updatePosition();
     return () => {
       track.removeEventListener('scroll', scheduleUpdate);
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [total]);
+  }, [total, enhanced]);
 
   const goTo = (index: number) => {
+    if (enhanced) { rendererRef.current?.goTo(Math.max(0, Math.min(index, total - 1))); return; }
     const track = trackRef.current;
     if (!track) return;
     const cards = track.querySelectorAll<HTMLElement>('.pg-card');
@@ -96,6 +134,11 @@ export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGal
     const left = Math.min(card.offsetLeft, Math.max(0, track.scrollWidth - track.clientWidth));
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     track.scrollTo({ left, behavior: reducedMotion ? 'instant' : 'smooth' });
+  };
+
+  const moveBy = (delta: number) => {
+    if (enhanced) rendererRef.current?.step(delta);
+    else goTo(positionRef.current.index + delta);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -111,24 +154,52 @@ export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGal
 
   const currentLabel = projects[position.index]?.title ?? 'Empty future project slot';
 
-  return <div className="project-gallery">
+  return <div className="project-gallery" ref={galleryRef} data-enhanced={enhanced || undefined}>
     <div className="pg-toolbar">
       <p className="pg-summary"><span>{String(projects.length).padStart(2, '0')} projects</span><span aria-hidden="true">/</span><span>03 open slots</span></p>
-      <span className="pg-instruction" id={instructionId}>Swipe or use the arrows to explore.<span className="pg-sr-only"> When the gallery is focused, use Left and Right arrow keys. Home goes to the first card and End goes to the last.</span></span>
+      <span className="pg-instruction" id={instructionId}>{thai ? 'ลากหรือใช้ลูกศรเพื่อสำรวจ' : 'Drag, swipe, or use the arrows to explore.'}<span className="pg-sr-only"> When the gallery is focused, use Left and Right arrow keys. Home goes to the first card and End goes to the last.</span></span>
+    </div>
+
+    <div className="pg-showcase" data-ready={enhanced || undefined}>
+      {Renderer && !reduced && !webglUnavailable && <div className="pg-stage" aria-hidden={!enhanced || undefined} inert={!enhanced}>
+        <Renderer
+          ref={rendererRef}
+          id={`${trackId}-visual`}
+          items={items}
+          initialIndex={positionRef.current.index}
+          preset={settings.galleryPreset}
+          speed={settings.gallerySpeed * settings.animationSpeed}
+          bend={settings.galleryBend}
+          intro="bloom"
+          cardHeight={0.76}
+          fit="landscape"
+          gap={24}
+          radius={8}
+          liquid={0.28}
+          focusOnClick={false}
+          captureWheel={false}
+          label={thai ? 'แกลเลอรีโปรเจกต์' : 'Project gallery'}
+          descriptionId={instructionId}
+          onChange={updateActive}
+          onReady={onRendererReady}
+          onUnavailable={onRendererUnavailable}
+          onSelect={(index, _item, trigger) => { const project = projects[index]; if (project) onOpen(project, trigger); }}
+        />
+      </div>}
     </div>
 
     <div
-      className="pg-track"
+      className={`pg-track${enhanced ? ' pg-track--enhanced' : ''}`}
       id={trackId}
       ref={trackRef}
-      role="region"
-      aria-label="Project gallery"
-      aria-roledescription="carousel"
+      role={enhanced ? 'group' : 'region'}
+      aria-label={enhanced ? (thai ? 'รายละเอียดโปรเจกต์' : 'Project details') : 'Project gallery'}
+      aria-roledescription={enhanced ? undefined : 'carousel'}
       aria-describedby={instructionId}
-      tabIndex={0}
+      tabIndex={enhanced ? -1 : 0}
       onKeyDown={handleKeyDown}
     >
-      {projects.map((project, index) => <article className="pg-card" key={project.id} aria-label={`${index + 1} of ${total}: ${project.title}`}>
+      {projects.map((project, index) => <article className="pg-card" key={project.id} hidden={enhanced && position.index !== index} aria-label={`${index + 1} of ${total}: ${project.title}`}>
         <button className="pg-project-trigger" onClick={event => onOpen(project, event.currentTarget)} aria-label={`Explore ${project.title}`}>
           <span className="pg-cover">
             <img src={project.image} alt={project.alt} width="1200" height="800" loading="lazy" decoding="async" />
@@ -152,7 +223,7 @@ export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGal
         </div>
       </article>)}
 
-      {futureSlots.map((slot, index) => <article className="pg-card pg-card--future" key={slot.id} aria-label={`${projects.length + index + 1} of ${total}: Empty future project slot`}>
+      {futureSlots.map((slot, index) => <article className="pg-card pg-card--future" key={slot.id} hidden={enhanced && position.index !== projects.length + index} aria-label={`${projects.length + index + 1} of ${total}: Empty future project slot`}>
         <div className={`pg-cover pg-future-cover pg-future-cover--${slot.cover}`} aria-hidden="true">
           <span className="pg-status"><Plus size={9} />OPEN SLOT</span>
           <span className="pg-future-art"><span /><span /><span /></span>
@@ -171,14 +242,18 @@ export function ProjectGallery({ projects, onOpen, language = 'en' }: ProjectGal
       </article>)}
     </div>
 
+    <div className="pg-pagination" aria-label={thai ? 'เลือกโปรเจกต์' : 'Choose a project'}>
+      {items.map((item, index) => <button key={item.src} type="button" className="pg-dot" aria-label={`${index + 1}: ${item.title}`} aria-controls={enhanced ? `${trackId}-visual` : trackId} aria-current={position.index === index ? 'true' : undefined} onClick={() => goTo(index)}><span /></button>)}
+    </div>
+
     <div className="pg-footer">
       <div className="pg-progress-group">
         <span className="pg-position" role="status" aria-live="polite" aria-atomic="true"><span className="pg-sr-only">{currentLabel}. Gallery position </span><strong>{String(position.index + 1).padStart(2, '0')}</strong><span aria-hidden="true"> / </span><span className="pg-sr-only">of </span>{String(total).padStart(2, '0')}</span>
         <progress className="pg-progress" value={position.index + 1} max={total} aria-label="Project gallery position" />
       </div>
       <div className="pg-controls" aria-label="Gallery controls">
-        <button className="pg-nav" type="button" aria-label="Previous project" aria-controls={trackId} disabled={position.atStart} onClick={() => goTo(positionRef.current.index - 1)}><ArrowLeft size={17} aria-hidden="true" /></button>
-        <button className="pg-nav" type="button" aria-label="Next project" aria-controls={trackId} disabled={position.atEnd} onClick={() => goTo(positionRef.current.index + 1)}><ArrowRight size={17} aria-hidden="true" /></button>
+        <button className="pg-nav" type="button" aria-label="Previous project" aria-controls={enhanced ? `${trackId}-visual` : trackId} disabled={position.atStart} onClick={() => moveBy(-1)}><ArrowLeft size={17} aria-hidden="true" /></button>
+        <button className="pg-nav" type="button" aria-label="Next project" aria-controls={enhanced ? `${trackId}-visual` : trackId} disabled={position.atEnd} onClick={() => moveBy(1)}><ArrowRight size={17} aria-hidden="true" /></button>
       </div>
     </div>
   </div>;

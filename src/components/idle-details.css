@@ -5,7 +5,6 @@
 .contact-button { position: relative; }
 .profile-check { position: absolute; z-index: 2; right: -6px; bottom: -6px; display: grid; place-items: center; width: 30px; height: 30px; color: #fff; filter: drop-shadow(0 1px 2px rgb(0 0 0 / 16%)); pointer-events: none; animation: profile-check-pulse calc(5s * var(--motion-duration-factor, 1)) ease-in-out infinite; animation-play-state: paused; }
 .profile-check svg { display: block; }
-.profile-check svg > path:first-child { fill: #1d9bf0; stroke: #1d9bf0; }
 .profile-check[data-running="true"] { animation-play-state: running; }
 @keyframes profile-check-pulse { 0%, 68%, 100% { transform: scale(1); } 76% { transform: scale(1.1) rotate(-5deg); } 84% { transform: scale(1) rotate(0); } }
 :root[data-design="neobrutalism"] .profile-check { filter: drop-shadow(1px 2px 0 var(--text)); }

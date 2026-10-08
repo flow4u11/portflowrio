@@ -1,0 +1,4 @@
+.pixel-avatar { position: relative; display: block; aspect-ratio: 1; overflow: hidden; border: 0; border-radius: 50%; padding: 0; background: transparent; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.pixel-avatar-image { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; user-select: none; }
+.pixel-avatar-image--alternate { position: absolute; inset: 0; opacity: 0; }
+.pixel-avatar-mask { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }

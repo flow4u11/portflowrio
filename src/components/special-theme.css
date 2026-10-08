@@ -16,6 +16,10 @@
 .theme-lab-input[aria-invalid="true"] { border-color: #c12d20; }
 .theme-lab-submit { display: flex; align-items: center; gap: 7px; flex: 0 0 auto; min-height: 44px; padding: 9px 11px; border: 1px solid var(--text); border-radius: 3px; background: var(--text); color: var(--bg); font-size: 10px; font-weight: 600; }
 .theme-lab-error { margin: 12px 0 0; color: #b82b20; font-size: 11px; line-height: 1.7; }
+.theme-lab-suggestions { height: 37px; padding-top: 6px; }
+.theme-lab-suggestions button { width: 100%; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--line); background: var(--surface); color: var(--text); padding: 6px 9px; border-radius: 3px; font-size: 11px; }
+.theme-lab-suggestions kbd { font: 9px "Space Mono", monospace; color: var(--muted); }
+.theme-lab-message { min-height: 38px; margin-top: 4px; }
 :root[data-theme="dark"]:not([data-design="neobrutalism"]) .theme-lab-error { color: #ff998f; }
 .special-theme-control-slot { display: inline-flex; align-items: center; justify-content: center; justify-self: end; flex: 0 0 auto; }
 .special-theme-control { position: relative; display: grid; place-items: center; width: 44px; height: 44px; border: 2px solid #181818; border-radius: 2px; padding: 0; background: #d0bef5; color: #181818; box-shadow: 3px 3px 0 #181818; transition: transform calc(.18s * var(--motion-duration-factor, 1)) var(--ease), box-shadow calc(.18s * var(--motion-duration-factor, 1)) var(--ease); }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useSpring } from 'motion/react';
-import { ArrowDown, ArrowUp, ArrowUpRight, Asterisk, Check, Film, Gamepad2, Grid2X2, Lightbulb, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpRight, Check, Film, Gamepad2, Grid2X2, Lightbulb, X } from 'lucide-react';
 import { ThemeTogglerButton } from './components/animate-ui/theme-toggler';
 import { StarsBackground } from './components/animate-ui/stars-background';
 import { PixelAvatar } from './components/PixelAvatar';
@@ -21,17 +21,14 @@ import { ProjectGallery, type Project } from './components/ProjectGallery';
 import { MotionSettingsDialog, FpsOverlay, useMotionSettings } from './components/MotionSettings';
 import { useSectionNavigation } from './components/useSectionNavigation';
 import { IdleGlare, ProfileCheck } from './components/IdleDetails';
+import { PortfolioLoader } from './components/PortfolioLoader';
+import { ExperienceStatus, GraduationYears } from './components/InformationMotion';
+import { SectionTitle } from './components/SectionTitle';
+import { PixelTrail } from './components/PixelTrail';
+import { HeroPlayground } from './components/HeroPlayground';
 
 type Theme = 'light' | 'dark';
 const navigation = [{ id: 'home', label: 'Home' }, { id: 'about', label: 'About' }, { id: 'projects', label: 'Projects' }, { id: 'contact', label: 'Contact' }];
-
-function Loader({ progress, reduced }: { progress: number; reduced: boolean }) {
-  return <motion.div className="loading-screen" role="status" aria-label="Loading portfolio" initial={{ opacity: 1 }} exit={reduced ? { opacity: 0 } : { opacity: 0, y: '-12%', rotateX: -12, scale: 0.98 }} transition={{ duration: reduced ? 0.1 : 0.65, ease: [0.22, 1, 0.36, 1] }}>
-    <div className="loader-top"><span>kimportflowrio</span><span>MY CREATIVE SPACE</span></div>
-    <div className="loader-center"><Asterisk className="loader-star" aria-hidden="true" size={42} /><p>Welcome to<br />my <i>Portfolio.</i></p></div>
-    <div className="loader-bottom"><span>LOADING EXPERIENCE</span><div className="loader-track"><motion.div animate={{ width: `${progress}%` }} transition={{ duration: 0.4 }} /></div><span>{String(progress).padStart(3, '0')}%</span></div>
-  </motion.div>;
-}
 
 export default function App() {
   const reduced = useReducedMotion() ?? false;
@@ -49,6 +46,7 @@ export default function App() {
   }, [language]);
   const [theme, setTheme] = useState<Theme>(() => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
   const [loading, setLoading] = useState(true);
+  const [heroReady, setHeroReady] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
   const [activeSection, setActiveSection] = useState('home');
   const [scrolled, setScrolled] = useState(false);
@@ -80,7 +78,7 @@ export default function App() {
     let cancelled = false;
     let complete = 0;
     const timers: ReturnType<typeof setTimeout>[] = [];
-    const markReady = () => { complete += 1; if (!cancelled) setLoadProgress(Math.round(complete / 3 * 100)); };
+    const markReady = () => { complete += 1; if (!cancelled) setLoadProgress(Math.round(complete / 3 * 92)); };
     const images = ['/assets/profile-anime.png', '/assets/profile-photo.png'].map(src => new Promise<void>(resolve => {
       const image = new Image();
       let ready = false;
@@ -97,7 +95,13 @@ export default function App() {
     }));
     const wait = (milliseconds: number) => new Promise<void>(resolve => { timers.push(setTimeout(resolve, milliseconds)); });
     const fonts = Promise.race([document.fonts.ready, wait(1400)]).then(markReady);
-    void Promise.all([...images, fonts, wait(reduced ? 120 : 1150)]).then(() => { if (!cancelled) setLoading(false); });
+    void Promise.all([...images, fonts, wait(700)]).then(async () => {
+      if (cancelled) return;
+      setLoadProgress(100);
+      // Keep the completed bar visible before the connected Hero entrance.
+      await wait(1700);
+      if (!cancelled) setLoading(false);
+    });
     return () => { cancelled = true; timers.forEach(clearTimeout); };
   }, [reduced]);
 
@@ -149,7 +153,7 @@ export default function App() {
   };
 
   return <>
-    <AnimatePresence>{loading ? <Loader progress={loadProgress} reduced={reduced} /> : null}</AnimatePresence>
+    <AnimatePresence>{loading ? <PortfolioLoader progress={loadProgress} reduced={reduced} /> : null}</AnimatePresence>
     <div className="portfolio-page" inert={loading || undefined}>
       <StarsBackground className="page-stars" starColor={theme === 'dark' ? '#d5d8ed' : '#6d7b9c'} factor={0} pointerEvents={false} />
       <div id="header-sentinel" aria-hidden="true" />
@@ -163,44 +167,47 @@ export default function App() {
 
       <main>
         <section className="hero" id="home" aria-labelledby="hero-title">
-          <motion.div ref={heroRef} className="hero-profile" initial={false} animate={!loading && (heroVisible || reduced) ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }} transition={{ duration: reduced ? 0 : 0.5 / settings.animationSpeed, ease: [0.22, 1, 0.36, 1] }}>
+          <HeroPlayground enabled={!loading && heroReady} language={language}>
+          <motion.div ref={heroRef} className="hero-profile" initial={false} onAnimationComplete={() => { if (!loading) setHeroReady(true); }} animate={!loading && (heroVisible || reduced) ? { opacity: 1, y: 0, rotateX: 0, z: 0, scale: 1 } : { opacity: 0, y: 50, rotateX: 14, z: -100, scale: .92 }} transition={{ duration: reduced ? 0 : 1.15 / settings.animationSpeed, delay: reduced ? 0 : .12, ease: [0.22, 1, 0.36, 1] }}>
             <div className="profile-frame"><PixelAvatar className="profile-avatar" defaultSrc="/assets/profile-anime.png" hoverSrc="/assets/profile-photo.png" /><ProfileCheck /><span className="profile-corner profile-corner--one" aria-hidden="true">+</span><span className="profile-corner profile-corner--two" aria-hidden="true">+</span></div>
             <h1 id="hero-title"><AnimatedName>Chayathorn Chianpolsane</AnimatedName></h1>
             <p className="hero-role"><Typewriter /></p>
             <div className="hero-tags"><span>UX/UI</span><span className="tag-dot" aria-hidden="true">·</span><span>Game design</span><span className="tag-dot" aria-hidden="true">·</span><span>Visual craft</span></div>
           </motion.div>
           <a href="#about" className="explore-button" onClick={event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate({ id: 'about', label: 'About', keyboard: event.detail === 0 }); }}><span>Explore my world</span><ArrowDown aria-hidden="true" size={15} /><IdleGlare /></a>
+          </HeroPlayground>
         </section>
 
         <section className="section about-section" id="about" aria-labelledby="about-title">
           <Depth><p className="eyebrow"><span>01</span> About me</p></Depth>
           <div className="about-layout">
-            <Depth className="about-introduction"><CyclingAboutTitle id="about-title" /><p className="about-lead"><LocalizedCopy text={text.lead} language={language} /></p><div className="study-strip"><div><strong>Bangkok University</strong><span>Games and Interactive Media</span></div><span className="year-label">YEAR 01</span></div><dl className="personal-details" lang={language}><div><dt>{text.country}</dt><dd><LocalizedCopy text={text.countryValue} language={language} /></dd></div><div className="personal-school"><dt>{text.school}</dt><dd><LocalizedCopy text={text.schoolValue} language={language} /></dd></div></dl></Depth>
+            <Depth className="about-introduction"><CyclingAboutTitle id="about-title" /><p className="about-lead"><LocalizedCopy text={text.lead} language={language} /></p><div className="study-strip"><div><strong>Bangkok University</strong><span>Games and Interactive Media</span></div><span className="year-label" lang={language}>{text.present}</span></div><ExperienceStatus language={language} /><dl className="personal-details" lang={language}><div><dt>{text.country}</dt><dd><LocalizedCopy text={text.countryValue} language={language} /></dd></div><div className="personal-school"><dt>{text.school}</dt><dd><LocalizedCopy text={text.schoolValue} language={language} /><GraduationYears /></dd></div></dl></Depth>
             <Depth className="about-story"><p className="about-copy"><LocalizedCopy text={text.design} language={language} /></p><p className="about-copy"><LocalizedCopy text={text.learning} language={language} /></p><p className="about-copy"><LocalizedCopy text={text.leisure} language={language} /></p><p className="about-copy theme-story" lang={language}>{text.themeBefore}<ThemeLab onActivate={activateSpecial} language={language} />{text.themeAfter}</p><div className="interest-row"><span><Grid2X2 size={15} aria-hidden="true" />UX/UI design</span><span><Lightbulb size={15} aria-hidden="true" />Game lighting</span><span><Gamepad2 size={15} aria-hidden="true" />FPS games</span><span><Film size={15} aria-hidden="true" />Visual storytelling</span></div></Depth>
           </div>
           {[{ label: 'My creative toolkit', id: 'toolkit', rows: toolkitRows }, { label: 'The technology behind my projects', id: 'technology', rows: technologyRows }].map(collection => <Depth key={collection.id}><div className={`tools-block tools-block--${collection.id}`}><p className="eyebrow">{collection.label}</p><div className="toolkit-lanes">{collection.rows.map((items, index) => <div className="toolkit-lane" key={index}><LoopingMarquee label={`${collection.id === 'toolkit' ? 'Creative toolkit' : 'Project technology'}, row ${index + 1}`} contentClassName="tool-list" direction={index ? 'right' : 'left'} durationSeconds={48 + index * 8}>{items.map(tool => <div className="tool-item" key={tool}><ToolBrandIcon name={tool} /><span>{tool}</span></div>)}</LoopingMarquee></div>)}</div></div></Depth>)}
         </section>
 
         <section className="section projects-section" id="projects" aria-labelledby="projects-title">
-          <Depth><div className="section-heading"><div><p className="eyebrow"><span>02</span> Selected projects</p><h2 id="projects-title">Ideas taking<br /><i>shape.</i></h2></div><p className="section-intro"><LocalizedCopy text={text.projectIntro} language={language} /></p></div></Depth>
+          <Depth><div className="section-heading"><div><p className="eyebrow"><span>02</span> Selected projects</p><SectionTitle id="projects-title" first="Ideas taking" last="shape." /></div><p className="section-intro"><LocalizedCopy text={text.projectIntro} language={language} /></p></div></Depth>
           <Depth><ProjectGallery projects={projects} onOpen={openModal} language={language} /></Depth>
           <Depth><p className="draft-note"><span aria-hidden="true">+</span> <LocalizedCopy text={text.projectNote} language={language} /></p></Depth>
         </section>
 
         <section className="section contact-section" id="contact" aria-labelledby="contact-title">
-          <Depth><div className="contact-content"><p className="eyebrow"><span>03</span> Let’s connect</p><h2 id="contact-title">Good things start<br />with a <i>hello.</i></h2><p><LocalizedCopy text={text.contact} language={language} /></p><button className="contact-button" onClick={event => openModal('contact', event.currentTarget)}>{text.hello} <ArrowUpRight size={18} aria-hidden="true" /><IdleGlare /></button><span className="contact-note">Design. Games. Whatever comes next.</span></div></Depth>
-          <Depth><div className="social-links"><a href="mailto:flowxyzy@gmail.com"><ToolBrandIcon name="Gmail" /><span>flowxyzy@gmail.com</span></a><a href="https://discord.com/users/845863458628567050" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="Discord" /><span>flow4u</span></a><a href="https://github.com/flow4u11" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="GitHub" /><span>flow4u11</span></a><a href="https://fastwork.co/user/flow4u?source=web_marketplace_profile-menu_profile" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="Fastwork" /><span>Fastwork</span></a></div></Depth>
+          <Depth><div className="contact-content"><p className="eyebrow"><span>03</span> Let’s connect</p><SectionTitle id="contact-title" first="Good things start" last="with a hello." /><p><LocalizedCopy text={text.contact} language={language} /></p><button className="contact-button" onClick={event => openModal('contact', event.currentTarget)}>{text.hello} <ArrowUpRight size={18} aria-hidden="true" /><IdleGlare /></button><span className="contact-note"><ExperienceStatus language={language} /></span></div></Depth>
+          <Depth><div className="social-links"><a href="mailto:flowxyzy@gmail.com"><ToolBrandIcon name="Gmail" /><span>flowxyzy@gmail.com</span></a><a href="https://discord.com/users/845863458628567050" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="Discord" /><span>flow4u</span></a><a href="https://github.com/flow4u11" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="GitHub" /><span>flow4u11</span></a><a href="https://fastwork.co/user/flow4u?source=web_marketplace_profile-menu_profile" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="Fastwork" /><span>Fastwork</span></a><a href="https://www.instagram.com/flow3u/" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="Instagram" /><span>flow3u</span></a></div></Depth>
         </section>
       </main>
 
       <footer className="site-footer"><div className="footer-brand"><a className="wordmark" href="#home" aria-label="flowrio, back to home"><ScrambleWordmark /></a><p>© {new Date().getFullYear()} · Made with curiosity.</p><p className="design-credit"><LocalizedCopy text={text.footer} language={language} /></p></div>{!loading && <FooterConfetti />}<a className="back-to-top" href="#home">Back to top <ArrowUp size={13} aria-hidden="true" /></a></footer>
     </div>
+    <PixelTrail enabled={!loading} />
     <FpsOverlay />
     <MotionSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} language={language} />
 
     <dialog ref={dialogRef} className={`detail-dialog ${modal === 'contact' ? 'detail-dialog--contact' : ''}`} aria-labelledby="dialog-title" data-closing={dialogClosing || undefined} onClose={onDialogClose} onCancel={event => { event.preventDefault(); closeModal(); }} onAnimationEnd={event => { if (event.target === event.currentTarget && event.animationName === 'dialog-out') finishModalClose(); }} onPointerDown={event => { const rect = event.currentTarget.getBoundingClientRect(); outsideDown.current = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; }} onClick={event => { const rect = event.currentTarget.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outsideDown.current && outside) closeModal(); outsideDown.current = false; }}>
       <button className="dialog-close" onClick={closeModal} aria-label={text.close}><X size={18} /></button>
-      {modal === 'contact' ? <div className="contact-dialog-content"><p className="eyebrow">Let’s make a connection</p><h2 id="dialog-title">Let’s <i>talk.</i></h2><p><LocalizedCopy text={text.contactDialog} language={language} /></p><div className="contact-channels"><a href="mailto:flowxyzy@gmail.com"><ToolBrandIcon name="Gmail" /><span><strong>Gmail</strong>flowxyzy@gmail.com</span><ArrowUpRight size={16} aria-hidden="true" /></a><a href="https://github.com/flow4u11" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="GitHub" /><span><strong>GitHub</strong>flow4u11</span><ArrowUpRight size={16} aria-hidden="true" /></a><a href="https://fastwork.co/user/flow4u?source=web_marketplace_profile-menu_profile" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="Fastwork" /><span><strong>Fastwork</strong>flow4u</span><ArrowUpRight size={16} aria-hidden="true" /></a><div className="discord-channel"><a href="https://discord.com/users/845863458628567050" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="Discord" /><span><strong>Discord</strong>flow4u</span><ArrowUpRight size={16} aria-hidden="true" /></a><button onClick={copyDiscord} aria-label={language === 'th' ? 'คัดลอกชื่อ Discord' : 'Copy Discord username'}>{copied ? <Check size={16} aria-hidden="true" /> : text.copy}</button></div></div><span className="copy-status" aria-live="polite">{copied ? text.copied : text.copyHint}</span></div> : modal ? <><img className="dialog-cover" src={modal.image} alt={modal.alt} width="1200" height="800" /><div className="dialog-content"><p className="eyebrow">{modal.status}</p><h2 id="dialog-title">{modal.title}</h2><p lang={language}>{modal.description}</p><div className="project-links">{modal.videoUrl && <a href={modal.videoUrl} target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="YouTube" />{text.video}<ArrowUpRight size={14} aria-hidden="true" /></a>}{modal.liveUrl && <a href={modal.liveUrl} target="_blank" rel="noopener noreferrer">{text.visit}<ArrowUpRight size={14} aria-hidden="true" /></a>}{modal.sourceUrl && <a href={modal.sourceUrl} target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="GitHub" />GitHub</a>}</div>{modal.videoId && <div className="gameplay-video"><iframe src={`https://www.youtube-nocookie.com/embed/${modal.videoId}`} title="LastStand gameplay" loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="encrypted-media; fullscreen; picture-in-picture" allowFullScreen /></div>}<div className="project-tags">{modal.tags.map(tag => <span key={tag}>{tag}</span>)}</div><div className="case-study-rows" lang={language}>{modal.details.map(item => <div key={item.label}><h3>{item.label}</h3><p>{item.text}</p></div>)}</div><p className="case-study-note" lang={language}>{modal.videoUrl ? text.cover : text.webCover}</p></div></> : null}
+      {modal === 'contact' ? <div className="contact-dialog-content"><p className="eyebrow">Let’s make a connection</p><h2 id="dialog-title">Let’s <i>talk.</i></h2><p><LocalizedCopy text={text.contactDialog} language={language} /></p><div className="contact-channels"><a href="mailto:flowxyzy@gmail.com"><ToolBrandIcon name="Gmail" /><span><strong>Gmail</strong>flowxyzy@gmail.com</span><ArrowUpRight size={16} aria-hidden="true" /></a><a href="https://github.com/flow4u11" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="GitHub" /><span><strong>GitHub</strong>flow4u11</span><ArrowUpRight size={16} aria-hidden="true" /></a><a href="https://fastwork.co/user/flow4u?source=web_marketplace_profile-menu_profile" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="Fastwork" /><span><strong>Fastwork</strong>flow4u</span><ArrowUpRight size={16} aria-hidden="true" /></a><a href="https://www.instagram.com/flow3u/" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="Instagram" /><span><strong>Instagram</strong>flow3u</span><ArrowUpRight size={16} aria-hidden="true" /></a><div className="discord-channel"><a href="https://discord.com/users/845863458628567050" target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="Discord" /><span><strong>Discord</strong>flow4u</span><ArrowUpRight size={16} aria-hidden="true" /></a><button onClick={copyDiscord} aria-label={language === 'th' ? 'คัดลอกชื่อ Discord' : 'Copy Discord username'}>{copied ? <Check size={16} aria-hidden="true" /> : text.copy}</button></div></div><span className="copy-status" aria-live="polite">{copied ? text.copied : text.copyHint}</span></div> : modal ? <><img className="dialog-cover" src={modal.image} alt={modal.alt} width="1200" height="800" /><div className="dialog-content"><p className="eyebrow">{modal.status}</p><h2 id="dialog-title">{modal.title}</h2><p lang={language}>{modal.description}</p><div className="project-links">{modal.videoUrl && <a href={modal.videoUrl} target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="YouTube" />{text.video}<ArrowUpRight size={14} aria-hidden="true" /></a>}{modal.liveUrl && <a href={modal.liveUrl} target="_blank" rel="noopener noreferrer">{text.visit}<ArrowUpRight size={14} aria-hidden="true" /></a>}{modal.sourceUrl && <a href={modal.sourceUrl} target="_blank" rel="noopener noreferrer"><ToolBrandIcon name="GitHub" />GitHub</a>}</div>{modal.videoId && <div className="gameplay-video"><iframe src={`https://www.youtube-nocookie.com/embed/${modal.videoId}`} title="LastStand gameplay" loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="encrypted-media; fullscreen; picture-in-picture" allowFullScreen /></div>}<div className="project-tags">{modal.tags.map(tag => <span key={tag}>{tag}</span>)}</div><div className="case-study-rows" lang={language}>{modal.details.map(item => <div key={item.label}><h3>{item.label}</h3><p>{item.text}</p></div>)}</div><p className="case-study-note" lang={language}>{modal.videoUrl ? text.cover : text.webCover}</p></div></> : null}
     </dialog>
   </>;
 }

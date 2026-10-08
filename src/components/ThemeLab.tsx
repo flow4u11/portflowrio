@@ -12,17 +12,21 @@ export type ThemeLabProps = {
 const copy = {
   en: {
     keyword: 'theme', trigger: 'Open theme experiment', title: 'A different point of view',
-    hint: 'Try neobrutalism. Type the word below, then press Enter.', label: 'Theme keyword',
+    hint: 'Try neo, brutalism or neobrutalism. Tab completes a suggestion; Enter opens the theme.', label: 'Theme keyword',
     submit: 'Try it', close: 'Close theme experiment',
-    error: 'That theme is not available. Type neobrutalism to try this experiment.',
+    error: 'Theme not found. Try neo or neobrutalism.',
   },
   th: {
     keyword: 'ธีม', trigger: 'เปิดการทดลองธีม', title: 'ลองมองในมุมใหม่',
-    hint: 'ลอง neobrutalism พิมพ์คำนี้ด้านล่างแล้วกด Enter', label: 'ชื่อธีม',
+    hint: 'พิมพ์ neo, brutalism หรือ neobrutalism กด Tab เพื่อเติมคำ และ Enter เพื่อเปิดธีม', label: 'ชื่อธีม',
     submit: 'ลองเลย', close: 'ปิดการทดลองธีม',
-    error: 'ยังไม่มีธีมนี้ ลองพิมพ์ neobrutalism เพื่อเปิดธีมทดลอง',
+    error: 'ยังไม่มีธีมนี้ ลองพิมพ์ neo หรือ neobrutalism',
   },
 };
+
+const normalizeKeyword = (value: string) => value.trim().toLowerCase().replace(/[\s_-]+/g, '');
+const themeKeywords = new Set(['neo', 'neobrutalism', 'neobrutalist', 'neobrutal', 'brutalism', 'brutalist', 'brutal', 'nb']);
+const themeSuggestions = ['neobrutalism', 'brutalism', 'neo'];
 
 /** An inline word for an About sentence; the dialog is portalled to avoid clipping. */
 export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
@@ -37,6 +41,8 @@ export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const keyword = normalizeKeyword(value);
+  const suggestion = keyword ? themeSuggestions.find(item => item.startsWith(keyword) && item !== keyword) : undefined;
 
   const close = useCallback((restoreFocus = true) => {
     if (closeTimer.current) return;
@@ -82,7 +88,7 @@ export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
       window.removeEventListener('resize', place);
       window.visualViewport?.removeEventListener('resize', place);
     };
-  }, [open, error, language]);
+  }, [open, language]);
 
   useEffect(() => {
     if (!open) return;
@@ -146,7 +152,7 @@ export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
       <p className="theme-lab-hint" id={`${id}-hint`}>{text.hint}</p>
       <form onSubmit={event => {
         event.preventDefault();
-        if (value.trim().toLowerCase() !== 'neobrutalism') {
+        if (!themeKeywords.has(keyword)) {
           setError(true);
           inputRef.current?.focus({ preventScroll: true });
           return;
@@ -163,15 +169,27 @@ export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
           className="theme-lab-input"
           value={value}
           onChange={event => { setValue(event.target.value); setError(false); }}
+          onKeyDown={event => {
+            if (event.key === 'Tab' && !event.shiftKey && suggestion) {
+              event.preventDefault(); setValue(suggestion); setError(false);
+            }
+          }}
           autoComplete="off"
           autoCapitalize="none"
           spellCheck={false}
           placeholder="neobrutalism"
           maxLength={48}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={Boolean(suggestion)}
+          aria-controls={`${id}-suggestions`}
           aria-invalid={error || undefined}
           aria-describedby={error ? `${id}-error` : `${id}-hint`}
         /><button className="theme-lab-submit" type="submit"><span>{text.submit}</span><ArrowUpRight size={16} aria-hidden="true" /></button></div>
-        {error && <p className="theme-lab-error" id={`${id}-error`} role="alert">{text.error}</p>}
+        <div className="theme-lab-suggestions" id={`${id}-suggestions`} role="listbox" aria-label={language === 'th' ? 'ธีมที่แนะนำ' : 'Theme suggestions'}>
+          {suggestion && <button type="button" role="option" aria-selected="true" tabIndex={-1} onMouseDown={event => event.preventDefault()} onClick={() => { setValue(suggestion); setError(false); inputRef.current?.focus({ preventScroll: true }); }}><span>{suggestion}</span><kbd>Tab</kbd></button>}
+        </div>
+        <p className="theme-lab-error theme-lab-message" id={`${id}-error`} role="alert">{error ? text.error : '\u00a0'}</p>
       </form>
     </div>, document.body)}
   </>;

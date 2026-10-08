@@ -19,6 +19,23 @@ body.motion-settings-locked { overflow: hidden; }
 .motion-settings-scale { display: flex; justify-content: space-between; color: var(--muted); font-size: 9px; line-height: 1.4; }
 .motion-settings-hint { margin: 8px 0 0; color: var(--muted); font-size: 10px; line-height: 1.7; }
 .motion-settings-component-speed { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+.motion-settings-details { margin-top: 18px; border-top: 1px solid var(--line); }
+.motion-settings-details summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; color: var(--text); font-size: 12px; font-weight: 500; cursor: pointer; list-style: none; }
+.motion-settings-details summary::-webkit-details-marker { display: none; }
+.motion-settings-details summary::after { content: '+'; color: var(--muted); font: 16px "Space Mono", monospace; }
+.motion-settings-details[open] summary::after { content: '−'; }
+.motion-settings-details summary:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+.motion-settings-details-body { padding: 2px 0 8px; }
+.motion-settings-details-body .motion-settings-range + .motion-settings-range { margin-top: 12px; }
+.motion-settings-range:has(input:disabled) { opacity: .45; }
+.motion-settings-range input:disabled { cursor: default; }
+.motion-settings-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 17px; }
+.motion-settings-toggle-row label { font-size: 12px; font-weight: 500; cursor: pointer; }
+.motion-settings-toggle-row input { width: 24px; height: 24px; flex-shrink: 0; margin: 0; accent-color: var(--text); cursor: pointer; }
+.motion-settings-toggle-row input:focus-visible { outline: 2px solid var(--text); outline-offset: 5px; }
+.motion-settings-select-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 17px; font-size: 12px; }
+.motion-settings-select-row select { max-width: 55%; min-height: 38px; border: 1px solid var(--line); border-radius: 4px; padding: 5px 24px 5px 9px; background: var(--bg); color: var(--text); font: inherit; cursor: pointer; }
+.motion-settings-select-row select:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
 .motion-settings-fps-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 22px; padding: 19px 0; border-block: 1px solid var(--line); }
 .motion-settings-fps-row label { font-size: 12px; line-height: 1.6; font-weight: 500; cursor: pointer; }
 .motion-settings-fps-row .motion-settings-hint { margin-top: 5px; }

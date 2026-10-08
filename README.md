@@ -1,8 +1,8 @@
-# kimportflowrio
+# flowrio
 
 My portfolio for design, games, and interactive experiences.
 
-[Visit the portfolio](https://kimportflowrio.vercel.app).
+[Visit the portfolio](https://myflowrio.vercel.app).
 
 ## Local preview
 
@@ -17,17 +17,19 @@ Open http://127.0.0.1:5173. The development server serves the frontend and Visit
 
 ## Experience
 
-- Light/Dark themes with an iris transition. An About keyword experiment unlocks a separate neobrutalism design.
+- Light/Dark themes with an iris transition. The About theme experiment accepts `neo`, `brutalism` and `neobrutalism`, with Tab autocomplete.
 - English/Thai key information, short scramble transitions, genuine tool icons, and separate toolkit and technology collections, each moving in two rows ordered by category.
 - Shared particle background, bounded 2.5D viewport reveals, a moving name gradient with a fixed font, and full-viewport, once-per-session paper confetti with gravity, air resistance and flutter. Motion pauses when hidden/offscreen and respects reduced-motion preferences.
-- Noto Sans Thai for Thai content and a blue scalloped profile check badge.
+- A centered typewriter loader holds its completed bar before a connected 3D Hero entrance. The profile uses a blue many-point verification star.
+- Double-click the Hero name to scatter its letters and components into a floating basketball court. Pull letters to aim, release to shoot, and drag other pieces to their magnetic outlines. Keyboard controls, reset and inactivity restoration are included.
+- Noto Sans Thai for Thai content, graduation-year counting, experience status, and Instagram contact.
 - LastStand, my first Unreal Engine 5 FPS project; the live School Ledger app; and three layouts reserved for future projects.
-- Motion settings from the top-left wordmark: star speed/count, component pace and an optional FPS estimate, saved locally. Section links use native smooth scrolling with keyboard focus handling and user interruption.
-- Native gallery scrolling, centered dialogs with keyboard focus handling, contact/profile links, and a hover/focus portrait transition.
+- Motion settings from the top-left wordmark: stars, component pace, optional FPS, portrait pixels, pointer trail and carousel preset/speed/curve, saved locally. Section links use native smooth scrolling with keyboard focus handling and user interruption.
+- ReactBits WebGL FlexCarousel with five slots and native scrolling fallback, centered dialogs, a shuffled pixel portrait transition and a theme-aware pixel pointer trail.
 
 ## Stack
 
-React, TypeScript, Vite, Tailwind CSS, Motion and Lucide. An optional Node.js Visits API backed by Supabase PostgreSQL is retained. The displayed technology collection also includes tools used in other projects.
+React, TypeScript, Vite, Tailwind CSS, Motion, OGL and Lucide. The gallery renderer loads separately when needed. An optional Node.js Visits API backed by Supabase PostgreSQL is retained. The displayed technology collection also includes tools used in other projects.
 
 ## Visits
 
@@ -38,6 +40,7 @@ The footer has no visitor counter, and the page does not record new visits. The 
 ```sh
 npm run check
 npm run test:visits
+node --test src/components/hero-playground-physics.test.mjs
 npm run build
 npm start
 ```
@@ -48,4 +51,4 @@ Production preview runs at http://127.0.0.1:4173. Builds are minified with sourc
 
 Original designs are created in Figma, with AI-assisted implementation. Project covers are original illustrations, not gameplay or app captures. LastStand links to the actual gameplay video; the packaged game is not included in this repository.
 
-Original design, content, artwork and application code are reserved under [LICENSE](LICENSE). Third-party software and brand assets retain their own terms. See [component sources](docs/animate-ui-sources.md) and [icon sources](src/assets/icons/ATTRIBUTION.md).
+Original design, content, artwork and application code are reserved under [LICENSE](LICENSE). Third-party software and brand assets retain their own terms. See [component sources](docs/animate-ui-sources.md), [ReactBits sources and license](docs/react-bits-sources.md), and [icon sources](src/assets/icons/ATTRIBUTION.md).

@@ -56,19 +56,6 @@ h2 i { font: italic 1.05em/1 Georgia, "Times New Roman", serif; letter-spacing: 
 
 /* A brief landing sequence driven by image/font readiness. */
 .loading-screen { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; justify-content: space-between; background: #050505; color: #fff; padding: 40px var(--page-pad); transform-origin: center top; perspective: 1000px; }
-.loader-top { display: flex; justify-content: space-between; align-items: center; }
-.loader-top > span:first-child { font-size: 19px; font-weight: 550; letter-spacing: -.7px; }
-.loader-top > span:last-child { font: 9px "Space Mono", monospace; letter-spacing: 1px; color: #aaa; }
-.loader-center { width: fit-content; margin: auto; text-align: center; }
-.loader-star { display: block; margin-inline: auto; font-size: 42px; line-height: 1; margin-bottom: 30px; animation: loader-turn calc(8s * var(--motion-duration-factor, 1)) linear infinite; }
-.loader-center p { font-size: clamp(39px, 6vw, 76px); line-height: 1.08; letter-spacing: -3px; }
-.loader-center i { font-family: Georgia, serif; font-weight: 400; }
-.loader-bottom { display: grid; grid-template-columns: auto 1fr auto; gap: 28px; align-items: center; font: 9px "Space Mono", monospace; letter-spacing: .6px; }
-.loader-track { height: 1px; background: #333; }
-.loader-track > div { height: 100%; background: #fff; }
-@keyframes loader-turn { to { rotate: 360deg; } }
-
-/* Header stays quiet; the theme change uses Animate UI's gradual transition. */
 .site-header { position: fixed; z-index: 100; inset: 0 0 auto; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 var(--page-pad); height: 80px; border-bottom: 1px solid transparent; transition: background calc(.4s * var(--motion-duration-factor, 1)), border-color calc(.4s * var(--motion-duration-factor, 1)); }
 .site-header.is-scrolled { background: var(--bg); border-bottom-color: var(--line); }
 .wordmark { width: fit-content; font-size: 19px; font-weight: 600; letter-spacing: -.65px; line-height: 1; }
@@ -80,7 +67,7 @@ h2 i { font: italic 1.05em/1 Georgia, "Times New Roman", serif; letter-spacing: 
 .page-progress { position: absolute; inset: auto 0 -1px; height: 1px; background: var(--text); transform-origin: left; pointer-events: none; }
 
 /* Monochrome star fields keep the center composition uncluttered. */
-.hero { position: relative; isolation: isolate; min-height: 650px; height: 100svh; max-height: 1100px; overflow: hidden; }
+.hero { position: relative; isolation: isolate; perspective: 1200px; min-height: 650px; height: 100svh; max-height: 1100px; overflow: hidden; }
 .hero-profile { position: absolute; top: 46%; left: 0; right: 0; translate: 0 -50%; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 24px; perspective: 1000px; }
 .profile-frame { position: relative; margin-bottom: 29px; }
 .profile-avatar { width: 116px; height: 116px; outline: 1px solid var(--line); outline-offset: 6px; }
@@ -302,10 +289,6 @@ dialog::backdrop { background: rgb(0 0 0 / 65%); }
   .dialog-content h2 { font-size: 33px; }
   .case-study-rows > div { grid-template-columns: 1fr; gap: 9px; }
   .contact-dialog-content { padding: 41px 27px 26px; }
-  .loader-top > span:last-child { font-size: 7px; }
-  .loader-bottom { grid-template-columns: 1fr auto; gap: 14px; font-size: 8px; }
-  .loader-track { grid-row: 2; grid-column: 1 / -1; }
-  .loader-center p { letter-spacing: -1.8px; }
 }
 @media (max-width: 360px) {
   :root { --page-pad: 18px; }

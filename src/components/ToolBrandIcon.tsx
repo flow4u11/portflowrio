@@ -28,6 +28,7 @@ import vercelIcon from '../assets/icons/vercel.svg';
 import vitestIcon from '../assets/icons/vitest.svg';
 import gmailIcon from '../assets/icons/gmail.svg';
 import discordIcon from '../assets/icons/discord.svg';
+import instagramIcon from '../assets/icons/instagram.svg';
 import youtubeIcon from '../assets/icons/youtube.svg';
 import premiereProIcon from '../assets/icons/premiere-pro.svg';
 import afterEffectsIcon from '../assets/icons/after-effects.svg';
@@ -74,6 +75,7 @@ const brands: Record<string, BrandAsset> = {
   "vitest": { src: vitestIcon, monochrome: true },
   "gmail": { src: gmailIcon, monochrome: true },
   "discord": { src: discordIcon, monochrome: true },
+  "instagram": { src: instagramIcon, monochrome: true },
   "youtube": { src: youtubeIcon, monochrome: true },
   "premiere pro": { src: premiereProIcon },
   "after effects": { src: afterEffectsIcon },

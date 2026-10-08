@@ -42,3 +42,5 @@ known license, and brand-guideline URL. Retrieved 2026-10-07.
 Brand/trademark assets do not acquire an open-source license merely because
 they appear in this folder. Check the recorded source guidelines when changing
 their use. The component deliberately returns no mark for unknown products.
+
+- **Instagram:** Unmodified brand silhouette from [Simple Icons](https://github.com/simple-icons/simple-icons/blob/develop/icons/instagram.svg), CC0 icon data; the Instagram trademark remains Meta's.

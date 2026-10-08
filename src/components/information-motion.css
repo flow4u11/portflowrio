@@ -1,0 +1,11 @@
+.graduation-years { display: inline-block; font-variant-numeric: tabular-nums; color: var(--muted); margin-top: 5px; font-size: 11px; }
+.experience-status { display: inline-flex; align-items: center; color: var(--muted); font-size: 11px; line-height: 1.8; margin-top: 16px; }
+.experience-dot { width: 5px; height: 5px; border-radius: 50%; background: #37a978; margin-right: 8px; }
+.experience-ellipsis { display: inline-flex; min-width: 13px; }
+.experience-ellipsis i { font-style: normal; animation: experience-dots calc(1.8s * var(--motion-duration-factor, 1)) ease-in-out infinite paused; }
+.experience-ellipsis i:nth-child(2) { animation-delay: .16s; }
+.experience-ellipsis i:nth-child(3) { animation-delay: .32s; }
+.experience-status[data-running="true"] i { animation-play-state: running; }
+.personal-school dd > .graduation-years { display: block; }
+@keyframes experience-dots { 0%, 65%, 100% { opacity: .3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) { .experience-ellipsis i { animation: none; } }

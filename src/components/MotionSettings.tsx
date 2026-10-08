@@ -8,11 +8,26 @@ export type MotionSettings = {
   starCount: number;
   showFps: boolean;
   animationSpeed: number;
+  avatarGrid: number;
+  avatarDuration: number;
+  avatarStagger: number;
+  trailEnabled: boolean;
+  trailSize: number;
+  trailLifetime: number;
+  trailDensity: number;
+  galleryPreset: 'liquid' | 'ribbon' | 'vortex' | 'arch';
+  gallerySpeed: number;
+  galleryBend: number;
 };
 
 const STORAGE_KEY = 'portfolio-motion-settings';
-const STORAGE_VERSION = 1;
-const DEFAULT_SETTINGS: MotionSettings = { starSpeed: 1, starCount: 120, showFps: false, animationSpeed: 1 };
+const STORAGE_VERSION = 2;
+const DEFAULT_SETTINGS: MotionSettings = {
+  starSpeed: 1, starCount: 120, showFps: false, animationSpeed: 1,
+  avatarGrid: 10, avatarDuration: 0.55, avatarStagger: 0.85,
+  trailEnabled: true, trailSize: 8, trailLifetime: 360, trailDensity: 0.75,
+  galleryPreset: 'liquid', gallerySpeed: 1, galleryBend: 0.34,
+};
 
 function boundedNumber(value: unknown, fallback: number, min: number, max: number, step: number) {
   if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
@@ -27,6 +42,16 @@ function normalizeSettings(value: unknown): MotionSettings {
     starCount: boundedNumber(source.starCount, DEFAULT_SETTINGS.starCount, 20, 240, 1),
     showFps: typeof source.showFps === 'boolean' ? source.showFps : DEFAULT_SETTINGS.showFps,
     animationSpeed: boundedNumber(source.animationSpeed, DEFAULT_SETTINGS.animationSpeed, 0.5, 2, 0.05),
+    avatarGrid: boundedNumber(source.avatarGrid, DEFAULT_SETTINGS.avatarGrid, 4, 20, 1),
+    avatarDuration: boundedNumber(source.avatarDuration, DEFAULT_SETTINGS.avatarDuration, 0.2, 1.5, 0.05),
+    avatarStagger: boundedNumber(source.avatarStagger, DEFAULT_SETTINGS.avatarStagger, 0.25, 1, 0.05),
+    trailEnabled: typeof source.trailEnabled === 'boolean' ? source.trailEnabled : DEFAULT_SETTINGS.trailEnabled,
+    trailSize: boundedNumber(source.trailSize, DEFAULT_SETTINGS.trailSize, 4, 16, 1),
+    trailLifetime: boundedNumber(source.trailLifetime, DEFAULT_SETTINGS.trailLifetime, 120, 900, 20),
+    trailDensity: boundedNumber(source.trailDensity, DEFAULT_SETTINGS.trailDensity, 0.25, 1.5, 0.05),
+    galleryPreset: source.galleryPreset && ['liquid', 'ribbon', 'vortex', 'arch'].includes(source.galleryPreset) ? source.galleryPreset : DEFAULT_SETTINGS.galleryPreset,
+    gallerySpeed: boundedNumber(source.gallerySpeed, DEFAULT_SETTINGS.gallerySpeed, 0.5, 2, 0.05),
+    galleryBend: boundedNumber(source.galleryBend, DEFAULT_SETTINGS.galleryBend, 0, 0.65, 0.01),
   };
 }
 
@@ -34,7 +59,7 @@ function parseSettings(serialized: string | null): MotionSettings {
   if (!serialized) return { ...DEFAULT_SETTINGS };
   try {
     const stored: unknown = JSON.parse(serialized);
-    if (!stored || typeof stored !== 'object' || !('version' in stored) || stored.version !== STORAGE_VERSION) return { ...DEFAULT_SETTINGS };
+    if (!stored || typeof stored !== 'object' || !('version' in stored) || (stored.version !== 1 && stored.version !== STORAGE_VERSION)) return { ...DEFAULT_SETTINGS };
     return normalizeSettings('settings' in stored ? stored.settings : undefined);
   } catch { return { ...DEFAULT_SETTINGS }; }
 }
@@ -45,7 +70,7 @@ function readSettings() {
 }
 
 function settingsEqual(a: MotionSettings, b: MotionSettings) {
-  return a.starSpeed === b.starSpeed && a.starCount === b.starCount && a.showFps === b.showFps && a.animationSpeed === b.animationSpeed;
+  return (Object.keys(DEFAULT_SETTINGS) as (keyof MotionSettings)[]).every(key => a[key] === b[key]);
 }
 
 type SettingsContext = {
@@ -108,6 +133,11 @@ const COPY = {
     fps: 'Show FPS', fpsHint: 'Browser frame rate, including idle frames. This is a live estimate.',
     reset: 'Reset to defaults', saved: 'Saved on this browser', reduced: 'Your device prefers reduced motion. Animation stays reduced.',
     slow: 'Slower', fast: 'Faster', fewer: 'Fewer', more: 'More',
+    portrait: 'Profile photo', grid: 'Pixel grid', duration: 'Transition duration', stagger: 'Pixel stagger',
+    trail: 'Pointer trail', trailEnabled: 'Show pixel trail', trailHint: 'Follows a mouse in black or white to match your theme.',
+    trailSize: 'Pixel size', trailLifetime: 'Fade duration', trailDensity: 'Trail density',
+    gallery: 'Project gallery', preset: 'Movement style', gallerySpeed: 'Gallery speed', galleryBend: 'Curve strength',
+    liquid: 'Liquid', ribbon: 'Ribbon', vortex: 'Vortex', arch: 'Arch',
   },
   th: {
     title: 'ตั้งค่าการเคลื่อนไหว', intro: 'เลือกจังหวะที่สบายตา การเปลี่ยนแปลงมีผลทันที',
@@ -116,10 +146,26 @@ const COPY = {
     fps: 'แสดง FPS', fpsHint: 'อัตราเฟรมของเบราว์เซอร์ รวมเฟรมขณะไม่มีการเคลื่อนไหว เป็นค่าประมาณแบบสด',
     reset: 'คืนค่าเริ่มต้น', saved: 'บันทึกในเบราว์เซอร์นี้', reduced: 'อุปกรณ์ของคุณเลือกให้ลดการเคลื่อนไหว แอนิเมชันจะยังคงลดลง',
     slow: 'ช้าลง', fast: 'เร็วขึ้น', fewer: 'น้อย', more: 'มาก',
+    portrait: 'รูปโปรไฟล์', grid: 'จำนวนพิกเซลต่อด้าน', duration: 'เวลาเปลี่ยนรูป', stagger: 'จังหวะไล่พิกเซล',
+    trail: 'เอฟเฟกต์ตามเมาส์', trailEnabled: 'แสดงพิกเซลตามเมาส์', trailHint: 'พิกเซลสีดำหรือขาวตามธีมของคุณ เมื่อใช้เมาส์',
+    trailSize: 'ขนาดพิกเซล', trailLifetime: 'เวลาจางหาย', trailDensity: 'ความหนาแน่น',
+    gallery: 'แกลเลอรีโปรเจกต์', preset: 'รูปแบบการเคลื่อนไหว', gallerySpeed: 'ความเร็วแกลเลอรี', galleryBend: 'ความโค้ง',
+    liquid: 'พลิ้วไหว', ribbon: 'ริบบิ้น', vortex: 'วนหมุน', arch: 'โค้ง',
   },
 };
 
 function multiplier(value: number) { return `${Number(value.toFixed(2))}×`; }
+
+function SettingRange({ id, label, value, min, max, step, display, disabled = false, onChange }: {
+  id: string; label: string; value: number; min: number; max: number; step: number;
+  display?: string; disabled?: boolean; onChange: (value: number) => void;
+}) {
+  const formatted = display ?? String(value);
+  return <div className="motion-settings-range">
+    <div className="motion-settings-label"><label htmlFor={id}>{label}</label><output htmlFor={id}>{formatted}</output></div>
+    <input id={id} type="range" min={min} max={max} step={step} value={value} disabled={disabled} aria-valuetext={formatted} onChange={event => onChange(event.currentTarget.valueAsNumber)} />
+  </div>;
+}
 
 export function MotionSettingsDialog({ open, onClose, language }: { open: boolean; onClose: () => void; language: 'en' | 'th' }) {
   const { settings, updateSettings, resetSettings } = useMotionSettings();
@@ -201,6 +247,22 @@ export function MotionSettingsDialog({ open, onClose, language }: { open: boolea
       <input id={`${id}-animation-speed`} type="range" min="0.5" max="2" step="0.05" value={settings.animationSpeed} aria-valuetext={multiplier(settings.animationSpeed)} onChange={event => updateSettings({ animationSpeed: event.currentTarget.valueAsNumber })} />
       <div className="motion-settings-scale" aria-hidden="true"><span>{text.slow}</span><span>{text.fast}</span></div>
     </div>
+    <details className="motion-settings-details"><summary>{text.portrait}</summary><div className="motion-settings-details-body">
+      <SettingRange id={`${id}-avatar-grid`} label={text.grid} value={settings.avatarGrid} min={4} max={20} step={1} display={`${settings.avatarGrid} × ${settings.avatarGrid}`} onChange={avatarGrid => updateSettings({ avatarGrid })} />
+      <SettingRange id={`${id}-avatar-duration`} label={text.duration} value={settings.avatarDuration} min={0.2} max={1.5} step={0.05} display={`${settings.avatarDuration} s`} onChange={avatarDuration => updateSettings({ avatarDuration })} />
+      <SettingRange id={`${id}-avatar-stagger`} label={text.stagger} value={settings.avatarStagger} min={0.25} max={1} step={0.05} display={`${Math.round(settings.avatarStagger * 100)}%`} onChange={avatarStagger => updateSettings({ avatarStagger })} />
+    </div></details>
+    <details className="motion-settings-details"><summary>{text.trail}</summary><div className="motion-settings-details-body">
+      <div className="motion-settings-toggle-row"><div><label htmlFor={`${id}-trail-enabled`}>{text.trailEnabled}</label><p className="motion-settings-hint" id={`${id}-trail-hint`}>{text.trailHint}</p></div><input id={`${id}-trail-enabled`} type="checkbox" checked={settings.trailEnabled} aria-describedby={`${id}-trail-hint`} onChange={event => updateSettings({ trailEnabled: event.currentTarget.checked })} /></div>
+      <SettingRange id={`${id}-trail-size`} label={text.trailSize} value={settings.trailSize} min={4} max={16} step={1} display={`${settings.trailSize} px`} disabled={!settings.trailEnabled} onChange={trailSize => updateSettings({ trailSize })} />
+      <SettingRange id={`${id}-trail-lifetime`} label={text.trailLifetime} value={settings.trailLifetime} min={120} max={900} step={20} display={`${settings.trailLifetime} ms`} disabled={!settings.trailEnabled} onChange={trailLifetime => updateSettings({ trailLifetime })} />
+      <SettingRange id={`${id}-trail-density`} label={text.trailDensity} value={settings.trailDensity} min={0.25} max={1.5} step={0.05} display={multiplier(settings.trailDensity)} disabled={!settings.trailEnabled} onChange={trailDensity => updateSettings({ trailDensity })} />
+    </div></details>
+    <details className="motion-settings-details"><summary>{text.gallery}</summary><div className="motion-settings-details-body">
+      <div className="motion-settings-select-row"><label htmlFor={`${id}-gallery-preset`}>{text.preset}</label><select id={`${id}-gallery-preset`} value={settings.galleryPreset} onChange={event => updateSettings({ galleryPreset: event.currentTarget.value as MotionSettings['galleryPreset'] })}>{(['liquid', 'ribbon', 'vortex', 'arch'] as const).map(preset => <option key={preset} value={preset}>{text[preset]}</option>)}</select></div>
+      <SettingRange id={`${id}-gallery-speed`} label={text.gallerySpeed} value={settings.gallerySpeed} min={0.5} max={2} step={0.05} display={multiplier(settings.gallerySpeed)} onChange={gallerySpeed => updateSettings({ gallerySpeed })} />
+      <SettingRange id={`${id}-gallery-bend`} label={text.galleryBend} value={settings.galleryBend} min={0} max={0.65} step={0.01} display={`${Math.round(settings.galleryBend * 100)}%`} onChange={galleryBend => updateSettings({ galleryBend })} />
+    </div></details>
     <div className="motion-settings-fps-row"><div><label htmlFor={`${id}-fps`}>{text.fps}</label><p id={`${id}-fps-hint`} className="motion-settings-hint">{text.fpsHint}</p></div><input id={`${id}-fps`} type="checkbox" checked={settings.showFps} aria-describedby={`${id}-fps-hint`} onChange={event => updateSettings({ showFps: event.currentTarget.checked })} /></div>
     {reducedMotion && <p className="motion-settings-reduced">{text.reduced}</p>}
     <div className="motion-settings-footer"><button type="button" className="motion-settings-reset" onClick={resetSettings}><RotateCcw size={13} aria-hidden="true" />{text.reset}</button><span>{text.saved}</span></div>
