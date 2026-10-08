@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { playgroundBlast, playgroundHomeFlight, scatterPlaygroundPieces } from './hero-playground-physics.ts';
+import { playgroundAim, playgroundBlast, playgroundHeldPose, playgroundHomeFlight, playgroundShotFlight, scatterPlaygroundPieces } from './hero-playground-physics.ts';
 
 const bounds = { width: 780, height: 760, top: 120, bottom: 672 };
 const close = (actual, expected, tolerance = 1e-8) => assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} differs from ${expected}`);
@@ -63,6 +63,84 @@ test('home return has a smooth low-speed arrival, including vertical and identit
   }
   const identity = playgroundHomeFlight({ x: 10, y: 20, rotation: 0 }, { x: 10, y: 20 });
   for (const frame of identity.frames) assert.deepEqual(frame, { x: 10, y: 20, rotation: 0, depth: 0, offset: frame.offset });
+});
+
+test('a released shot rises and falls on an arc, then arrives softly at the exact home', () => {
+  const from = { x: 620, y: 520, rotation: -28, depth: -24 };
+  const home = { x: 220, y: 500 };
+  const flight = playgroundShotFlight(from, home, bounds, { width: 42, height: 48 });
+  assertFiniteFlight(flight);
+  assert.deepEqual(flight.frames[0], { ...from, offset: 0 });
+  assert.deepEqual(flight.end, { ...home, rotation: 0, depth: 0 });
+  assert.ok(flight.duration >= 640 && flight.duration <= 1180);
+  assert.ok(flight.frames[1].y < from.y, 'the piece launches upward');
+  const apex = Math.min(...flight.frames.map(frame => frame.y));
+  assert.ok(apex < Math.min(from.y, home.y) - 70, 'the shot has a visible raised apex');
+  const downward = flight.frames.slice(1).some((frame, index) => frame.y > flight.frames[index].y + 1);
+  assert.ok(downward, 'gravity produces a descending approach');
+  const speeds = flight.frames.slice(1).map((frame, index) => Math.hypot(frame.x - flight.frames[index].x, frame.y - flight.frames[index].y) / ((frame.offset - flight.frames[index].offset) * flight.duration / 1000));
+  assert.ok(speeds.at(-1) < Math.max(...speeds.slice(0, 12)) * .05, 'the final magnetic capture dissipates launch velocity');
+  const beforeEnd = flight.frames.at(-2);
+  assert.ok(Math.hypot(beforeEnd.x - home.x, beforeEnd.y - home.y) < .7, 'arrival does not jump several pixels');
+  assert.ok(Math.abs(beforeEnd.rotation) < .02 && Math.abs(beforeEnd.depth) < .1);
+  for (const frame of flight.frames) assertContained(frame, { width: 42, height: 48 }, bounds);
+});
+
+test('released letters and wide parts fit rotated viewport edges throughout interpolation', () => {
+  for (const width of [280, 320, 390, 780]) {
+    const area = { width, height: 650, top: 80, bottom: 590 };
+    const homes = [
+      { x: width / 2, y: 155, width: 116, height: 116, kind: 'part' },
+      { x: width / 2, y: 330, width: width - 40, height: 44, kind: 'part' },
+      { x: width / 2, y: 380, width: 220, height: 44, kind: 'part' },
+      { x: width / 2, y: 530, width: 177, height: 49, kind: 'part' },
+      ...Array.from({ length: 12 }, (_, index) => ({ x: 24 + index * (width - 48) / 11, y: 280, width: 44, height: 44, kind: 'letter' })),
+    ];
+    const targets = scatterPlaygroundPieces(homes, { x: width / 2, y: 280 }, area);
+    targets.forEach((from, index) => {
+      const home = homes[index];
+      const flight = playgroundShotFlight(from, home, area, home);
+      assertFiniteFlight(flight);
+      assert.deepEqual(flight.end, { x: home.x, y: home.y, rotation: 0, depth: 0 });
+      flight.frames.forEach((frame, frameIndex) => {
+        assertContained(frame, home, area);
+        const next = flight.frames[frameIndex + 1];
+        if (!next) return;
+        // The browser interpolates transforms between keyframes, so check the
+        // swept rotated footprint as well as the stored trajectory samples.
+        for (const progress of [.25, .5, .75]) assertContained({ x: frame.x + (next.x - frame.x) * progress, y: frame.y + (next.y - frame.y) * progress, rotation: frame.rotation + (next.rotation - frame.rotation) * progress }, home, area);
+      });
+    });
+  }
+});
+
+test('low ceilings limit the shot apex smoothly and collapsed inputs remain finite', () => {
+  const area = { width: 320, height: 440, top: 100, bottom: 420 };
+  const size = { width: 44, height: 44 };
+  const flight = playgroundShotFlight({ x: 70, y: 125, rotation: 0, depth: -12 }, { x: 250, y: 125 }, area, size);
+  assertFiniteFlight(flight);
+  for (const frame of flight.frames) assertContained(frame, size, area);
+  assert.ok(Math.min(...flight.frames.map(frame => frame.y)) >= 122);
+  assert.deepEqual(flight.end, { x: 250, y: 125, rotation: 0, depth: 0 });
+  for (const home of [{ x: 100, y: 100 }, { x: Infinity, y: NaN }]) {
+    assertFiniteFlight(playgroundShotFlight({ x: NaN, y: Infinity, rotation: NaN }, home, { width: 0, height: 0, top: 100, bottom: -100 }, { width: 500, height: 900 }));
+  }
+});
+
+test('aim assistance accepts a broad homeward gesture and captures nearby pieces', () => {
+  const start = { x: 500, y: 500 };
+  const home = { x: 200, y: 300 };
+  const size = { width: 44, height: 44 };
+  assert.equal(playgroundAim(start, start, home, size).locked, false);
+  assert.equal(playgroundAim(start, { x: 470, y: 498 }, home, size).locked, true);
+  assert.equal(playgroundAim(start, { x: 550, y: 500 }, home, size).locked, false);
+  assert.equal(playgroundAim(start, { x: 500, y: 550 }, home, size).locked, false);
+  const near = playgroundAim(start, { x: 205, y: 310 }, home, size);
+  assert.equal(near.locked, true);
+  assert.ok(near.magnet > .2 && near.magnet <= .5);
+  for (const pose of [{ x: -1000, y: -1000, rotation: 31 }, { x: 1000, y: 1000, rotation: -31 }]) {
+    assertContained(playgroundHeldPose(pose, { width: 270, height: 44 }, { width: 320, height: 650, top: 80, bottom: 590 }), { width: 270, height: 44 }, { width: 320, height: 650, top: 80, bottom: 590 });
+  }
 });
 
 test('blast starts at the measured pose with an outward impulse and dissipates into the exact target', () => {

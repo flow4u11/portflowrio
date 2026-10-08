@@ -8,7 +8,18 @@
 .hero-playground-reset:disabled { opacity: .5; cursor: default; }
 .hero-playground-reset:focus-visible { outline: 2px solid var(--text); outline-offset: 5px; }
 .hero-playground-tether { position: absolute; z-index: 6; inset: 0; width: 100%; height: 100%; overflow: hidden; }
-.hero-playground-tether path { fill: none; stroke: var(--muted); stroke-width: 1; stroke-linecap: round; opacity: .65; }
+.hero-playground-tether path { fill: none; stroke: var(--text); stroke-width: 1.8; stroke-dasharray: 6 7; stroke-linecap: round; opacity: .95; }
+.hero-playground-home-target { position: absolute; z-index: 5; left: 0; top: 0; opacity: 0; pointer-events: none; color: var(--text); }
+.hero-playground-home-target[data-active="true"] { opacity: 1; }
+.hero-playground-home-frame { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; opacity: .42; transform-origin: center; }
+.hero-playground-home-frame i { position: absolute; width: 9px; height: 9px; border-color: currentColor; border-style: solid; border-width: 0; }
+.hero-playground-home-frame i:nth-child(1) { left: 0; top: 0; border-left-width: 1.5px; border-top-width: 1.5px; }
+.hero-playground-home-frame i:nth-child(2) { right: 0; top: 0; border-right-width: 1.5px; border-top-width: 1.5px; }
+.hero-playground-home-frame i:nth-child(3) { left: 0; bottom: 0; border-left-width: 1.5px; border-bottom-width: 1.5px; }
+.hero-playground-home-frame i:nth-child(4) { right: 0; bottom: 0; border-right-width: 1.5px; border-bottom-width: 1.5px; }
+.hero-playground-home-frame span { line-height: 1; opacity: .5; }
+.hero-playground-home-target[data-locked="true"] .hero-playground-home-frame { opacity: .95; animation: playground-lock .58s cubic-bezier(.18,.7,.25,1) both; }
+.hero-playground-home-target[data-locked="true"] .hero-playground-home-frame span { opacity: .7; }
 .hero-playground-piece { position: absolute; z-index: 7; left: 0; top: 0; pointer-events: auto; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; transform-origin: center; outline: none; will-change: transform; -webkit-tap-highlight-color: transparent; }
 .hero-playground-piece:focus-visible { outline: 1px solid var(--muted); outline-offset: 5px; }
 .hero-playground-piece[data-motion="dragging"] { z-index: 11; cursor: grabbing; }
@@ -34,6 +45,7 @@
   75% { transform: translate3d(2px, 4px, -3px) rotateX(7deg) rotateY(-8deg) rotateZ(1deg); }
 }
 @keyframes playground-fade { to { opacity: 0; } }
+@keyframes playground-lock { 0% { transform: scale(1.16); opacity: .5; } 50% { transform: scale(.94); opacity: 1; } 100% { transform: scale(1); opacity: .95; } }
 @media (max-width: 600px) {
   .hero-playground-toolbar { top: 102px; right: 22px; }
   .hero-playground-reset { padding: 8px 10px; font-size: 9px; }

@@ -32,21 +32,40 @@ function rotatedSize(size: PlaygroundSize, rotation: number): PlaygroundSize {
   return { width: size.width * cosine + size.height * sine, height: size.width * sine + size.height * cosine };
 }
 
-function centerLimits(size: PlaygroundSize, rotation: number, bounds: PlaygroundBounds) {
+function centerLimits(size: PlaygroundSize, rotation: number, bounds: PlaygroundBounds, padding = 22) {
   const usable = usableBounds(bounds);
   const rotated = rotatedSize(normalizedSize(size), rotation);
   // Reduce the margin for a close-fitting piece. An oversized piece keeps
   // its center in the available region, since its edges cannot both fit.
-  const marginX = Math.max(0, Math.min(22, (usable.width - rotated.width) / 2));
-  const marginY = Math.max(0, Math.min(22, (usable.bottom - usable.top - rotated.height) / 2));
+  const marginX = Math.max(0, Math.min(padding, (usable.width - rotated.width) / 2));
+  const marginY = Math.max(0, Math.min(padding, (usable.bottom - usable.top - rotated.height) / 2));
   const halfWidth = Math.min(usable.width / 2, rotated.width / 2 + marginX);
   const halfHeight = Math.min((usable.bottom - usable.top) / 2, rotated.height / 2 + marginY);
   return { left: halfWidth, right: usable.width - halfWidth, top: usable.top + halfHeight, bottom: usable.bottom - halfHeight };
 }
 
-function boundedPose(pose: PlaygroundPose, size: PlaygroundSize, bounds: PlaygroundBounds): PlaygroundPose {
-  const limits = centerLimits(size, pose.rotation, bounds);
+function boundedPose(pose: PlaygroundPose, size: PlaygroundSize, bounds: PlaygroundBounds, padding = 22): PlaygroundPose {
+  const limits = centerLimits(size, pose.rotation, bounds, padding);
   return { ...pose, x: clampPlayground(pose.x, limits.left, limits.right), y: clampPlayground(pose.y, limits.top, limits.bottom) };
+}
+
+/** A held piece keeps its rotated edges inside the court, including wide parts. */
+export function playgroundHeldPose(pose: PlaygroundPose, size: PlaygroundSize, bounds: PlaygroundBounds): PlaygroundPose {
+  return boundedPose(normalizedPose(pose), size, bounds, 8);
+}
+
+/** Broad directional assistance, with a stronger magnetic capture near home. */
+export function playgroundAim(start: PlaygroundPoint, held: PlaygroundPoint, home: PlaygroundPoint, size: PlaygroundSize) {
+  const dx = finite(held.x) - finite(start.x);
+  const dy = finite(held.y) - finite(start.y);
+  const homeX = finite(home.x) - finite(start.x);
+  const homeY = finite(home.y) - finite(start.y);
+  const travel = Math.hypot(dx, dy);
+  const originalDistance = Math.hypot(homeX, homeY);
+  const distance = Math.hypot(finite(home.x) - finite(held.x), finite(home.y) - finite(held.y));
+  const radius = clampPlayground(Math.hypot(finite(size.width), finite(size.height)) * .3, 36, 68);
+  const alignment = travel > 6 && originalDistance > 1 ? (dx * homeX + dy * homeY) / (travel * originalDistance) : 0;
+  return { locked: distance < radius * 1.2 || alignment > .6, magnet: clampPlayground(1 - distance / radius, 0, 1) ** 2 * .5 };
 }
 
 function seededRandom(seed: number) {
@@ -195,6 +214,61 @@ export function playgroundHomeFlight(
     const progress = mix(smootherstep(offset), 1 - (1 - offset) ** 3, momentum);
     frames.push({ x: mix(start.x, end.x, progress), y: mix(start.y, end.y, progress), rotation: mix(start.rotation, 0, progress), depth: mix(finite(start.depth), 0, progress), offset });
   }
+  frames[0] = { ...start, offset: 0 };
+  frames[frames.length - 1] = { ...end, offset: 1 };
+  return { frames, duration, end };
+}
+
+/**
+ * Assisted basketball flight: constant horizontal travel and gravity form a
+ * parabola, then a short magnetic capture dissipates velocity at home. The
+ * apex is limited before sampling, so a low ceiling flattens the arc smoothly
+ * instead of clipping it. All animation work is a finite set of keyframes.
+ */
+export function playgroundShotFlight(
+  from: PlaygroundPose,
+  home: PlaygroundPoint,
+  bounds: PlaygroundBounds,
+  size: PlaygroundSize,
+): PlaygroundFlight {
+  const start = boundedPose(normalizedPose(from), size, bounds, 0);
+  const end = boundedPose({ x: finite(home.x), y: finite(home.y), rotation: 0, depth: 0 }, size, bounds, 0);
+  const distance = Math.hypot(end.x - start.x, end.y - start.y);
+  const duration = Math.round(clampPlayground(560 + Math.sqrt(distance) * 20, 640, 1180));
+  const steps = Math.ceil(duration / 16);
+  const usable = usableBounds(bounds);
+  const footprint = Math.hypot(finite(size.width), finite(size.height));
+  const spin = footprint + 44 < Math.min(usable.width, usable.bottom - usable.top) ? Math.sign(end.x - start.x || start.rotation) * Math.min(12, distance * .018) : 0;
+  const capture = .22;
+  const clockRate = 1 / (1 - capture / 2);
+  const samples = Array.from({ length: steps + 1 }, (_, step) => {
+    const offset = step / steps;
+    // Match velocity at the capture boundary; ease to zero over the final 22%.
+    const clock = offset <= 1 - capture ? offset * clockRate : 1 - (1 - offset) ** 2 * clockRate / (2 * capture);
+    return {
+      offset, clock,
+      x: mix(start.x, end.x, clock),
+      y: mix(start.y, end.y, clock),
+      rotation: mix(start.rotation, 0, smootherstep(offset)) + spin * Math.sin(Math.PI * offset) * (1 - offset) ** 3,
+    };
+  });
+  let arc = distance < 2 ? 0 : clampPlayground(40 + distance * .22, 40, 190);
+  for (const sample of samples) {
+    const lift = 4 * sample.clock * (1 - sample.clock);
+    if (lift > .0001) {
+      const limits = centerLimits(size, sample.rotation, bounds, 0);
+      arc = Math.min(arc, Math.max(0, (sample.y - limits.top - 2) / lift));
+    }
+  }
+  const frames = samples.map(sample => {
+    const lift = 4 * sample.clock * (1 - sample.clock);
+    const pose = boundedPose({
+      x: sample.x, y: sample.y - arc * lift, rotation: sample.rotation,
+      // Recede through the apex rather than enlarging a wide part past an edge.
+      depth: mix(finite(start.depth), 0, smootherstep(sample.offset)) - Math.min(30, arc * .16) * Math.sin(Math.PI * sample.clock),
+    }, size, bounds, 0);
+    return { ...pose, offset: sample.offset };
+  });
   frames[0] = { ...start, offset: 0 };
   frames[frames.length - 1] = { ...end, offset: 1 };
   return { frames, duration, end };

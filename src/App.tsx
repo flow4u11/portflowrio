@@ -34,7 +34,7 @@ export default function App() {
   const reduced = useReducedMotion() ?? false;
   const { settings } = useMotionSettings();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { navigate, navigating } = useSectionNavigation({ reduced });
+  const { navigate, navigating } = useSectionNavigation({ reduced, speed: settings.animationSpeed });
   const [language, setLanguage] = useState<Language>(() => {
     try { return localStorage.getItem('portfolio-language') === 'th' ? 'th' : 'en'; } catch { return 'en'; }
   });
@@ -155,7 +155,7 @@ export default function App() {
   return <>
     <AnimatePresence>{loading ? <PortfolioLoader progress={loadProgress} reduced={reduced} /> : null}</AnimatePresence>
     <div className="portfolio-page" inert={loading || undefined}>
-      <StarsBackground className="page-stars" starColor={theme === 'dark' ? '#d5d8ed' : '#6d7b9c'} factor={0} pointerEvents={false} />
+      <StarsBackground className="page-stars" starColor={theme === 'dark' ? '#d5d8ed' : '#6d7b9c'} factor={0} pointerEvents={false}><div className="navigation-warp" aria-hidden="true">{[8, 20, 32, 44, 56, 68, 80, 92].map((left, index) => <i key={left} style={{ left: `${left}%`, top: `${24 + index % 3 * 25}%`, rotate: `${(left - 50) * -.5}deg` }} />)}</div></StarsBackground>
       <div id="header-sentinel" aria-hidden="true" />
       <a className="skip-link" href="#home">Skip to content</a>
       <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
@@ -189,8 +189,7 @@ export default function App() {
 
         <section className="section projects-section" id="projects" aria-labelledby="projects-title">
           <Depth><div className="section-heading"><div><p className="eyebrow"><span>02</span> Selected projects</p><SectionTitle id="projects-title" first="Ideas taking" last="shape." /></div><p className="section-intro"><LocalizedCopy text={text.projectIntro} language={language} /></p></div></Depth>
-          <div className="showcase-renderer"><ProjectGallery projects={projects} onOpen={openModal} language={language} /></div>
-          <Depth><p className="draft-note"><span aria-hidden="true">+</span> <LocalizedCopy text={text.projectNote} language={language} /></p></Depth>
+          <div className="showcase-renderer"><ProjectGallery projects={projects} onOpen={openModal} language={language} staticDesign={specialTheme} /></div>
         </section>
 
         <section className="section contact-section" id="contact" aria-labelledby="contact-title">

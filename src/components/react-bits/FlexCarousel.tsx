@@ -34,6 +34,8 @@ interface PresetValues {
 
 export interface FlexCarouselProps extends Partial<PresetValues> {
   items: FlexCarouselItem[];
+  preparedImages?: ReadonlyMap<string, HTMLImageElement>;
+  prewarm?: boolean;
   ref?: Ref<FlexCarouselHandle>;
   speed?: number;
   initialIndex?: number;
@@ -82,6 +84,7 @@ interface Slot {
   failed: boolean;
   ready: number;
   hover: number;
+  dim: number;
   color: number[];
   image: number[];
   dispose: () => void;
@@ -129,6 +132,7 @@ interface Draw {
 export interface FlexCarouselHandle {
   goTo: (index: number) => void;
   step: (delta: number) => void;
+  syncTo: (index: number) => void;
   focus: () => void;
 }
 
@@ -136,6 +140,7 @@ interface Engine {
   wake: () => void;
   goTo: (index: number) => void;
   step: (delta: number) => void;
+  syncTo: (index: number) => void;
   setItems: (items: FlexCarouselItem[]) => void;
 }
 
@@ -350,6 +355,8 @@ void main() {
 
 const FlexCarousel = ({
   items,
+  preparedImages,
+  prewarm = false,
   ref,
   speed = 1,
   initialIndex = 0,
@@ -390,10 +397,12 @@ const FlexCarousel = ({
   const engineRef = useRef<Engine | null>(null);
   const callbacksRef = useRef<Callbacks>({ onChange, onSelect, onReady, onUnavailable });
   const initialIndexRef = useRef(initialIndex);
+  initialIndexRef.current = initialIndex;
 
   useImperativeHandle(ref, () => ({
     goTo: index => engineRef.current?.goTo(index),
     step: delta => engineRef.current?.step(delta),
+    syncTo: index => engineRef.current?.syncTo(index),
     focus: () => containerRef.current?.focus({ preventScroll: true }),
   }), []);
 
@@ -440,6 +449,35 @@ const FlexCarousel = ({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return undefined;
+
+    let cancelled = false;
+    let disposeEngine: (() => void) | undefined;
+    let startupTimer: ReturnType<typeof setTimeout> | undefined;
+    let startupIdle = 0;
+    let lastStartupScroll = performance.now();
+    const cancelStartup = () => {
+      clearTimeout(startupTimer);
+      if (startupIdle && window.cancelIdleCallback) window.cancelIdleCallback(startupIdle);
+      startupIdle = 0;
+    };
+    const initialise = () => {
+      startupIdle = 0;
+      if (cancelled || document.hidden) return;
+      if (performance.now() - lastStartupScroll < 220) { armStartup(); return; }
+      window.removeEventListener('scroll', onStartupScroll);
+      document.removeEventListener('visibilitychange', onStartupVisibility);
+      disposeEngine = createEngine();
+    };
+    const armStartup = () => {
+      cancelStartup();
+      startupTimer = setTimeout(() => {
+        if (window.requestIdleCallback) startupIdle = window.requestIdleCallback(initialise, { timeout: 450 });
+        else startupTimer = setTimeout(initialise, 0);
+      }, Math.max(0, 220 - (performance.now() - lastStartupScroll)));
+    };
+    const onStartupScroll = () => { lastStartupScroll = performance.now(); armStartup(); };
+    const onStartupVisibility = () => { if (!document.hidden) armStartup(); };
+    const createEngine = () => {
 
     const canvasElement = document.createElement('canvas');
     // Preserve the semantic gallery when WebGL2 is unavailable or disabled.
@@ -552,6 +590,8 @@ const FlexCarousel = ({
     let scrollTimer: ReturnType<typeof setTimeout> | undefined;
     let visible = false;
     let ready = false;
+    let prewarming = prewarm;
+    let painted = false;
     let alive = true;
     let dirty = true;
     let activeIndex = -1;
@@ -585,12 +625,12 @@ const FlexCarousel = ({
     const focus = { index: -1, pending: -1, t: 0, v: 0, target: 0 };
     let instances: Instance[] = [];
 
-    // Texture readiness must not depend on the visibility-gated animation loop.
-    // Revealing the stage can itself change its intersection and dimensions.
+    // An offscreen warmup paints the final artwork before the stage is revealed.
     const announceReady = (allowPending = false) => {
-      if (!alive || ready || !slots.some(slot => slot.loaded)) return;
+      if (!alive || ready || !painted || !slots.some(slot => slot.loaded)) return;
       if (!allowPending && !slots.every(slot => slot.loaded || slot.failed)) return;
       ready = true;
+      prewarming = false;
       callbacksRef.current.onReady?.();
     };
 
@@ -610,14 +650,14 @@ const FlexCarousel = ({
         failed: false,
         ready: 0,
         hover: 0,
+        dim: 0,
         color: [0.5, 0.5, 0.5],
         image: [1, 1],
         dispose: () => {}
       };
-      const image = new Image();
-      image.crossOrigin = 'anonymous';
-      image.decoding = 'async';
-      image.onload = () => {
+      const prepared = preparedImages?.get(item.src);
+      const image = prepared ?? new Image();
+      const acceptImage = () => {
         if (!alive || !slots.includes(slot)) return;
         texture.image = image;
         texture.update();
@@ -643,21 +683,26 @@ const FlexCarousel = ({
           slot.color = [0.5, 0.5, 0.5];
         }
         slot.loaded = true;
-        announceReady();
+        slot.ready = 1;
         dirty = true;
         start();
       };
-      image.onerror = () => {
+      const rejectImage = () => {
         if (!alive) return;
         slot.failed = true;
-        announceReady();
         dirty = true;
         start();
       };
-      image.src = item.src;
+      if (prepared) queueMicrotask(acceptImage);
+      else {
+        image.crossOrigin = 'anonymous';
+        image.decoding = 'async';
+        image.onload = acceptImage;
+        image.onerror = rejectImage;
+        image.src = item.src;
+      }
       slot.dispose = () => {
-        image.onload = null;
-        image.onerror = null;
+        if (!prepared) { image.onload = null; image.onerror = null; }
         gl.deleteTexture(texture.texture);
       };
       return slot;
@@ -799,7 +844,6 @@ const FlexCarousel = ({
       introState.running = introState.kind !== 'none';
       introState.done = !introState.running;
       introState.t = 0;
-      announceReady(true);
       if (introState.kind === 'spin') {
         const distance = m.loop * 1.6 + width;
         pos = goal + distance;
@@ -822,7 +866,7 @@ const FlexCarousel = ({
 
     const frame = (now: number) => {
       raf = 0;
-      if (!alive || !visible || document.hidden || scrolling) return;
+      if (!alive || (!visible && !prewarming) || document.hidden || scrolling) return;
       // OGL physics and GPU draws share a 60 Hz ceiling; the rest of the page
       // can still animate at the display's native refresh rate.
       if (now - lastRender < FRAME_INTERVAL - 1) {
@@ -834,7 +878,7 @@ const FlexCarousel = ({
       const dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000) * (s?.speed ?? 1));
       last = now;
       if (!s || !slots.length) {
-        if (visible) raf = requestAnimationFrame(frame);
+        if (visible || prewarming) raf = requestAnimationFrame(frame);
         return;
       }
 
@@ -1003,6 +1047,10 @@ const FlexCarousel = ({
         slot.hover += (hoverTarget - slot.hover) * (1 - Math.exp(-dt / 0.12));
         if (Math.abs(hoverTarget - slot.hover) < 0.001) slot.hover = hoverTarget;
         else animating = true;
+        const dimTarget = !reducedMotion && hoveredIndex >= 0 && i !== hoveredIndex && !pointer.dragging ? 1 : 0;
+        slot.dim += (dimTarget - slot.dim) * (1 - Math.exp(-dt / 0.16));
+        if (Math.abs(dimTarget - slot.dim) < 0.001) slot.dim = dimTarget;
+        else animating = true;
       }
 
       const waiting = !introState.done;
@@ -1028,7 +1076,7 @@ const FlexCarousel = ({
             // adjacent images, lens, controls and details keep their own size.
             const hoverScale = Math.max(1, Math.min(1.085, height * 0.9 / cardH, width * 0.97 / w));
             scale *= 1 + (hoverScale - 1) * slots[i].hover;
-            let alpha = fx ? fx.alpha : 1;
+            let alpha = (fx ? fx.alpha : 1) * (1 - slots[i].dim * 0.4);
             if (focusAmount > 0) {
               if (i === focus.index && Math.abs(rel) < w) {
                 scale *= 1 + (focusScale - 1) * focusEase;
@@ -1090,6 +1138,11 @@ const FlexCarousel = ({
         lensUniforms.uStrength.value = effects.strength * (1 - focusEase);
         lensUniforms.uSceneAlpha.value = effects.sceneAlpha;
         renderer.render({ scene: lensMesh });
+        painted = true;
+        if (introState.done) {
+          announceReady(now - introState.readyAt > 3500);
+          if (ready) prewarming = false;
+        }
       }
 
       let nextHover = '';
@@ -1104,11 +1157,11 @@ const FlexCarousel = ({
         else container.removeAttribute('data-hover');
       }
 
-      if (visible && (animating || waiting || dirty || pointer.down)) raf = requestAnimationFrame(frame);
+      if ((visible || prewarming) && (animating || waiting || dirty || pointer.down)) raf = requestAnimationFrame(frame);
     };
 
     const start = () => {
-      if (raf || !visible || !alive || document.hidden || scrolling) return;
+      if (raf || (!visible && !prewarming) || !alive || document.hidden || scrolling) return;
       last = performance.now();
       raf = requestAnimationFrame(frame);
     };
@@ -1357,7 +1410,7 @@ const FlexCarousel = ({
       else start();
     };
     const onPageScroll = () => {
-      if (!visible || pointer.dragging) return;
+      if ((!visible && !prewarming) || pointer.dragging) return;
       scrolling = true;
       cancelAnimationFrame(raf);
       raf = 0;
@@ -1395,7 +1448,7 @@ const FlexCarousel = ({
     resizeObserver.observe(container);
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
-      if (visible) start();
+      if (visible || prewarming) start();
       else stop();
     });
     intersectionObserver.observe(container);
@@ -1419,6 +1472,19 @@ const FlexCarousel = ({
         skipIntro();
         closeFocus();
         goTo(metrics(s), index);
+      },
+      syncTo: index => {
+        const s = settingsRef.current;
+        if (!s || !slots.length) return;
+        skipIntro();
+        closeFocus();
+        goTo(metrics(s), index);
+        pos = goal;
+        lastPos = goal;
+        vel = 0;
+        dirty = true;
+        prewarming = true;
+        start();
       },
     };
 
@@ -1450,6 +1516,17 @@ const FlexCarousel = ({
       slots = [];
       gl.getExtension('WEBGL_lose_context')?.loseContext();
       if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+    };
+    };
+    window.addEventListener('scroll', onStartupScroll, { passive: true });
+    document.addEventListener('visibilitychange', onStartupVisibility);
+    armStartup();
+    return () => {
+      cancelled = true;
+      cancelStartup();
+      window.removeEventListener('scroll', onStartupScroll);
+      document.removeEventListener('visibilitychange', onStartupVisibility);
+      disposeEngine?.();
     };
   }, []);
 

@@ -5,71 +5,98 @@ import type { Language } from './LocalizedCopy';
 
 const richParts = (text: string) => text.split('**');
 const characters = (text: string) => {
-  // Keep Thai combining marks and emoji together as the visual text appears.
   if (typeof Intl.Segmenter !== 'function') return Array.from(text);
   const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
   return Array.from(segmenter.segment(text), part => part.segment);
 };
+type VisualPart = { text: string; bold: boolean };
+const visualParts = (text: string): VisualPart[] => richParts(text).map((part, index) => ({ text: part, bold: index % 2 === 1 }));
 
-/** A stable, complete semantic copy with a short, decorative typing layer. */
+/** Complete semantic text stays in place while a finite layer erases and types. */
 export function ProjectMotionCopy({ text, language, enabled = true }: { text: string; language: Language; enabled?: boolean }) {
   const { settings } = useMotionSettings();
   const { ref, active, reduced } = useIdleMotion<HTMLSpanElement>();
   const speed = useRef(settings.animationSpeed);
   speed.current = settings.animationSpeed;
   const visualRef = useRef<HTMLSpanElement>(null);
-  const parts = richParts(text);
+  const displayed = useRef<VisualPart[]>([]);
+  const lastText = useRef<string | null>(null);
+  const hasShown = useRef(false);
 
   useEffect(() => {
     const root = ref.current;
     const visual = visualRef.current;
-    if (!root || !visual || !active || reduced || !enabled) {
-      root?.removeAttribute('data-typing');
+    if (!root || !visual) return;
+    const next = visualParts(text);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const prepare = (parts: VisualPart[]) => {
+      visual.replaceChildren(...parts.map(part => document.createElement(part.bold ? 'strong' : 'span')));
+      return parts.map(part => ({ ...part, characters: characters(part.text) }));
+    };
+    let prepared = prepare(next);
+    const paint = (count: number) => {
+      let remaining = count;
+      displayed.current = prepared.map((part, index) => {
+        const copy = part.characters.slice(0, Math.max(0, remaining)).join('');
+        if (visual.children[index].textContent !== copy) visual.children[index].textContent = copy;
+        remaining -= part.characters.length;
+        return { text: copy, bold: part.bold };
+      });
+    };
+    const nextTotal = prepared.reduce((count, part) => count + part.characters.length, 0);
+    const finish = () => {
+      prepared = prepare(next);
+      paint(nextTotal);
+      root.removeAttribute('data-typing');
+    };
+    if (!active || reduced || !enabled) {
+      finish();
+      if (hasShown.current) lastText.current = text;
       return;
     }
-    const segments = richParts(text).map(characters);
-    const spans = Array.from(visual.children);
-    const total = segments.reduce((count, part) => count + part.length, 0);
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let started = 0;
-    root.setAttribute('data-typing', 'true');
-    spans.forEach(span => { span.textContent = ''; });
+    if (hasShown.current && lastText.current === text) { finish(); return; }
 
-    const finish = () => root.removeAttribute('data-typing');
+    const previous = hasShown.current ? displayed.current : [];
+    hasShown.current = true;
+    lastText.current = text;
+    prepared = prepare(previous);
+    const oldTotal = prepared.reduce((count, part) => count + part.characters.length, 0);
+    paint(oldTotal);
+    root.setAttribute('data-typing', 'true');
+    const eraseDuration = oldTotal ? Math.min(420, Math.max(140, oldTotal * 3)) / speed.current : 0;
+    const typeDuration = Math.min(1250, Math.max(380, nextTotal * 13)) / speed.current;
+    const started = performance.now();
+    let typing = false;
     const tick = () => {
       if (document.hidden) { finish(); return; }
-      const now = performance.now();
-      if (!started) started = now;
-      const progress = Math.min(1, (now - started) / (Math.min(1250, Math.max(560, total * 13)) / speed.current));
-      let remaining = Math.ceil(total * progress);
-      segments.forEach((part, index) => {
-        const next = part.slice(0, Math.max(0, remaining)).join('');
-        if (spans[index].textContent !== next) spans[index].textContent = next;
-        remaining -= part.length;
-      });
-      if (progress === 1) finish();
-      else timer = setTimeout(tick, 35);
+      const elapsed = performance.now() - started;
+      if (elapsed < eraseDuration) paint(Math.ceil(oldTotal * (1 - elapsed / eraseDuration)));
+      else {
+        if (!typing) { prepared = prepare(next); typing = true; }
+        const progress = Math.min(1, (elapsed - eraseDuration) / typeDuration);
+        paint(Math.ceil(nextTotal * progress));
+        if (progress === 1) { finish(); return; }
+      }
+      timer = setTimeout(tick, 35);
     };
-    // Let the artwork and caption enter before typing starts, so it is visible.
-    timer = setTimeout(tick, 220 / speed.current);
-    return () => { clearTimeout(timer); finish(); };
+    timer = setTimeout(tick, 35);
+    // Preserve the currently visible characters when a new selection interrupts.
+    return () => { clearTimeout(timer); };
   }, [text, active, reduced, enabled, ref]);
 
-  const renderParts = (visual: boolean) => parts.map((part, index) => index % 2
-    ? <strong key={index}>{part}</strong>
-    : visual ? <span key={index}>{part}</span> : part);
-
   return <span ref={ref} className="pg-motion-copy" lang={language}>
-    <span className="pg-motion-copy-full">{renderParts(false)}</span>
-    <span ref={visualRef} className="pg-motion-copy-visual" aria-hidden="true">{renderParts(true)}</span>
+    <span className="pg-motion-copy-full">{richParts(text).map((part, index) => index % 2 ? <strong key={index}>{part}</strong> : part)}</span>
+    <span ref={visualRef} className="pg-motion-copy-visual" aria-hidden="true" />
   </span>;
 }
 
-/** Count only the decorative layer; assistive technology always has the final number. */
+/** Count from the previous visible number; assistive text has the final value. */
 export function ProjectMotionNumber({ value, enabled = true }: { value: number; enabled?: boolean }) {
   const { settings } = useMotionSettings();
   const { ref, active, reduced } = useIdleMotion<HTMLSpanElement>();
   const visualRef = useRef<HTMLSpanElement>(null);
+  const displayed = useRef(value);
+  const initial = useRef(String(value).padStart(2, '0'));
   const speed = useRef(settings.animationSpeed);
   speed.current = settings.animationSpeed;
   const formatted = String(value).padStart(2, '0');
@@ -77,21 +104,27 @@ export function ProjectMotionNumber({ value, enabled = true }: { value: number; 
   useEffect(() => {
     const visual = visualRef.current;
     if (!visual) return;
-    visual.textContent = formatted;
-    if (!active || reduced || !enabled) return;
+    const from = displayed.current;
+    if (!active || reduced || !enabled || from === value) {
+      displayed.current = value;
+      visual.textContent = formatted;
+      return;
+    }
     let frame = 0;
     let started = 0;
     const tick = (now: number) => {
       if (!started) started = now;
-      const progress = Math.min(1, (now - started) / (680 / speed.current));
+      const progress = Math.min(1, (now - started) / (520 / speed.current));
       const eased = 1 - Math.pow(1 - progress, 3);
-      visual.textContent = String(Math.round(value * eased)).padStart(2, '0');
+      displayed.current = Math.round(from + (value - from) * eased);
+      const copy = String(displayed.current).padStart(2, '0');
+      if (visual.textContent !== copy) visual.textContent = copy;
       if (progress < 1 && !document.hidden) frame = requestAnimationFrame(tick);
-      else visual.textContent = formatted;
+      else { displayed.current = value; visual.textContent = formatted; }
     };
     frame = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(frame); visual.textContent = formatted; };
+    return () => { cancelAnimationFrame(frame); };
   }, [value, formatted, active, reduced, enabled]);
 
-  return <span ref={ref} className="pg-motion-number"><span className="pg-sr-only">{formatted}</span><span ref={visualRef} aria-hidden="true">{formatted}</span></span>;
+  return <span ref={ref} className="pg-motion-number"><span className="pg-sr-only">{formatted}</span><span ref={visualRef} aria-hidden="true">{initial.current}</span></span>;
 }

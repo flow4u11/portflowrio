@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { useMotionSettings } from './MotionSettings';
-import { clampPlayground, playgroundBlast, playgroundHomeFlight, scatterPlaygroundPieces, type PlaygroundBounds, type PlaygroundPoint, type PlaygroundPose } from './hero-playground-physics';
+import { playgroundAim, playgroundBlast, playgroundHeldPose, playgroundHomeFlight, playgroundShotFlight, scatterPlaygroundPieces, type PlaygroundBounds, type PlaygroundPoint, type PlaygroundPose } from './hero-playground-physics';
 import './hero-playground.css';
 
 type Piece = {
@@ -36,20 +36,20 @@ type Session = {
   focusTarget: HTMLElement;
   focusTabIndex: string | null;
 };
-type Drag = { id: string; pointer: number; start: PlaygroundPoint; from: PlaygroundPose; current: PlaygroundPoint };
+type Drag = { id: string; pointer: number; start: PlaygroundPoint; from: PlaygroundPose; current: PlaygroundPoint; startedAt: number; travel: number };
 type Phase = 'idle' | 'playing' | 'assembling';
 
 const COPY = {
   en: {
     title: 'Floating pieces', assemble: 'Put it back', returned: 'Back in place.',
     keyboard: 'Use Tab to choose a piece. Enter or Space returns it. Escape puts everything back.',
-    letter: 'Letter', returnPiece: 'hold to see its path home, release or press Enter to return',
+    letter: 'Letter', returnPiece: 'click to return, or hold and aim toward its home to shoot; Enter returns it',
     profile: 'Profile', role: 'Intro', tags: 'Interests', explore: 'Explore', ready: 'Choose any floating piece.',
   },
   th: {
     title: 'ชิ้นส่วนที่ลอยอยู่', assemble: 'จัดกลับที่เดิม', returned: 'กลับเข้าที่แล้ว',
     keyboard: 'ใช้ Tab เลือกชิ้นส่วน กด Enter หรือ Space เพื่อคืนที่เดิม กด Escape เพื่อคืนทุกอย่าง',
-    letter: 'ตัวอักษร', returnPiece: 'กดค้างเพื่อดูเส้นทางกลับ ปล่อยหรือกด Enter เพื่อคืนที่เดิม',
+    letter: 'ตัวอักษร', returnPiece: 'คลิกเพื่อคืนที่เดิม หรือกดค้างแล้วเล็งไปที่เดิมเพื่อยิงกลับ กด Enter เพื่อคืนที่เดิม',
     profile: 'โปรไฟล์', role: 'คำแนะนำ', tags: 'ความสนใจ', explore: 'สำรวจ', ready: 'เลือกชิ้นส่วนที่ลอยอยู่ได้เลย',
   },
 };
@@ -96,6 +96,8 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
   const host = useRef<HTMLDivElement>(null);
   const layer = useRef<HTMLDivElement>(null);
   const tether = useRef<SVGPathElement>(null);
+  const homeTarget = useRef<HTMLDivElement>(null);
+  const homeGlyph = useRef<HTMLSpanElement>(null);
   const nodes = useRef(new Map<string, HTMLDivElement>());
   const session = useRef<Session | null>(null);
   const drag = useRef<Drag | null>(null);
@@ -117,9 +119,14 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
     inactivity.current = null;
   }, []);
 
-  const hideTether = useCallback(() => { tether.current?.setAttribute('d', ''); }, []);
+  const hideTether = useCallback(() => {
+    tether.current?.setAttribute('d', '');
+    if (homeTarget.current) { homeTarget.current.dataset.active = 'false'; homeTarget.current.dataset.locked = 'false'; }
+  }, []);
   const drawTether = useCallback((piece: Piece, from: PlaygroundPoint) => {
     tether.current?.setAttribute('d', `M${from.x.toFixed(2)},${from.y.toFixed(2)} L${piece.home.x.toFixed(2)},${piece.home.y.toFixed(2)}`);
+    const held = drag.current;
+    if (held && homeTarget.current) homeTarget.current.dataset.locked = String(playgroundAim(held.from, from, piece.home, piece).locked);
   }, []);
 
   const restoreSource = useCallback((source: HTMLElement) => {
@@ -255,7 +262,7 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
     if (phaseRef.current === 'playing') inactivity.current = setTimeout(() => assemble(), 24000);
   }, [assemble, clearInactivity]);
 
-  const returnPiece = useCallback((piece: Piece) => {
+  const returnPiece = useCallback((piece: Piece, shoot = false) => {
     const current = session.current;
     const node = nodes.current.get(piece.id);
     if (!current || !node || piece.returned || phaseRef.current !== 'playing') return;
@@ -264,7 +271,7 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
     node.dataset.motion = 'returning';
     node.setAttribute('aria-disabled', 'true');
     node.tabIndex = -1;
-    const flight = playgroundHomeFlight(piece.pose, piece.home);
+    const flight = shoot ? playgroundShotFlight(piece.pose, piece.home, current.bounds, piece) : playgroundHomeFlight(piece.pose, piece.home);
     settleFloat(piece, flight.duration);
     animatePiece(piece, flight.frames.map(frame => ({ transform: poseTransform(piece, frame), offset: frame.offset })), flight.duration, () => {
       piece.pose = flight.end;
@@ -434,22 +441,33 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
     node.focus({ preventScroll: true });
     node.setPointerCapture(event.pointerId);
     node.dataset.motion = 'dragging';
-    drag.current = { id: piece.id, pointer: event.pointerId, from: { ...piece.pose }, start: { x: event.clientX, y: event.clientY }, current: piece.pose };
+    drag.current = { id: piece.id, pointer: event.pointerId, from: { ...piece.pose }, start: { x: event.clientX, y: event.clientY }, current: piece.pose, startedAt: performance.now(), travel: 0 };
+    const target = homeTarget.current;
+    if (target) {
+      target.style.width = `${piece.width}px`;
+      target.style.height = `${piece.height}px`;
+      target.style.transform = `translate3d(${piece.home.x - piece.width / 2}px, ${piece.home.y - piece.height / 2}px, 0)`;
+      target.dataset.kind = piece.kind;
+      target.dataset.active = 'true';
+      if (homeGlyph.current) { homeGlyph.current.textContent = piece.glyph || ''; homeGlyph.current.style.font = piece.font || ''; homeGlyph.current.style.letterSpacing = piece.letterSpacing || ''; }
+    }
     drawTether(piece, piece.pose);
-    inactivity.current = setTimeout(() => assemble(), 60000);
+    inactivity.current = setTimeout(() => assemble(), 24000);
   };
 
   const pointerMove = (event: ReactPointerEvent<HTMLDivElement>, piece: Piece) => {
     const held = drag.current;
     const current = session.current;
     if (!held || !current || held.id !== piece.id || held.pointer !== event.pointerId) return;
-    held.current = {
-      x: clampPlayground(held.from.x + event.clientX - held.start.x, piece.width / 2 + 8, current.bounds.width - piece.width / 2 - 8),
-      y: clampPlayground(held.from.y + event.clientY - held.start.y, current.bounds.top + piece.height / 2, current.bounds.bottom - piece.height / 2),
-    };
-    piece.pose = { ...held.from, ...held.current };
+    const delta = { x: event.clientX - held.start.x, y: event.clientY - held.start.y };
+    held.travel = Math.max(held.travel, Math.hypot(delta.x, delta.y));
+    const next = playgroundHeldPose({ ...held.from, x: held.from.x + delta.x, y: held.from.y + delta.y }, piece, current.bounds);
+    const { magnet } = playgroundAim(held.from, next, piece.home, piece);
+    piece.pose = playgroundHeldPose({ ...next, x: next.x + (piece.home.x - next.x) * magnet, y: next.y + (piece.home.y - next.y) * magnet }, piece, current.bounds);
+    held.current = piece.pose;
     event.currentTarget.style.transform = poseTransform(piece, piece.pose);
     drawTether(piece, held.current);
+    restTimer();
   };
 
   const pointerUp = (event: ReactPointerEvent<HTMLDivElement>, piece: Piece) => {
@@ -458,7 +476,7 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
     drag.current = null;
     hideTether();
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-    returnPiece(piece);
+    returnPiece(piece, event.type === 'pointerup' && (held.travel > 6 || performance.now() - held.startedAt > 180));
   };
 
   return <div ref={host} className="hero-playground-host" data-play-active={phase !== 'idle'} onDoubleClickCapture={event => {
@@ -475,13 +493,20 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
       <div className="hero-playground-toolbar"><button type="button" className="hero-playground-reset" onClick={() => assemble(false, true)} disabled={phase === 'assembling'}><RotateCcw size={13} aria-hidden="true" />{text.assemble}</button></div>
       <span className="sr-only">{text.keyboard}</span>
       <svg className="hero-playground-tether" viewBox={`0 0 ${scene.bounds.width} ${scene.bounds.height}`} aria-hidden="true"><path ref={tether} d="" /></svg>
+      <div ref={homeTarget} className="hero-playground-home-target" data-active="false" data-locked="false" aria-hidden="true"><div className="hero-playground-home-frame"><i /><i /><i /><i /><span ref={homeGlyph} /></div></div>
       {scene.pieces.map((piece, index) => <div key={piece.id} ref={node => { if (node) nodes.current.set(piece.id, node); else nodes.current.delete(piece.id); }} className={`hero-playground-piece hero-playground-piece--${piece.kind}`} role="button" tabIndex={homeIds.includes(piece.id) || phase === 'assembling' ? -1 : 0} aria-hidden={homeIds.includes(piece.id) || undefined} aria-label={`${piece.kind === 'letter' ? `${text.letter} ${piece.glyph}` : piece.label}: ${text.returnPiece}`} style={{ width: piece.width, height: piece.height, transform: poseTransform(piece, piece.pose), '--piece-float-duration': `${6.4 + index % 5}s` } as CSSProperties}
         onPointerDown={event => pointerDown(event, piece)} onPointerMove={event => pointerMove(event, piece)} onPointerUp={event => pointerUp(event, piece)} onPointerCancel={event => pointerUp(event, piece)} onLostPointerCapture={event => pointerUp(event, piece)}
         onClick={event => { if (event.detail === 0 && !piece.busy && !piece.returned) returnPiece(piece); }}
         onKeyDown={event => {
           if ((event.key === 'Enter' || event.key === ' ') && !piece.busy && !piece.returned && phaseRef.current === 'playing') {
             event.preventDefault();
+            const held = drag.current;
+            drag.current = null;
             hideTether();
+            const heldNode = held && nodes.current.get(held.id);
+            if (held && heldNode?.hasPointerCapture(held.pointer)) heldNode.releasePointerCapture(held.pointer);
+            const previousPiece = held && held.id !== piece.id && session.current?.pieces.find(item => item.id === held.id);
+            if (previousPiece) returnPiece(previousPiece);
             returnPiece(piece);
           }
         }}>
