@@ -3,6 +3,7 @@ import { useInView, useReducedMotion } from 'motion/react';
 import { useMotionSettings } from './MotionSettings';
 
 const phrases = ['Designing thoughtful experiences.', 'Exploring interactive worlds.', 'Turning little ideas into something real.'];
+const sizingPhrase = phrases.reduce((longest, phrase) => phrase.length > longest.length ? phrase : longest, '');
 
 export function Typewriter() {
   const { settings } = useMotionSettings();
@@ -41,5 +42,5 @@ export function Typewriter() {
     document.addEventListener('visibilitychange', resume);
     return () => { clearTimeout(timer); document.removeEventListener('visibilitychange', resume); };
   }, [reduced, visible]);
-  return <span ref={ref} className="typewriter"><span className="sr-only">Designing thoughtful experiences and exploring interactive worlds.</span><span aria-hidden="true">{reduced ? phrases[0] : text}<span className="typewriter-caret">|</span></span></span>;
+  return <span ref={ref} className="typewriter"><span className="sr-only">Designing thoughtful experiences and exploring interactive worlds.</span><span className="typewriter-sizer" aria-hidden="true">{sizingPhrase}|</span><span className="typewriter-value" aria-hidden="true">{reduced ? phrases[0] : text}<span className="typewriter-caret">|</span></span></span>;
 }

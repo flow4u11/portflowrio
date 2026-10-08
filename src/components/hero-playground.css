@@ -55,3 +55,5 @@
 @media (prefers-reduced-motion: reduce) {
   .hero-playground-layer *, .hero-playground-layer *::before, .hero-playground-layer *::after { animation: none !important; }
 }
+
+.hero-playground-copy > .hero-role, .hero-playground-copy .typewriter { white-space: nowrap; max-width: none; }

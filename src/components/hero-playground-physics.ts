@@ -143,7 +143,9 @@ export function playgroundBlast(
   const random = seededRandom(919 + index * 3571);
   const duration = 1280 + Math.round(random() * 160);
   const steps = 72;
-  const dt = duration / steps / 1000;
+  const frameDt = duration / steps / 1000;
+  const substeps = Math.ceil(frameDt / (1 / 240));
+  const dt = frameDt / substeps;
   const usable = usableBounds(bounds);
   const directionX = start.x - finite(origin.x);
   const directionY = start.y - finite(origin.y);
@@ -161,24 +163,27 @@ export function playgroundBlast(
   const stiffness = 64;
   const drag = 16;
   for (let step = 1; step <= steps; step++) {
-    // Let the outward impulse lead before the resting target attracts the
-    // piece. Even a target on the opposite side begins with an outward kick.
-    const attraction = stiffness * smootherstep(clampPlayground(step * dt / .12, 0, 1));
-    velocityX += ((end.x - pose.x) * attraction - velocityX * drag) * dt;
-    velocityY += ((end.y - pose.y) * attraction - velocityY * drag) * dt;
-    angularVelocity += ((end.rotation - pose.rotation) * attraction - angularVelocity * drag) * dt;
-    depthVelocity += ((finite(end.depth) - pose.depth) * attraction - depthVelocity * drag) * dt;
-    const next = { x: pose.x + velocityX * dt, y: pose.y + velocityY * dt, rotation: pose.rotation + angularVelocity * dt, depth: clampPlayground(pose.depth + depthVelocity * dt, -64, 20) };
-    const limits = centerLimits(size, next.rotation, bounds);
-    if (next.x < limits.left || next.x > limits.right) {
-      next.x = clampPlayground(next.x, limits.left, limits.right);
-      velocityX = next.x === limits.left ? Math.abs(velocityX) * .26 : -Math.abs(velocityX) * .26;
+    for (let substep = 0; substep < substeps; substep++) {
+      // Integrate at 240 Hz, then sample a bounded compositor trajectory.
+      // Let the outward impulse lead before the resting target attracts the
+      // piece. Even a target on the opposite side begins with an outward kick.
+      const attraction = stiffness * smootherstep(clampPlayground(((step - 1) * frameDt + (substep + 1) * dt) / .12, 0, 1));
+      velocityX += ((end.x - pose.x) * attraction - velocityX * drag) * dt;
+      velocityY += ((end.y - pose.y) * attraction - velocityY * drag) * dt;
+      angularVelocity += ((end.rotation - pose.rotation) * attraction - angularVelocity * drag) * dt;
+      depthVelocity += ((finite(end.depth) - pose.depth) * attraction - depthVelocity * drag) * dt;
+      const next = { x: pose.x + velocityX * dt, y: pose.y + velocityY * dt, rotation: pose.rotation + angularVelocity * dt, depth: clampPlayground(pose.depth + depthVelocity * dt, -64, 20) };
+      const limits = centerLimits(size, next.rotation, bounds);
+      if (next.x < limits.left || next.x > limits.right) {
+        next.x = clampPlayground(next.x, limits.left, limits.right);
+        velocityX = next.x === limits.left ? Math.abs(velocityX) * .26 : -Math.abs(velocityX) * .26;
+      }
+      if (next.y < limits.top || next.y > limits.bottom) {
+        next.y = clampPlayground(next.y, limits.top, limits.bottom);
+        velocityY = next.y === limits.top ? Math.abs(velocityY) * .26 : -Math.abs(velocityY) * .26;
+      }
+      pose = next;
     }
-    if (next.y < limits.top || next.y > limits.bottom) {
-      next.y = clampPlayground(next.y, limits.top, limits.bottom);
-      velocityY = next.y === limits.top ? Math.abs(velocityY) * .26 : -Math.abs(velocityY) * .26;
-    }
-    pose = next;
     frames.push({ ...pose, offset: step / steps });
   }
   const residual = { x: end.x - pose.x, y: end.y - pose.y, rotation: end.rotation - pose.rotation, depth: finite(end.depth) - pose.depth };

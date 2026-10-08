@@ -21,10 +21,10 @@ Open http://127.0.0.1:5173. The development server serves the frontend and Visit
 - English/Thai key information, short scramble transitions, genuine tool icons, and separate toolkit and technology collections, each moving in two rows ordered by category.
 - Shared particle background, bounded 2.5D viewport reveals, a moving name gradient with a fixed font, and full-viewport, once-per-session paper confetti with gravity, air resistance and flutter. Motion pauses when hidden/offscreen and respects reduced-motion preferences.
 - A minimal centered scramble loader with Shiny Text holds its completed bar before the connected Hero entrance. The profile uses a blue many-point verification star.
-- A hidden Hero interaction scatters letters and components with bounded impulse physics and continued idle motion. Hold a piece to preview its dotted curved shot home, then release or click to return it. Keyboard controls, reset and inactivity restoration are included.
+- A hidden Hero interaction scatters letters and components with bounded impulse physics and continued idle motion. Hold a piece to preview its dotted curved shot home, then release or click to return it. Keyboard controls, reset and automatic restoration after 12 seconds of inactivity are included.
 - Noto Sans Thai for Thai content, graduation-year counting, experience status, and Instagram contact.
 - LastStand, my first Unreal Engine 5 FPS project; the live School Ledger app; and three layouts reserved for future projects.
-- Nearly full-screen motion settings from the top-left wordmark: star speed/count/scale, Pixel Snow, component pace, optional FPS, portrait pixels, pointer trail, gallery animation and toolkit motion. Customize a five-stop name gradient, six color palettes, direction/speed and optional Shiny Text. Preferences are saved locally and older settings migrate automatically. Section links use finite eased scrolling with a perspective star tunnel, keyboard focus handling and user interruption.
+- Full-screen settings workspace with category navigation and separate header/content/footer from the top-left wordmark: star speed/count/scale, Pixel Snow, component pace, optional FPS, portrait pixels, pointer trail, gallery animation and toolkit motion. Customize a five-stop name gradient, six color palettes, direction/speed and optional Shiny Text. Preferences are saved locally and older settings migrate automatically. Section links use finite eased scrolling with a perspective star tunnel, keyboard focus handling and user interruption.
 - ReactBits WebGL FlexCarousel with five slots and native scrolling fallback, centered dialogs, a shuffled pixel portrait transition and a theme-aware pixel pointer trail.
 
 ## Stack
@@ -40,7 +40,7 @@ The footer has no visitor counter, and the page does not record new visits. The 
 ```sh
 npm run check
 npm run test:visits
-node --test src/components/hero-playground-physics.test.mjs src/components/motion-settings-model.test.mjs
+node --test src/components/hero-playground-physics.test.mjs src/components/motion-settings-model.test.mjs src/components/playground-idle.test.mjs
 npm run build
 npm start
 ```

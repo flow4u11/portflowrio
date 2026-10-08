@@ -377,3 +377,8 @@ dialog::backdrop { background: rgb(0 0 0 / 65%); }
 .personal-details { grid-template-columns: 1fr; }
 .personal-school { grid-column: auto; }
 @media (prefers-reduced-motion: reduce) { .discord-channel > a:hover, .discord-channel > button:hover { transform: none; } }
+
+/* Reserve the longest phrase so the floating clone never measures a partial word. */
+.hero-role .typewriter { display: inline-grid; }
+.hero-role .typewriter > :is(.typewriter-sizer, .typewriter-value) { grid-area: 1 / 1; }
+.hero-role .typewriter-sizer { visibility: hidden; white-space: nowrap; }

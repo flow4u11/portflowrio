@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProp
 import { RotateCcw } from 'lucide-react';
 import { useMotionSettings } from './MotionSettings';
 import { playgroundAim, playgroundBlast, playgroundHeldPose, playgroundHomeFlight, playgroundShotFlight, scatterPlaygroundPieces, type PlaygroundBounds, type PlaygroundPoint, type PlaygroundPose } from './hero-playground-physics';
+import { createPlaygroundIdle } from './playground-idle';
 import './hero-playground.css';
 
 type Piece = {
@@ -102,7 +103,7 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
   const session = useRef<Session | null>(null);
   const drag = useRef<Drag | null>(null);
   const phaseRef = useRef<Phase>('idle');
-  const inactivity = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [idleClock] = useState(createPlaygroundIdle);
   const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingFocus = useRef<{ element: HTMLElement; tabIndex: string | null } | null>(null);
   const mounted = useRef(true);
@@ -115,9 +116,8 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
   copy.current = text;
 
   const clearInactivity = useCallback(() => {
-    if (inactivity.current) clearTimeout(inactivity.current);
-    inactivity.current = null;
-  }, []);
+    idleClock.cancel();
+  }, [idleClock]);
 
   const hideTether = useCallback(() => {
     tether.current?.setAttribute('d', '');
@@ -265,8 +265,13 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
 
   const restTimer = useCallback(() => {
     clearInactivity();
-    if (phaseRef.current === 'playing') inactivity.current = setTimeout(() => assemble(), 24000);
-  }, [assemble, clearInactivity]);
+    if (phaseRef.current === 'playing') idleClock.arm(function restoreWhenIdle() {
+      if (phaseRef.current !== 'playing') return;
+      // A still-held piece is interaction too; release starts a fresh deadline.
+      if (drag.current) idleClock.arm(restoreWhenIdle);
+      else assemble();
+    });
+  }, [assemble, clearInactivity, idleClock]);
 
   const returnPiece = useCallback((piece: Piece, shoot = false) => {
     const current = session.current;
@@ -300,11 +305,11 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
       }
       if (current.pieces.every(item => item.returned)) {
         clearInactivity();
-        inactivity.current = setTimeout(() => finishSession(), 350);
+        idleClock.arm(() => finishSession(), 350);
       } else restTimer();
     });
     restTimer();
-  }, [animatePiece, clearInactivity, finishSession, restTimer, restoreSource, settleFloat, stopAnimation]);
+  }, [animatePiece, clearInactivity, finishSession, restTimer, restoreSource, settleFloat, stopAnimation, idleClock]);
 
   const begin = useCallback((origin: PlaygroundPoint) => {
     if (!enabled || session.current || document.hidden || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -388,8 +393,8 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
       // The original typewriter owns its timer. Mirror its occasional DOM text
       // changes rather than starting another timer or per-frame React loop.
       if (piece.source?.matches('.hero-role')) {
-        const original = piece.source.querySelector('.typewriter > [aria-hidden="true"]');
-        const clone = node.querySelector('.typewriter > [aria-hidden="true"]');
+        const original = piece.source.querySelector('.typewriter-value');
+        const clone = node.querySelector('.typewriter-value');
         if (original && clone) {
           const sync = () => {
             const caret = clone.querySelector('.typewriter-caret');
@@ -404,9 +409,15 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
         }
       }
     });
-    restTimer();
     // Scene identity changes only at entry; returning a piece never replays it.
-  }, [scene, animatePiece, restTimer]);
+  }, [scene, animatePiece]);
+
+  // Idle restoration owns its deadline independently of entry animation or
+  // text/appearance updates. Only real piece interaction renews it.
+  useEffect(() => {
+    if (phase === 'playing') restTimer();
+    return clearInactivity;
+  }, [phase, restTimer, clearInactivity]);
 
   useEffect(() => {
     mounted.current = true;
@@ -459,7 +470,7 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
       if (homeGlyph.current) { homeGlyph.current.textContent = piece.glyph || ''; homeGlyph.current.style.font = piece.font || ''; homeGlyph.current.style.letterSpacing = piece.letterSpacing || ''; }
     }
     drawTether(piece, piece.pose);
-    inactivity.current = setTimeout(() => assemble(), 24000);
+    restTimer();
   };
 
   const pointerMove = (event: ReactPointerEvent<HTMLDivElement>, piece: Piece) => {
