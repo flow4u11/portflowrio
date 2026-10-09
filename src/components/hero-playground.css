@@ -4,11 +4,6 @@
 .hero-playground-host .animated-name { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 .hero-playground-host[data-play-active="true"] .animated-name-gradient { animation-play-state: paused; }
 .hero-playground-layer { position: absolute; z-index: 6; inset: 0; pointer-events: none; overflow: hidden; perspective: 1100px; isolation: isolate; }
-.hero-playground-toolbar { position: absolute; z-index: 12; right: var(--page-pad, 32px); top: 105px; }
-.hero-playground-reset { pointer-events: auto; display: inline-flex; gap: 7px; align-items: center; min-height: 36px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 22px; font-size: 10px; color: var(--text); background: var(--bg); transition: border-color .2s, transform .2s; }
-.hero-playground-reset:hover { border-color: var(--muted); transform: translateY(-2px); }
-.hero-playground-reset:disabled { opacity: .5; cursor: default; }
-.hero-playground-reset:focus-visible { outline: 2px solid var(--text); outline-offset: 5px; }
 .hero-playground-tether { position: absolute; z-index: 6; inset: 0; width: 100%; height: 100%; overflow: hidden; }
 .hero-playground-tether path { fill: none; stroke: var(--text); stroke-width: 2.5; stroke-dasharray: 0 8; stroke-linecap: round; opacity: .95; }
 .hero-playground-home-target { position: absolute; z-index: 5; left: 0; top: 0; opacity: 0; pointer-events: none; color: var(--text); }
@@ -40,18 +35,12 @@
 .hero-playground-copy > .hero-tags { justify-content: center; white-space: nowrap; }
 .hero-playground-copy .profile-avatar { width: 100%; height: 100%; }
 .hero-playground-copy > .explore-button { color: var(--text); }
-.hero-playground-layer[data-phase="assembling"] .hero-playground-toolbar { animation: playground-fade .25s ease-in forwards; }
 @keyframes playground-float {
   0%, 100% { transform: translate3d(0, 0, 0) rotateX(0) rotateY(0) rotateZ(0); }
   25% { transform: translate3d(-2px, -4px, 4px) rotateX(-6deg) rotateY(8deg) rotateZ(-1deg); }
   75% { transform: translate3d(2px, 4px, -3px) rotateX(7deg) rotateY(-8deg) rotateZ(1deg); }
 }
-@keyframes playground-fade { to { opacity: 0; } }
 @keyframes playground-lock { 0% { transform: scale(1.16); opacity: .5; } 50% { transform: scale(.94); opacity: 1; } 100% { transform: scale(1); opacity: .95; } }
-@media (max-width: 600px) {
-  .hero-playground-toolbar { top: 102px; right: 22px; }
-  .hero-playground-reset { padding: 8px 10px; font-size: 9px; }
-}
 @media (prefers-reduced-motion: reduce) {
   .hero-playground-layer *, .hero-playground-layer *::before, .hero-playground-layer *::after { animation: none !important; }
 }

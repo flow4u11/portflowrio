@@ -17,3 +17,7 @@ Local preview without database settings uses ignored `.data/visits.json`. Partia
 ## Checks
 
 `npm run test:visits` checks duplicate/concurrent arrivals, corrupt local data handling, hash-only database requests, failure handling, server configuration, request parsing and HTTP limits.
+
+## Appearance defaults
+
+First visits and Reset to defaults use the shared preset in `src/components/motion-settings-model.ts`. Changes saved by a visitor remain in that browser. Updating the shared preset requires a reviewed source change and deployment; the public Settings panel only changes personal preferences. Gallery motion defaults off on mobile, and reduced motion takes priority.

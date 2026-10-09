@@ -5,7 +5,7 @@ import { getPortfolioReadiness, subscribePortfolioReadiness, type PortfolioReadi
 import './portfolio-loader.css';
 import { ShinyText } from './ShinyText';
 
-type LoaderPhase = 'entry' | 'loading' | 'complete';
+type LoaderPhase = 'loading' | 'complete';
 type Resource = 'portrait' | 'portraitAlternate' | 'fonts' | 'gallery' | 'background';
 
 const RESOURCE_WEIGHTS: Record<Resource, number> = {
@@ -26,7 +26,7 @@ function scramble(target: string, progress: number, frame: number) {
 /** One finite sequence: entrance, real preparation, settled text, then the Hero handoff. */
 export function PortfolioLoader({ reduced, onComplete }: { reduced: boolean; onComplete: () => void }) {
   const { settings } = useMotionSettings();
-  const [phase, setPhase] = useState<LoaderPhase>(reduced ? 'loading' : 'entry');
+  const [phase, setPhase] = useState<LoaderPhase>('loading');
   const [fallback, setFallback] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
@@ -140,10 +140,8 @@ export function PortfolioLoader({ reduced, onComplete }: { reduced: boolean; onC
       lastFrame = now;
       if (!document.hidden) visibleTime += delta;
       const motionReduced = configRef.current.reduced;
-      const entryDuration = motionReduced ? 0 : 440 / speed;
-      if (loadingAt < 0 && visibleTime >= entryDuration) {
+      if (loadingAt < 0) {
         loadingAt = visibleTime;
-        setPhase('loading');
       }
       if (loadingAt >= 0 && completeAt < 0) {
         const elapsed = visibleTime - loadingAt;
@@ -215,14 +213,8 @@ export function PortfolioLoader({ reduced, onComplete }: { reduced: boolean; onC
     aria-label={complete ? 'Portfolio ready' : 'Preparing portfolio'} data-phase={phase} data-complete={complete} initial={false}
     exit={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
     transition={{ duration: reduced ? .12 : .85 / settings.animationSpeed, ease: [.22, 1, .36, 1] }}>
-    <motion.div className="portfolio-loader-entry" aria-hidden="true"
-      initial={reduced ? { opacity: 0 } : { opacity: 0, y: 10, scale: .65 }}
-      animate={phase === 'entry' ? { opacity: [0, 1, 1, 0], y: [10, 0, 0], scale: [.65, 1, .78] } : { opacity: 0, scale: .78 }}
-      transition={{ duration: reduced ? 0 : .44 / settings.animationSpeed, times: [0, .32, .72, 1], ease: [.22, 1, .36, 1] }}>
-      <i /><i /><i /><i />
-    </motion.div>
     <motion.div className="portfolio-loader-center" aria-hidden="true"
-      initial={false} animate={phase === 'entry' ? { opacity: 0, y: 18 } : { opacity: 1, y: 0 }}
+      initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 10 }} animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: reduced ? 0 : -18, transition: { duration: reduced ? .1 : .38 / settings.animationSpeed, ease: [.22, 1, .36, 1] } }}
       transition={{ duration: reduced ? 0 : .52 / settings.animationSpeed, ease: [.22, 1, .36, 1] }}>
       <ShinyText contentRef={labelRef} className="portfolio-loader-label" text="Loading..." speed={1.8 / settings.animationSpeed} delay={.3} disabled={reduced} />

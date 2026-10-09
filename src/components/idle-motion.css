@@ -69,7 +69,7 @@
    never changes/restarts it; repeated groups stay fully pointer interactive. */
 .looping-marquee[data-static="true"] { overflow: visible; }
 .looping-marquee[data-static="true"] .looping-marquee-track { width: auto; animation: none; transform: none; }
-.looping-marquee[data-static="true"] .looping-marquee-group { display: block; min-width: 0; }
+.looping-marquee[data-static="true"] .looping-marquee-group { display: block; min-width: 0; width: 100%; flex: 1 1 100%; }
 .looping-marquee[data-static="true"] .looping-marquee-set { width: auto; flex-wrap: wrap; padding-right: 0; }
 .looping-marquee[data-static="true"] .looping-marquee-copy,
 .looping-marquee[data-static="true"] .looping-marquee-clone { display: none; }
@@ -80,7 +80,7 @@
   .cycling-about-play { display: none; }
   .looping-marquee { overflow: visible; }
   .looping-marquee .looping-marquee-track { width: auto; animation: none; transform: none; }
-  .looping-marquee .looping-marquee-group { display: block; min-width: 0; }
+  .looping-marquee .looping-marquee-group { display: block; min-width: 0; width: 100%; flex: 1 1 100%; }
   .looping-marquee .looping-marquee-set { width: auto; flex-wrap: wrap; padding-right: 0; }
   .looping-marquee .looping-marquee-copy,
   .looping-marquee .looping-marquee-clone { display: none; }

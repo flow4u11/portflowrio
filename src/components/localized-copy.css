@@ -1,6 +1,4 @@
 .localized-copy { position: relative; display: inline-block; vertical-align: baseline; max-width: 100%; }
-.localized-copy[data-scrambling] .localized-copy-content { opacity: 0; }
-.localized-copy-scramble { position: absolute; inset: 0; overflow: hidden; overflow-wrap: anywhere; pointer-events: none; }
 .localized-copy strong { color: var(--text); font-weight: 650; }
 .language-control { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 62px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: var(--text); font: 10px 'Space Mono', monospace; transition: background calc(.2s * var(--motion-duration-factor, 1)), transform calc(.2s * var(--motion-duration-factor, 1)) var(--ease); }
 .language-control:hover { background: var(--surface); transform: translateY(-1px); }

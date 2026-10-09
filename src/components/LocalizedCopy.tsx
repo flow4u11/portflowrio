@@ -1,41 +1,46 @@
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Languages } from 'lucide-react';
 import { useIdleMotion } from './useIdleMotion';
 import { useMotionSettings } from './MotionSettings';
+import { ShinyText } from './ShinyText';
 import './localized-copy.css';
 
 export type Language = 'en' | 'th';
-const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-/** Keep readable content in the accessibility tree while a short visual layer resolves. */
-export function LocalizedCopy({ text, language }: { text: string; language: Language }) {
+/** A finite fade exchanges readable text without a scrambled intermediate copy. */
+export function LocalizedCopy({ text, language, shine = false }: { text: string; language: Language; shine?: boolean }) {
   const { settings } = useMotionSettings();
   const speed = useRef(settings.animationSpeed);
   speed.current = settings.animationSpeed;
   const { ref, active, reduced } = useIdleMotion<HTMLSpanElement>();
-  const previous = useRef(text);
-  const [scramble, setScramble] = useState<string | null>(null);
-  useEffect(() => {
-    if (previous.current === text) return;
-    previous.current = text;
-    if (!active || reduced || document.hidden) { setScramble(null); return; }
-    const characters = Array.from(text.replaceAll('**', ''));
-    let frame = 0;
-    const tick = () => {
-      frame += 1;
-      if (frame >= 10 || document.hidden) { setScramble(null); clearInterval(timer); return; }
-      const resolved = Math.ceil(characters.length * frame / 10);
-      setScramble(characters.map((character, index) => index < resolved || /\s|[.,!?—·]/u.test(character)
-        ? character : glyphs[Math.floor(Math.random() * glyphs.length)]).join(''));
-    };
-    const timer = setInterval(tick, 55 / speed.current);
-    tick();
-    return () => clearInterval(timer);
-  }, [text, active, reduced]);
-  useEffect(() => { if (!active || reduced) setScramble(null); }, [active, reduced]);
-  return <span ref={ref} className="localized-copy" lang={language} data-scrambling={scramble !== null || undefined}>
-    <span className="localized-copy-content">{text.split('**').map((part, index) => index % 2 ? <strong key={index}>{part}</strong> : part)}</span>
-    {scramble !== null && <span className="localized-copy-scramble" aria-hidden="true">{scramble}</span>}
+  const [displayed, setDisplayed] = useState({ text, language });
+  const entering = useRef(false);
+  useLayoutEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    if (!active || reduced || document.hidden) {
+      entering.current = false;
+      if (displayed.text !== text || displayed.language !== language) setDisplayed({ text, language });
+      return;
+    }
+    if (displayed.text !== text || displayed.language !== language) {
+      const animation = node.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 110 / speed.current, fill: 'forwards' });
+      let cancelled = false;
+      animation.onfinish = () => {
+        if (cancelled) return;
+        entering.current = true;
+        setDisplayed({ text, language });
+      };
+      return () => { cancelled = true; animation.cancel(); };
+    }
+    if (entering.current) {
+      entering.current = false;
+      const animation = node.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180 / speed.current, easing: 'ease-out' });
+      return () => animation.cancel();
+    }
+  }, [text, language, displayed, active, reduced, ref]);
+  return <span ref={ref} className="localized-copy" lang={displayed.language}>
+    <span className="localized-copy-content">{displayed.text.split('**').map((part, index) => index % 2 ? <strong key={index}>{part}</strong> : shine ? <ShinyText key={index} disabled={reduced} text={part} speed={1.6 / settings.animationSpeed} delay={1.5} /> : part)}</span>
   </span>;
 }
 

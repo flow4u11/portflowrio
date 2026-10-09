@@ -40,11 +40,12 @@ input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-sele
 .skip-link:focus { transform: none; }
 .depth-stage { min-width: 0; }
 .portfolio-page { position: relative; isolation: isolate; }
+.portfolio-page[data-loading="true"] { visibility: hidden; }
 .portfolio-page main, .site-footer { position: relative; z-index: 1; }
 #header-sentinel { position: absolute; top: 0; left: 0; width: 1px; height: 24px; pointer-events: none; }
 .page-stars { position: fixed !important; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: .8; background: radial-gradient(ellipse at 15% 30%, rgb(129 147 218 / 13%), transparent 52%), radial-gradient(ellipse at 85% 80%, rgb(175 151 215 / 12%), transparent 55%); }
 [data-theme="dark"] .page-stars { opacity: .48; background: radial-gradient(ellipse at 15% 30%, rgb(74 85 147 / 13%), transparent 52%), radial-gradient(ellipse at 85% 80%, rgb(116 81 161 / 13%), transparent 55%); }
-.nav-indicator { position: absolute; inset: 0; background: var(--surface); border: 1px solid var(--line); border-radius: inherit; }
+.nav-indicator { position: absolute; top: 0; left: 0; height: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 30px; pointer-events: none; transform-origin: center; }
 .nav-label { position: relative; z-index: 1; }
 .typewriter { display: inline-block; max-width: 100%; min-height: 1.7em; }
 .typewriter-caret { display: inline-block; margin-left: 3px; animation: caret-blink calc(1.2s * var(--motion-duration-factor, 1)) step-end infinite; }
@@ -57,15 +58,16 @@ h2 i { font: italic 1.05em/1 Georgia, "Times New Roman", serif; letter-spacing: 
 
 /* A brief landing sequence driven by image/font readiness. */
 .loading-screen { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; justify-content: space-between; background: #050505; color: #fff; padding: 40px var(--page-pad); transform-origin: center top; perspective: 1000px; }
-.site-header { position: fixed; z-index: 100; inset: 0 0 auto; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 var(--page-pad); height: 80px; border-bottom: 1px solid transparent; transition: background calc(.4s * var(--motion-duration-factor, 1)), border-color calc(.4s * var(--motion-duration-factor, 1)); }
-.site-header.is-scrolled { background: var(--bg); border-bottom-color: var(--line); }
+.site-header { position: fixed; z-index: 100; inset: 0 0 auto; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 var(--page-pad); height: 80px; border-bottom: 0; transition: background calc(.4s * var(--motion-duration-factor, 1)), border-color calc(.4s * var(--motion-duration-factor, 1)); }
+.site-header.is-scrolled { background: var(--bg); }
+.site-header.is-scrolled::after { content: ''; position: absolute; inset: auto 0 -1px; height: 1px; background: var(--line); pointer-events: none; }
 .wordmark { width: fit-content; font-size: 19px; font-weight: 600; letter-spacing: -.65px; line-height: 1; }
 .wordmark > span { margin-left: 1px; }
-.site-header nav { display: flex; gap: 3px; font-size: 12px; }
+.site-header nav { position: relative; display: flex; gap: 3px; font-size: 12px; }
 .site-header nav a { position: relative; padding: 10px 15px; color: var(--muted); transition: color calc(.3s * var(--motion-duration-factor, 1)); border-radius: 30px; }
 .site-header nav a:hover, .site-header nav a[aria-current] { color: var(--text); }
 .theme-control { justify-self: end; }
-.page-progress { position: absolute; inset: auto 0 -1px; height: 1px; background: var(--text); transform-origin: left; pointer-events: none; }
+.page-progress { position: absolute; z-index: 1; inset: auto 0 -1px; height: 1px; background: var(--text); transform-origin: left; pointer-events: none; }
 
 /* Monochrome star fields keep the center composition uncluttered. */
 .hero { position: relative; isolation: isolate; perspective: 1200px; min-height: 650px; height: 100svh; max-height: 1100px; overflow: hidden; }
@@ -93,7 +95,7 @@ h2 i { font: italic 1.05em/1 Georgia, "Times New Roman", serif; letter-spacing: 
 .about-story { padding-top: 12px; display: flex; flex-direction: column; gap: clamp(24px, 2.2vw, 36px); }
 .about-story .about-copy { max-width: none; font-size: 14px; margin-top: 0; }
 .about-story .interest-row { margin-top: 0; }
-.about-lead { font-size: 20px; line-height: 1.7; letter-spacing: -.4px; margin-top: 31px; }
+.about-lead { font-size: 16px; line-height: 1.8; letter-spacing: -.2px; margin-top: 31px; }
 .about-copy { font-size: 13px; line-height: 1.95; color: var(--muted); margin-top: 21px; max-width: 560px; }
 .study-strip { display: flex; align-items: center; gap: 15px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 31px; padding: 22px 0; }
 .study-mark { display: grid; place-items: center; width: 37px; height: 37px; border: 1px solid var(--text); font-size: 12px; font-weight: 650; letter-spacing: -1px; flex-shrink: 0; transition: transform calc(.25s * var(--motion-duration-factor, 1)) var(--ease); }
@@ -217,7 +219,7 @@ dialog::backdrop { background: rgb(0 0 0 / 65%); }
 @media (max-width: 900px) {
   .section { padding-top: 90px; padding-bottom: 90px; }
   .about-layout { gap: 38px; }
-  .about-lead { font-size: 18px; }
+  .about-lead { font-size: 15px; }
   .section-intro { font-size: 11px; }
   .projects-grid { gap: 23px; }
   .project-status { top: 12px; left: 12px; font-size: 6px; }
@@ -252,7 +254,7 @@ dialog::backdrop { background: rgb(0 0 0 / 65%); }
   .about-introduction h2 { font-size: 54px; }
   .about-story { padding-top: 0; }
   .about-story .about-copy { font-size: 13px; }
-  .about-lead { font-size: 18px; margin-top: 25px; }
+  .about-lead { font-size: 15px; margin-top: 25px; }
   .about-copy { font-size: 12px; }
   .study-strip { gap: 12px; margin-top: 27px; }
   .study-strip strong { font-size: 11px; }

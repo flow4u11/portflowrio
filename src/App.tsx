@@ -27,7 +27,7 @@ import { SectionTitle } from './components/SectionTitle';
 import { PixelTrail } from './components/PixelTrail';
 import { HeroPlayground } from './components/HeroPlayground';
 import { useActiveSection } from './components/useActiveSection';
-import { NavigationWarp } from './components/NavigationWarp';
+import { TopbarNavigation } from './components/TopbarNavigation';
 
 type Theme = 'light' | 'dark';
 const heroPart: Variants = {
@@ -131,15 +131,14 @@ export default function App() {
   };
 
   return <>
+    <PortfolioBackground className="page-stars" starColor={theme === 'dark' ? '#d5d8ed' : '#6d7b9c'} factor={0} pointerEvents={false} />
     <AnimatePresence onExitComplete={finishLoaderExit}>{loading ? <PortfolioLoader reduced={reduced} onComplete={finishLoading} /> : null}</AnimatePresence>
-    <div className="portfolio-page" inert={loading || !heroEntered || undefined}>
-      <PortfolioBackground className="page-stars" starColor={theme === 'dark' ? '#d5d8ed' : '#6d7b9c'} factor={0} pointerEvents={false} />
-      <NavigationWarp />
+    <div className="portfolio-page" data-loading={loading} inert={loading || !heroEntered || undefined}>
       <div id="header-sentinel" aria-hidden="true" />
       <a className="skip-link" href="#home">Skip to content</a>
       <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
         <button type="button" className="wordmark wordmark-settings" onClick={() => setSettingsOpen(true)} aria-label={language === 'th' ? 'เปิดการตั้งค่า' : 'Open motion settings'} aria-haspopup="dialog"><ScrambleWordmark settingsHint /></button>
-        <nav aria-label="Main navigation">{navigation.map(item => <a key={item.id} href={`#${item.id}`} className={item.id === 'home' ? 'nav-home' : undefined} onClick={event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); if (!transitioning) navigate({ ...item, keyboard: event.detail === 0 }); }} aria-current={activeSection === item.id ? 'location' : undefined}>{activeSection === item.id && <motion.span className="nav-indicator" layoutId="active-navigation" transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 160 * settings.animationSpeed ** 2, damping: 25 * settings.animationSpeed }} aria-hidden="true" />}<span className="nav-label">{item.label}</span></a>)}</nav>
+        <TopbarNavigation items={navigation} active={activeSection} reduced={reduced} speed={settings.animationSpeed} onNavigate={next => { if (!transitioning) navigate(next); }} />
         <div className="header-controls"><LanguageControl language={language} onChange={setLanguage} /><SpecialThemeControl active={specialTheme} onExit={exitSpecial} language={language} disabled={transitioning || navigating}><ThemeTogglerButton theme={theme} onThemeChange={setTheme} disabled={transitioning || navigating} className="theme-control" aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} /></SpecialThemeControl></div>
         <motion.div className="page-progress" style={{ scaleX: pageProgress }} aria-hidden="true" />
       </header>
@@ -167,7 +166,7 @@ export default function App() {
         </section>
 
         <section className="section projects-section" id="projects" aria-labelledby="projects-title">
-          <Depth><div className="section-heading"><div><p className="eyebrow"><span>02</span> Selected projects</p><SectionTitle id="projects-title" first="Ideas taking" last="shape." /></div><p className="section-intro"><LocalizedCopy text={text.projectIntro} language={language} /></p></div></Depth>
+          <Depth><div className="section-heading"><div><p className="eyebrow"><span>02</span> Selected projects</p><SectionTitle id="projects-title" first="Ideas taking" last="shape." /></div></div></Depth>
           <div className="showcase-renderer"><ProjectGallery projects={projects} onOpen={openModal} language={language} staticDesign={specialTheme} /></div>
         </section>
 

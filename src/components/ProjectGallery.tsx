@@ -452,7 +452,7 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
     <div className="pg-footer">
       <div className="pg-progress-group">
         <span className="pg-position" role="status" aria-live="polite" aria-atomic="true"><span className="pg-sr-only">{currentLabel}. Gallery position </span><strong><ProjectMotionNumber value={position.index + 1} /></strong><span aria-hidden="true"> / </span><span className="pg-sr-only">of </span>{String(total).padStart(2, '0')}</span>
-        <progress className="pg-progress" value={position.index + 1} max={total} aria-label="Project gallery position" />
+        <div className="pg-progress" role="progressbar" aria-valuenow={position.index + 1} aria-valuemin={0} aria-valuemax={total} aria-label="Project gallery position"><span className="pg-progress-fill" style={{ transform: `scaleX(${(position.index + 1) / total})` }} /></div>
       </div>
     </div>
   </div>;

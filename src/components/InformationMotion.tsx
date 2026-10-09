@@ -42,6 +42,6 @@ export function GraduationYears() {
 export function ExperienceStatus({ language }: { language: Language }) {
   const { ref, active } = useIdleMotion<HTMLSpanElement>();
   return <span ref={ref} className="experience-status" data-running={active} lang={language}>
-    <span className="experience-dot" aria-hidden="true" /><LocalizedCopy language={language} text={language === 'th' ? 'กำลังมองหาประสบการณ์' : 'Looking for experience'} /><span className="experience-ellipsis" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span>
+    <span className="experience-dot" aria-hidden="true" /><LocalizedCopy shine language={language} text={language === 'th' ? 'กำลังมองหาประสบการณ์' : 'Looking for experience'} /><span className="experience-ellipsis" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span>
   </span>;
 }

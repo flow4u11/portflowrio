@@ -4,6 +4,7 @@ The shared background is an original Three.js scene, using a single point cloud 
 
 - Three.js is pinned to **0.186.1** (MIT); the renderer is a separate dynamically loaded module.
 - At most 240 stars render (120 on mobile), at 30 frames per second, with a 900,000-pixel / 1.25 DPR cap. No textures, shadows or postprocessing are used.
+- Loading shares the same field as the page. Navigation briefly accelerates these stars and adds one bounded line draw from their exact positions; no separate particle overlay is mounted. Arrival or interruption removes the trails immediately.
 - Hidden pages stop rendering. Reduced-motion and unavailable/lost WebGL use the original bounded Canvas2D fallback.
 - Startup waits for the scene's first render and the selected gallery presentation, or an explicit fallback. Text completion and the final progress hold finish before the Hero entrance.
 

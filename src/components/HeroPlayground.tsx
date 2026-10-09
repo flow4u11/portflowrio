@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
-import { RotateCcw } from 'lucide-react';
 import { useMotionSettings } from './MotionSettings';
 import { playgroundAim, playgroundBlast, playgroundHeldPose, playgroundHomeFlight, playgroundShotFlight, scatterPlaygroundPieces, type PlaygroundBounds, type PlaygroundPoint, type PlaygroundPose } from './hero-playground-physics';
 import { createPlaygroundIdle } from './playground-idle';
@@ -42,14 +41,14 @@ type Phase = 'idle' | 'playing' | 'assembling';
 
 const COPY = {
   en: {
-    title: 'Floating pieces', assemble: 'Put it back', returned: 'Back in place.',
-    keyboard: 'Use Tab to choose a piece. Enter or Space returns it. Escape puts everything back.',
+    title: 'Floating pieces', returned: 'Back in place.',
+    keyboard: 'Double-click anywhere to put everything back. Use Tab to choose a piece. Enter or Space returns it. Escape puts everything back.',
     letter: 'Letter', returnPiece: 'click to return, or hold and aim toward its home to shoot; Enter returns it',
     profile: 'Profile', role: 'Intro', tags: 'Interests', explore: 'Explore', ready: 'Choose any floating piece.',
   },
   th: {
-    title: 'ชิ้นส่วนที่ลอยอยู่', assemble: 'จัดกลับที่เดิม', returned: 'กลับเข้าที่แล้ว',
-    keyboard: 'ใช้ Tab เลือกชิ้นส่วน กด Enter หรือ Space เพื่อคืนที่เดิม กด Escape เพื่อคืนทุกอย่าง',
+    title: 'ชิ้นส่วนที่ลอยอยู่', returned: 'กลับเข้าที่แล้ว',
+    keyboard: 'ดับเบิลคลิกที่ไหนก็ได้เพื่อคืนทุกอย่าง ใช้ Tab เลือกชิ้นส่วน กด Enter หรือ Space เพื่อคืนที่เดิม กด Escape เพื่อคืนทุกอย่าง',
     letter: 'ตัวอักษร', returnPiece: 'คลิกเพื่อคืนที่เดิม หรือกดค้างแล้วเล็งไปที่เดิมเพื่อยิงกลับ กด Enter เพื่อคืนที่เดิม',
     profile: 'โปรไฟล์', role: 'คำแนะนำ', tags: 'ความสนใจ', explore: 'สำรวจ', ready: 'เลือกชิ้นส่วนที่ลอยอยู่ได้เลย',
   },
@@ -301,12 +300,12 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
       }
       if (document.activeElement === node) {
         const next = current.pieces.find(item => !item.returned && !item.busy);
-        (next ? nodes.current.get(next.id) : layer.current?.querySelector<HTMLButtonElement>('.hero-playground-reset'))?.focus({ preventScroll: true });
+        (next ? nodes.current.get(next.id) : current.focusTarget)?.focus({ preventScroll: true });
       }
       if (current.pieces.every(item => item.returned)) {
         clearInactivity();
         idleClock.arm(() => finishSession(), 350);
-      } else restTimer();
+      }
     });
     restTimer();
   }, [animatePiece, clearInactivity, finishSession, restTimer, restoreSource, settleFloat, stopAnimation, idleClock]);
@@ -429,6 +428,12 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
     const stopEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && session.current) { event.preventDefault(); assemble(false, true); }
     };
+    const stopDoubleClick = (event: MouseEvent) => {
+      if (!session.current) return;
+      event.preventDefault();
+      event.stopPropagation();
+      assemble(false, true);
+    };
     const observer = hero && typeof IntersectionObserver !== 'undefined' ? new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting || entry.intersectionRatio < .12) finishSession();
     }, { threshold: [0, .12] }) : null;
@@ -437,6 +442,7 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
     preference.addEventListener('change', stopReduced);
     window.addEventListener('resize', stopResize, { passive: true });
     window.addEventListener('keydown', stopEscape);
+    window.addEventListener('dblclick', stopDoubleClick, true);
     return () => {
       mounted.current = false;
       finishSession();
@@ -445,6 +451,7 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
       preference.removeEventListener('change', stopReduced);
       window.removeEventListener('resize', stopResize);
       window.removeEventListener('keydown', stopEscape);
+      window.removeEventListener('dblclick', stopDoubleClick, true);
     };
   }, [assemble, finishSession]);
 
@@ -508,7 +515,6 @@ export function HeroPlayground({ children, enabled = true, language = 'en' }: { 
   }}>
     {children}
     {scene && <div ref={layer} className="hero-playground-layer" data-phase={phase} role="group" aria-label={text.title}>
-      <div className="hero-playground-toolbar"><button type="button" className="hero-playground-reset" onClick={() => assemble(false, true)} disabled={phase === 'assembling'}><RotateCcw size={13} aria-hidden="true" />{text.assemble}</button></div>
       <span className="sr-only">{text.keyboard}</span>
       <svg className="hero-playground-tether" viewBox={`0 0 ${scene.bounds.width} ${scene.bounds.height}`} aria-hidden="true"><path ref={tether} d="" /></svg>
       <div ref={homeTarget} className="hero-playground-home-target" data-active="false" data-locked="false" aria-hidden="true"><div className="hero-playground-home-frame"><i /><i /><i /><i /><span ref={homeGlyph} /></div></div>

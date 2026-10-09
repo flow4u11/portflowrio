@@ -73,6 +73,8 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, scale 
     let disposed = false;
     let publishedCount = -1;
     let publishedSpeed = -1;
+    let warp: { began: number; duration: number; direction: number } | null = null;
+    let warpStrength = 0;
     const currentOffset = { x: 0, y: 0 };
     const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
 
@@ -101,6 +103,15 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, scale 
         context.globalAlpha = star.opacity;
         // Small rects avoid hundreds of paths, shadows, and full-page CSS paints.
         context.fillRect(x, y, diameter, diameter);
+        if (warpStrength > .001) {
+          context.strokeStyle = colorRef.current;
+          context.lineWidth = Math.max(.6, diameter * .55);
+          context.globalAlpha = star.opacity * warpStrength;
+          context.beginPath();
+          context.moveTo(x + diameter / 2, y + diameter / 2);
+          context.lineTo(x + diameter / 2, y + (warp?.direction ?? 1) * warpStrength * (18 + star.depth * 70));
+          context.stroke();
+        }
       }
       context.globalAlpha = 1;
     };
@@ -112,7 +123,10 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, scale 
         const rate = 60 / Math.max(Number.isFinite(currentSpeed) ? currentSpeed : 90, 1)
           * Math.min(2, Math.max(0.25, Number.isFinite(multiplier) ? multiplier : 1));
         // Integrate speed into the phase so a slider change does not jump the field.
-        phaseRef.current += previousFrame ? Math.min((timestamp - previousFrame) / 1000, 0.1) * rate : 0;
+        const progress = warp ? Math.min(1, (timestamp - warp.began) / warp.duration) : 1;
+        warpStrength = warp && !reduceMotion ? Math.sin(Math.PI * progress) ** 2 : 0;
+        phaseRef.current += previousFrame ? Math.min((timestamp - previousFrame) / 1000, 0.1) * rate * (1 + warpStrength * 24 * (warp?.direction ?? 1)) : 0;
+        if (progress >= 1) warp = null;
         previousFrame = timestamp;
         draw();
       }
@@ -127,6 +141,12 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, scale 
         if (!reduceMotion) frame = window.requestAnimationFrame(tick);
       }
     };
+    const onNavigation = (event: Event) => {
+      const detail = (event as CustomEvent<{ duration: number; direction: number; warp: boolean }>).detail;
+      if (detail.warp && !reduceMotion && !document.hidden) warp = { began: performance.now(), duration: detail.duration, direction: detail.direction };
+    };
+    const stopWarp = () => { warp = null; warpStrength = 0; if (!document.hidden) draw(); };
+    const onVisibility = () => { if (document.hidden) stopWarp(); resume(); };
 
     const resize = () => {
       const bounds = canvas.getBoundingClientRect();
@@ -154,7 +174,9 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, scale 
       resume();
     });
     visibilityObserver.observe(canvas);
-    document.addEventListener('visibilitychange', resume);
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('portfolio:navigation-start', onNavigation);
+    window.addEventListener('portfolio:navigation-end', stopWarp);
     repaintRef.current = () => { if (!document.hidden && onScreen) draw(); };
     resize();
 
@@ -164,7 +186,9 @@ function StarCanvas({ starColor, speed, speedMultiplier = 1, count, size, scale 
       window.cancelAnimationFrame(resizeFrame);
       resizeObserver.disconnect();
       visibilityObserver.disconnect();
-      document.removeEventListener('visibilitychange', resume);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('portfolio:navigation-start', onNavigation);
+      window.removeEventListener('portfolio:navigation-end', stopWarp);
       repaintRef.current = null;
     };
   }, [offset, reduceMotion]);

@@ -67,15 +67,15 @@ export function namePalette(settings: MotionSettings): readonly string[] {
 /** Adaptive defaults are sampled only on initialization/reset, never on resize. */
 export function createDefaultSettings(mobile = false): MotionSettings {
   return {
-    starSpeed: 1, starCount: 120, starScale: 1, showFps: false, animationSpeed: 1,
-    avatarGrid: 10, avatarDuration: 0.55, avatarStagger: 0.85,
-    trailEnabled: true, trailSize: 8, trailLifetime: 360, trailDensity: 0.75,
-    galleryPreset: 'liquid', gallerySpeed: 1, galleryBend: 0.34,
+    starSpeed: 1.65, starCount: 210, starScale: 1.5, showFps: false, animationSpeed: .9,
+    avatarGrid: 20, avatarDuration: 0.55, avatarStagger: 0.85,
+    trailEnabled: true, trailSize: 6, trailLifetime: 180, trailDensity: 0.4,
+    galleryPreset: 'liquid', gallerySpeed: 1.2, galleryBend: 0.05,
     galleryAnimated: !mobile, marqueeEnabled: true,
     nameGradientPreset: 'monochrome', nameGradientStart: '#7978ee',
     nameGradientSecond: '#b08bcf', nameGradientMiddle: '#df80bf', nameGradientFourth: '#a4b5c0', nameGradientEnd: '#59c6b5',
-    nameGradientStops: 5, nameGradientSpeed: 1, nameGradientDirection: 110,
-    nameShineEnabled: true, nameShineSpeed: 2.4, nameShineDelay: 1.2,
+    nameGradientStops: 5, nameGradientSpeed: 2, nameGradientDirection: 110,
+    nameShineEnabled: true, nameShineSpeed: 1.6, nameShineDelay: 1.5,
     nameShineWidth: 35, nameShineSoftness: .8, nameShineAngle: 120,
     nameShineDirection: 'left', nameShineColor: '#ffffff', nameShineAutoColor: true,
     backgroundStyle: 'stars', snowSpeed: 1.25, snowDensity: 0.3,

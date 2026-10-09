@@ -14,7 +14,7 @@ export function useSectionNavigation({ reduced, speed = 1 }: { reduced: boolean;
     if (!target) return;
     cancelRef.current?.();
     const headerHeight = document.querySelector('.site-header')?.getBoundingClientRect().height ?? 80;
-    const requestedTop = target.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+    const requestedTop = target.getBoundingClientRect().top + window.scrollY - headerHeight;
     const top = Math.max(0, Math.min(requestedTop, document.documentElement.scrollHeight - window.innerHeight));
     const complete = () => {
       if (window.location.hash !== `#${next.id}`) history.pushState(null, '', `#${next.id}`);

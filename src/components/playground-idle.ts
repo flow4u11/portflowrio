@@ -1,4 +1,4 @@
-export const PLAYGROUND_IDLE_MS = 12000;
+export const PLAYGROUND_IDLE_MS = 5000;
 type Clock = {
   set: (callback: () => void, delay: number) => unknown;
   clear: (handle: unknown) => void;

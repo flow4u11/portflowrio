@@ -8,15 +8,15 @@ function setup() {
   const advance = elapsed => { time += elapsed; for (const [key, job] of jobs) if (job.at <= time) { jobs.delete(key); job.callback(); } };
   return { idle, advance, archived, jobs };
 }
-test('idle restores once after twelve seconds with no interaction', () => {
+test('idle restores once after five seconds with no interaction', () => {
   const { idle, advance, jobs } = setup(); let returns = 0;
   idle.arm(() => returns++); advance(PLAYGROUND_IDLE_MS - 1); assert.equal(returns, 0);
   advance(1); assert.equal(returns, 1); advance(60000); assert.equal(returns, 1); assert.equal(jobs.size, 0);
 });
 test('interaction renews one deadline instead of accumulating callbacks', () => {
   const { idle, advance, jobs } = setup(); let returns = 0;
-  idle.arm(() => returns++); advance(11000); idle.arm(() => returns++);
-  advance(11000); assert.equal(returns, 0); assert.equal(jobs.size, 1);
+  idle.arm(() => returns++); advance(PLAYGROUND_IDLE_MS - 1000); idle.arm(() => returns++);
+  advance(PLAYGROUND_IDLE_MS - 1000); assert.equal(returns, 0); assert.equal(jobs.size, 1);
   advance(1000); assert.equal(returns, 1);
 });
 test('queued stale timers cannot affect a replacement session or explicit reset', () => {
