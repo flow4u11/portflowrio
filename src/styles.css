@@ -95,7 +95,7 @@ h2 i { font: italic 1.05em/1 Georgia, "Times New Roman", serif; letter-spacing: 
 .about-story { padding-top: 12px; display: flex; flex-direction: column; gap: clamp(24px, 2.2vw, 36px); }
 .about-story .about-copy { max-width: none; font-size: 14px; margin-top: 0; }
 .about-story .interest-row { margin-top: 0; }
-.about-lead { font-size: 16px; line-height: 1.8; letter-spacing: -.2px; margin-top: 31px; }
+.about-lead { font-size: 16px; line-height: 28px; letter-spacing: -.2px; margin-top: 32px; }
 .about-copy { font-size: 13px; line-height: 1.95; color: var(--muted); margin-top: 21px; max-width: 560px; }
 .study-strip { display: flex; align-items: center; gap: 15px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 31px; padding: 22px 0; }
 .study-mark { display: grid; place-items: center; width: 37px; height: 37px; border: 1px solid var(--text); font-size: 12px; font-weight: 650; letter-spacing: -1px; flex-shrink: 0; transition: transform calc(.25s * var(--motion-duration-factor, 1)) var(--ease); }
@@ -219,7 +219,7 @@ dialog::backdrop { background: rgb(0 0 0 / 65%); }
 @media (max-width: 900px) {
   .section { padding-top: 90px; padding-bottom: 90px; }
   .about-layout { gap: 38px; }
-  .about-lead { font-size: 15px; }
+  .about-lead { font-size: 16px; }
   .section-intro { font-size: 11px; }
   .projects-grid { gap: 23px; }
   .project-status { top: 12px; left: 12px; font-size: 6px; }
@@ -254,7 +254,7 @@ dialog::backdrop { background: rgb(0 0 0 / 65%); }
   .about-introduction h2 { font-size: 54px; }
   .about-story { padding-top: 0; }
   .about-story .about-copy { font-size: 13px; }
-  .about-lead { font-size: 15px; margin-top: 25px; }
+  .about-lead { font-size: 16px; margin-top: 24px; }
   .about-copy { font-size: 12px; }
   .study-strip { gap: 12px; margin-top: 27px; }
   .study-strip strong { font-size: 11px; }

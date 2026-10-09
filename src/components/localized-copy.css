@@ -1,6 +1,17 @@
 .localized-copy { position: relative; display: inline-block; vertical-align: baseline; max-width: 100%; }
 .localized-copy strong { color: var(--text); font-weight: 650; }
+.localized-copy[data-scrambling] .localized-copy-content { opacity: 0; }
+.localized-copy-scramble, .localized-copy-outgoing { position: absolute; inset: 0; overflow: hidden; overflow-wrap: anywhere; pointer-events: none; }
+.localized-copy-outgoing > span { visibility: hidden; }
+.localized-copy-outgoing strong { animation: localized-bold-out calc(110ms * var(--motion-duration-factor, 1)) ease-in both; }
+.localized-copy[data-bold-entering] .localized-copy-content strong { animation: localized-bold-in calc(180ms * var(--motion-duration-factor, 1)) ease-out both; }
+@keyframes localized-bold-out { to { opacity: 0; } }
+@keyframes localized-bold-in { from { opacity: 0; } to { opacity: 1; } }
 .language-control { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 62px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: var(--text); font: 10px 'Space Mono', monospace; transition: background calc(.2s * var(--motion-duration-factor, 1)), transform calc(.2s * var(--motion-duration-factor, 1)) var(--ease); }
 .language-control:hover { background: var(--surface); transform: translateY(-1px); }
 .language-control .localized-copy { width: 2ch; }
-@media (prefers-reduced-motion: reduce) { .language-control:hover { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .language-control:hover { transform: none; }
+  .localized-copy-outgoing { display: none; }
+  .localized-copy-content strong { animation: none !important; }
+}
