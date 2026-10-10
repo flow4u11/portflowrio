@@ -513,6 +513,9 @@ const FlexCarousel = ({
     canvas.style.display = 'block';
     canvas.style.width = '100%';
     canvas.style.height = '100%';
+    // GPU preparation may paint the final artwork, but that bitmap must never
+    // become the visitor's first visible frame before the entrance starts.
+    canvas.style.visibility = 'hidden';
     canvas.setAttribute('aria-hidden', 'true');
     container.prepend(canvas);
 
@@ -876,7 +879,7 @@ const FlexCarousel = ({
 
     const frame = (now: number) => {
       raf = 0;
-      if (!alive || (!visible && !prewarming) || document.hidden || scrolling) return;
+      if (!alive || (!visible && !prewarming) || document.hidden || (scrolling && !introState.running)) return;
       // OGL physics and GPU draws share a 60 Hz ceiling; the rest of the page
       // can still animate at the display's native refresh rate.
       if (now - lastRender < FRAME_INTERVAL - 1) {
@@ -923,7 +926,7 @@ const FlexCarousel = ({
             // Preparation paints the final frame, but never consumes the
             // visitor's entrance animation while the stage is offscreen.
             introState.done = true;
-          container.dataset.introState = 'done';
+            container.dataset.introState = 'waiting';
             introState.t = 1;
           } else {
             introduced = true;
@@ -1170,6 +1173,7 @@ const FlexCarousel = ({
         lensUniforms.uSceneAlpha.value = effects.sceneAlpha;
         renderer.render({ scene: lensMesh });
         painted = true;
+        if (canvas.style.visibility === 'hidden' && (introduced || s.intro === 'none')) canvas.style.visibility = 'visible';
         if (introState.done) {
           announceReady(now - introState.readyAt > 3500);
           if (ready) prewarming = false;
@@ -1192,7 +1196,7 @@ const FlexCarousel = ({
     };
 
     const start = () => {
-      if (raf || (!visible && !prewarming) || !alive || document.hidden || scrolling) return;
+      if (raf || (!visible && !prewarming) || !alive || document.hidden || (scrolling && !introState.running)) return;
       last = performance.now();
       raf = requestAnimationFrame(frame);
     };
@@ -1502,8 +1506,10 @@ const FlexCarousel = ({
       closeFocus();
       if ((!visible && !prewarming) || pointer.dragging) return;
       scrolling = true;
-      cancelAnimationFrame(raf);
-      raf = 0;
+      if (!introState.running) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else start();
       pointer.over = false;
       pointer.down = false;
       setHovered(-1);

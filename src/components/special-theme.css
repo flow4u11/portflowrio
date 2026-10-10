@@ -170,3 +170,11 @@
 @keyframes theme-ghost-caret { 50% { opacity: 0; } }
 @keyframes theme-ghost-accept { from { opacity: 0; transform: scaleX(.2); transform-origin: left; } 30% { opacity: 1; } to { opacity: 0; transform: scaleX(1); transform-origin: left; } }
 @media (prefers-reduced-motion: reduce) { .theme-lab-ghost-caret { animation: none; } .theme-lab-input-wrap[data-accepted="true"]::after { display: none; } }
+
+/* Original theme emblems: layered geometry and a crescent with a small bat. */
+.special-theme-emblem { transition: transform 280ms var(--ease); transform-origin: center; }
+.special-theme-control .special-theme-return-icon { background: var(--bg); border-radius: 50%; padding: 2px; width: 16px; height: 16px; right: -4px; bottom: -4px; border: 1px solid currentColor; }
+.special-theme-control:is(:hover, :focus-visible) .special-theme-emblem { transform: rotate(-8deg) scale(1.08); }
+:root[data-design="halloween"] .special-theme-control { color: var(--halloween-accent); }
+:root[data-design="halloween"] .special-theme-control .special-theme-return-icon { color: var(--text); }
+@media (prefers-reduced-motion: reduce) { .special-theme-emblem { transition: none; transform: none !important; } }

@@ -49,7 +49,7 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
     const pointer = interactionRef.current;
     const running = state.active && state.ready && !state.isStatic && !document.hidden && !navigatingRef.current && !pointer.hovered && !pointer.pressed && !pointer.keyboard;
     if (running) {
-      resumeTimeline(animation, heldTime, rate.current);
+      timeline.current = resumeTimeline(animation, heldTime, rate.current);
     } else holdTimeline(animation, heldTime);
   }, []);
   const updateInteraction = useCallback((patch: Partial<MarqueeInteraction>) => {

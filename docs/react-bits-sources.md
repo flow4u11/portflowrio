@@ -60,3 +60,9 @@ SOFTWARE.
 The existing attributed Flex Carousel now exposes its Rise/Bloom/Spin/Deal entrances and fit, card height, gap, radius, tilt, roundness, reach, dispersion, liquid, cursor-follow and hover-focus controls. Offscreen warmup paints a ready frame without consuming the first visible entrance. Settings v6 keeps earlier personal preferences; reduced motion and the mobile static default remain. Reference: https://reactbits.dev/components/flex-carousel .
 
 Contact shine uses a linear, continuous left-to-right band with both wrap endpoints outside the text; the static base fill remains readable. Nagi panel/reply entrances, word hover and Halloween silhouettes are original bounded opacity/transform motion. These additions do not include ReactBits Pro source.
+
+## Upgrade 0.8 entrance timing
+
+The prepared carousel bitmap stays hidden until its first entrance frame has been rendered. That short entrance can draw during arrival scrolling; the ordinary gallery retains its scroll-quiet gate. Native and reduced-motion fallbacks remain available.
+
+Nagi's reply typewriter is original, finite and grapheme-aware, with a complete accessible text alternative. Closing, hiding or reduced motion settles the reply; reopening does not replay completed answers. Its localized interface reuses the portfolio's existing scramble. Special-theme emblems are original SVG artwork.
