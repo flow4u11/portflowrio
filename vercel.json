@@ -4,9 +4,17 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "functions": {
-    "api/visits.mjs": { "maxDuration": 10 }
+    "api/visits.mjs": {
+      "maxDuration": 10
+    },
+    "api/nagi.mjs": {
+      "maxDuration": 25
+    }
   },
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
   ]
 }
