@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { createNagiHandler } from './nagi.mjs';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { createVisitsHandler } from './visits.mjs';
@@ -8,9 +9,11 @@ loadLocalEnvironment();
 const root = path.resolve('dist');
 const port = Number(process.env.PORT || 4173);
 const visits = createVisitsHandler(createConfiguredVisitStore(), { onError: error => console.error('Visit counter failed:', error.message) });
+const nagi = createNagiHandler();
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/vnd.microsoft.icon', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2' };
 const server = http.createServer(async (request, response) => {
   const pathname = new URL(request.url, 'http://localhost').pathname;
+  if (pathname === '/api/nagi') { await nagi(request, response); return; }
   if (pathname === '/api/visits') { await visits(request, response); return; }
   if (!['GET', 'HEAD'].includes(request.method)) { response.writeHead(405, { Allow: 'GET, HEAD' }); response.end(); return; }
   try {

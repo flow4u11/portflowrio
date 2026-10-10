@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { createNagiHandler } from '../server/nagi.mjs';
 import { createServer as createViteServer } from 'vite';
 import { createVisitsHandler } from '../server/visits.mjs';
 import { createConfiguredVisitStore, loadLocalEnvironment } from '../server/visit-runtime.mjs';
@@ -6,8 +7,10 @@ import { createConfiguredVisitStore, loadLocalEnvironment } from '../server/visi
 loadLocalEnvironment();
 const port = Number(process.env.PORT || 5173);
 const visits = createVisitsHandler(createConfiguredVisitStore(), { onError: error => console.error('Visit counter failed:', error.message) });
+const nagi = createNagiHandler();
 let vite;
 const server = http.createServer((request, response) => {
+  if (new URL(request.url, 'http://localhost').pathname === '/api/nagi') { void nagi(request, response); return; }
   if (new URL(request.url, 'http://localhost').pathname === '/api/visits') {
     void visits(request, response);
     return;

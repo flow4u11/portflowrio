@@ -1,32 +1,32 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowUpRight, Blocks, X } from 'lucide-react';
-import type { ThemeOrigin } from './useSpecialTheme';
+import type { ThemeOrigin, SpecialDesign } from './useSpecialTheme';
 import './special-theme.css';
 
 export type ThemeLabProps = {
-  onActivate: (origin?: ThemeOrigin) => void;
+  onActivate: (origin?: ThemeOrigin, design?: SpecialDesign) => void;
   language?: 'en' | 'th';
 };
 
 const copy = {
   en: {
     keyword: 'theme', trigger: 'Open theme experiment', title: 'A different point of view',
-    hint: 'Try neo, brutalism or neobrutalism. Tab completes a suggestion; Enter opens the theme.', label: 'Theme keyword',
+    hint: 'Try neobrutalism or halloween. Tab completes a suggestion; Enter opens the theme.', label: 'Theme keyword',
     submit: 'Try it', close: 'Close theme experiment',
-    error: 'Theme not found. Try neo or neobrutalism.',
+    error: 'Theme not found. Try neo or halloween.',
   },
   th: {
     keyword: 'ธีม', trigger: 'เปิดการทดลองธีม', title: 'ลองมองในมุมใหม่',
-    hint: 'พิมพ์ neo, brutalism หรือ neobrutalism กด Tab เพื่อเติมคำ และ Enter เพื่อเปิดธีม', label: 'ชื่อธีม',
+    hint: 'พิมพ์ neobrutalism หรือ halloween กด Tab เพื่อเติมคำ และ Enter เพื่อเปิดธีม', label: 'ชื่อธีม',
     submit: 'ลองเลย', close: 'ปิดการทดลองธีม',
-    error: 'ยังไม่มีธีมนี้ ลองพิมพ์ neo หรือ neobrutalism',
+    error: 'ยังไม่มีธีมนี้ ลองพิมพ์ neo หรือ halloween',
   },
 };
 
 const normalizeKeyword = (value: string) => value.trim().toLowerCase().replace(/[\s_-]+/g, '');
-const themeKeywords = new Set(['neo', 'neobrutalism', 'neobrutalist', 'neobrutal', 'brutalism', 'brutalist', 'brutal', 'nb']);
-const themeSuggestions = ['neobrutalism', 'brutalism', 'neo'];
+const themeKeywords = new Set(['neo', 'neobrutalism', 'neobrutalist', 'neobrutal', 'brutalism', 'brutalist', 'brutal', 'nb', 'halloween', 'spooky', 'ฮาโลวีน']);
+const themeSuggestions = ['neobrutalism', 'halloween', 'brutalism', 'neo'];
 
 /** Streams only the suggested suffix; accepting with Tab always fills the complete word. */
 function GhostCompletion({ prefix, suffix }: { prefix: string; suffix: string }) {
@@ -180,7 +180,7 @@ export function ThemeLab({ onActivate, language = 'en' }: ThemeLabProps) {
         const bounds = triggerRef.current?.getBoundingClientRect();
         const origin = bounds ? { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 } : undefined;
         close();
-        onActivate(origin);
+        onActivate(origin, ['halloween', 'spooky', 'ฮาโลวีน'].includes(keyword) ? 'halloween' : 'neobrutalism');
       }}>
         <label className="theme-lab-label" htmlFor={`${id}-input`}>{text.label}</label>
         <div className="theme-lab-entry"><div className="theme-lab-input-wrap" data-accepted={accepted || undefined} onAnimationEnd={() => setAccepted(false)}>

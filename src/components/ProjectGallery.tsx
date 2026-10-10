@@ -265,7 +265,7 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
       const card = (event.target as Element).closest<HTMLElement>('.pg-art-card');
       const index = card ? cards.indexOf(card) : -1;
       setHovered(index);
-      if (!settings.galleryAnimated) { cancelHover(); return; }
+      if (!settings.galleryAnimated || !settings.galleryHoverFocus) { cancelHover(); return; }
       if (index < 0 || Math.abs(index - positionRef.current.index) !== 1) { cancelHover(); return; }
       if (hoverCandidate === index) return;
       cancelHover();
@@ -320,7 +320,7 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [total, enhanced, staticDesign, reduced, settings.galleryAnimated, updateActive]);
+  }, [total, enhanced, staticDesign, reduced, settings.galleryAnimated, settings.galleryHoverFocus, updateActive]);
 
   const goTo = (index: number) => {
     const target = Math.max(0, Math.min(index, total - 1));
@@ -409,14 +409,19 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
           preset={settings.galleryPreset}
           speed={settings.gallerySpeed * settings.animationSpeed}
           bend={settings.galleryBend}
-          intro="none"
-          cardHeight={0.68}
-          fit="natural"
-          gap={24}
-          radius={16}
-          liquid={0.28}
+          intro={settings.galleryIntro}
+          cardHeight={settings.galleryCardHeight}
+          fit={settings.galleryFit}
+          gap={settings.galleryGap}
+          radius={settings.galleryRadius}
+          tilt={settings.galleryTilt}
+          roundness={settings.galleryRoundness}
+          reach={settings.galleryReach}
+          dispersion={settings.galleryDispersion}
+          liquid={settings.galleryLiquid}
+          followCursor={settings.galleryFollowCursor}
           focusOnClick={false}
-          focusOnHover
+          focusOnHover={settings.galleryHoverFocus}
           captureWheel={false}
           label={thai ? 'แกลเลอรีโปรเจกต์' : 'Project gallery'}
           descriptionId={instructionId}

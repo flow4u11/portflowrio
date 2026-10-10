@@ -48,7 +48,7 @@ export function LocalizedCopy({ text, language, shine = false }: { text: string;
     return () => { clearInterval(timer); clearTimeout(exitTimer); clearTimeout(enterTimer); };
   }, [text, active, reduced]);
   return <span ref={ref} className="localized-copy" lang={language} data-scrambling={transition.scramble !== null || undefined} data-bold-entering={transition.entering || undefined}>
-    <span className="localized-copy-content">{text.split('**').map((part, index) => index % 2 ? <strong key={index}>{part}</strong> : shine ? <ShinyText key={index} disabled={reduced} text={part} speed={1.6 / settings.animationSpeed} delay={1.5} /> : part)}</span>
+    <span className="localized-copy-content">{text.split('**').map((part, index) => index % 2 ? <strong key={index}>{part}</strong> : shine ? <ShinyText key={index} continuous direction="right" disabled={reduced} text={part} speed={2.8 / settings.animationSpeed} delay={0} /> : part)}</span>
     {transition.scramble !== null && <span className="localized-copy-scramble" aria-hidden="true">{transition.scramble}</span>}
     {transition.outgoing !== null && <span className="localized-copy-outgoing" aria-hidden="true">{transition.outgoing.split('**').map((part, index) => index % 2 ? <strong key={index}>{part}</strong> : <span key={index}>{part}</span>)}</span>}
   </span>;

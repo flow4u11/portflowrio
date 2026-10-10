@@ -16,6 +16,18 @@ export type MotionSettings = {
   gallerySpeed: number;
   galleryBend: number;
   galleryAnimated: boolean;
+  galleryIntro: 'rise' | 'bloom' | 'spin' | 'deal' | 'none';
+  galleryFit: 'natural' | 'portrait' | 'square' | 'landscape';
+  galleryGap: number;
+  galleryRadius: number;
+  galleryCardHeight: number;
+  galleryTilt: number;
+  galleryRoundness: number;
+  galleryReach: number;
+  galleryDispersion: number;
+  galleryLiquid: number;
+  galleryFollowCursor: boolean;
+  galleryHoverFocus: boolean;
   marqueeEnabled: boolean;
   nameGradientPreset: NameGradientPreset;
   nameGradientStart: string;
@@ -47,7 +59,7 @@ export type MotionSettings = {
 };
 
 export const STORAGE_KEY = 'portfolio-motion-settings';
-export const STORAGE_VERSION = 5;
+export const STORAGE_VERSION = 6;
 export const NAME_PALETTES = {
   monochrome: ['#151515', '#444444', '#777777', '#aaaaaa', '#dddddd'],
   aurora: ['#49d7be', '#6fcfbc', '#b9cc9b', '#e2acbd', '#cc81e3'],
@@ -72,6 +84,9 @@ export function createDefaultSettings(mobile = false): MotionSettings {
     trailEnabled: true, trailSize: 6, trailLifetime: 180, trailDensity: 0.4,
     galleryPreset: 'liquid', gallerySpeed: 1.2, galleryBend: 0.05,
     galleryAnimated: !mobile, marqueeEnabled: true,
+    galleryIntro: 'rise', galleryFit: 'natural', galleryGap: 24, galleryRadius: 16,
+    galleryCardHeight: .68, galleryTilt: 62, galleryRoundness: 1, galleryReach: .38,
+    galleryDispersion: .45, galleryLiquid: .28, galleryFollowCursor: true, galleryHoverFocus: true,
     nameGradientPreset: 'monochrome', nameGradientStart: '#7978ee',
     nameGradientSecond: '#b08bcf', nameGradientMiddle: '#df80bf', nameGradientFourth: '#a4b5c0', nameGradientEnd: '#59c6b5',
     nameGradientStops: 5, nameGradientSpeed: 2, nameGradientDirection: 110,
@@ -113,6 +128,18 @@ export function normalizeSettings(value: unknown, mobile = false): MotionSetting
     gallerySpeed: boundedNumber(source.gallerySpeed, defaults.gallerySpeed, 0.5, 2, 0.05),
     galleryBend: boundedNumber(source.galleryBend, defaults.galleryBend, 0, 0.65, 0.01),
     galleryAnimated: typeof source.galleryAnimated === 'boolean' ? source.galleryAnimated : defaults.galleryAnimated,
+    galleryIntro: source.galleryIntro && ['rise', 'bloom', 'spin', 'deal', 'none'].includes(source.galleryIntro) ? source.galleryIntro : defaults.galleryIntro,
+    galleryFit: source.galleryFit && ['natural', 'portrait', 'square', 'landscape'].includes(source.galleryFit) ? source.galleryFit : defaults.galleryFit,
+    galleryGap: boundedNumber(source.galleryGap, defaults.galleryGap, 8, 64, 4),
+    galleryRadius: boundedNumber(source.galleryRadius, defaults.galleryRadius, 0, 48, 4),
+    galleryCardHeight: boundedNumber(source.galleryCardHeight, defaults.galleryCardHeight, .4, .8, .04),
+    galleryTilt: boundedNumber(source.galleryTilt, defaults.galleryTilt, 0, 90, 1),
+    galleryRoundness: boundedNumber(source.galleryRoundness, defaults.galleryRoundness, 0, 1, .05),
+    galleryReach: boundedNumber(source.galleryReach, defaults.galleryReach, .1, .8, .02),
+    galleryDispersion: boundedNumber(source.galleryDispersion, defaults.galleryDispersion, 0, 1, .05),
+    galleryLiquid: boundedNumber(source.galleryLiquid, defaults.galleryLiquid, 0, 1, .04),
+    galleryFollowCursor: typeof source.galleryFollowCursor === 'boolean' ? source.galleryFollowCursor : defaults.galleryFollowCursor,
+    galleryHoverFocus: typeof source.galleryHoverFocus === 'boolean' ? source.galleryHoverFocus : defaults.galleryHoverFocus,
     marqueeEnabled: typeof source.marqueeEnabled === 'boolean' ? source.marqueeEnabled : defaults.marqueeEnabled,
     nameGradientPreset: source.nameGradientPreset && ['monochrome', 'aurora', 'sunrise', 'ocean', 'spectrum', 'ember', 'pastel', 'custom'].includes(source.nameGradientPreset) ? source.nameGradientPreset : defaults.nameGradientPreset,
     nameGradientStart: color(source.nameGradientStart, defaults.nameGradientStart),
@@ -148,7 +175,7 @@ export function parseSettings(serialized: string | null, mobile = false): Motion
   if (!serialized) return createDefaultSettings(mobile);
   try {
     const stored: unknown = JSON.parse(serialized);
-    if (!stored || typeof stored !== 'object' || !('version' in stored) || ![1, 2, 3, 4, STORAGE_VERSION].includes(stored.version as number)) return createDefaultSettings(mobile);
+    if (!stored || typeof stored !== 'object' || !('version' in stored) || ![1, 2, 3, 4, 5, STORAGE_VERSION].includes(stored.version as number)) return createDefaultSettings(mobile);
     return normalizeSettings('settings' in stored ? stored.settings : undefined, mobile);
   } catch { return createDefaultSettings(mobile); }
 }

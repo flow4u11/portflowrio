@@ -17,7 +17,7 @@ test('first initialization and reset use adaptive gallery defaults', () => {
 });
 
 test('legacy storage keeps existing controls and migrates new settings', () => {
-  for (const version of [1, 2, 3, 4]) {
+  for (const version of [1, 2, 3, 4, 5]) {
     const migrated = parseSettings(JSON.stringify({ version, settings: {
       starSpeed: 1.4, starCount: 197, showFps: true, animationSpeed: 0.75,
       avatarGrid: 14, avatarDuration: 0.8, avatarStagger: 0.45,
@@ -161,4 +161,21 @@ test('five custom stops and gradient direction persist with shine overrides', ()
   const gradient = nameGradientStyle(saved)['--name-gradient-colors'];
   assert.match(gradient, /^linear-gradient\(270deg/);
   for (const color of ['#111111', '#222222', '#333333', '#444444', '#555555']) assert.ok(gradient.includes(color));
+});
+
+test('carousel controls migrate, persist and bound geometry', () => {
+  const legacy = parseSettings(JSON.stringify({ version: 5, settings: { galleryAnimated: false, gallerySpeed: 1.5 } }));
+  assert.equal(legacy.galleryIntro, 'rise');
+  assert.equal(legacy.galleryAnimated, false);
+  const bounded = normalizeSettings({ galleryIntro: 'injected', galleryFit: 'bad', galleryGap: 999, galleryRadius: -4, galleryCardHeight: 4, galleryTilt: Infinity, galleryLiquid: -4, galleryFollowCursor: 'false' });
+  assert.equal(bounded.galleryIntro, 'rise');
+  assert.equal(bounded.galleryFit, 'natural');
+  assert.equal(bounded.galleryGap, 64);
+  assert.equal(bounded.galleryRadius, 0);
+  assert.equal(bounded.galleryCardHeight, .8);
+  assert.equal(bounded.galleryTilt, 62);
+  assert.equal(bounded.galleryLiquid, 0);
+  assert.equal(bounded.galleryFollowCursor, true);
+  const custom = { ...createDefaultSettings(), galleryIntro: 'deal', galleryFit: 'portrait', galleryGap: 32, galleryRadius: 24, galleryHoverFocus: false, galleryFollowCursor: false };
+  assert.deepEqual(parseSettings(JSON.stringify({ version: STORAGE_VERSION, settings: custom })), custom);
 });

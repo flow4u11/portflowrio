@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useIdleMotion } from './useIdleMotion';
 import { useMotionSettings } from './MotionSettings';
+import { holdTimeline, resumeTimeline } from './motion-timeline';
 import './idle-motion.css';
 
 type LoopingMarqueeProps = {
@@ -26,6 +27,9 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
   const [ready, setReady] = useState(false);
   const [distance, setDistance] = useState(0);
   const timeline = useRef<Animation | null>(null);
+  const heldTime = useRef<number | null>(null);
+  const rate = useRef(animationSpeed);
+  rate.current = animationSpeed;
   const previousGeometry = useRef({ distance: 0, duration: 0, direction });
   const [interaction, setInteraction] = useState(idleInteraction);
   const interactionRef = useRef(idleInteraction);
@@ -45,14 +49,8 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
     const pointer = interactionRef.current;
     const running = state.active && state.ready && !state.isStatic && !document.hidden && !navigatingRef.current && !pointer.hovered && !pointer.pressed && !pointer.keyboard;
     if (running) {
-      if (animation.playState !== 'running') animation.play();
-    } else if (animation.playState !== 'paused' || animation.pending) {
-      // Explicit holdTime freezes this exact sample immediately, including a
-      // pause that arrives before a pending play has reached the compositor.
-      const time = animation.currentTime;
-      animation.pause();
-      if (time !== null) animation.currentTime = time;
-    }
+      resumeTimeline(animation, heldTime, rate.current);
+    } else holdTimeline(animation, heldTime);
   }, []);
   const updateInteraction = useCallback((patch: Partial<MarqueeInteraction>) => {
     const current = interactionRef.current;
@@ -175,6 +173,7 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
       animation.pause();
       animation.currentTime = 0;
       timeline.current = animation;
+      heldTime.current = 0;
     } else {
       const previous = previousGeometry.current;
       const oldTime = Number(animation.currentTime ?? 0);
@@ -188,16 +187,15 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
       // Copy counts may change on resize. Keep the same pixel offset modulo
       // identical content, instead of remapping a percentage of a wider track.
       animation.currentTime = nextPhase * duration;
+      if (heldTime.current !== null) heldTime.current = nextPhase * duration;
     }
     previousGeometry.current = { distance, duration, direction };
-    animation.playbackRate = speed;
     syncPlayback();
   }, [distance, duration, direction, ready, isStatic, syncPlayback]);
 
   useLayoutEffect(() => {
     const animation = timeline.current;
     if (!animation) return;
-    animation.updatePlaybackRate(speed);
     syncPlayback();
   }, [speed, syncPlayback]);
 
@@ -205,6 +203,7 @@ export function LoopingMarquee({ children, label, className = '', contentClassNa
     if (!isStatic) return;
     timeline.current?.cancel();
     timeline.current = null;
+    heldTime.current = null;
   }, [isStatic]);
   useEffect(() => () => { timeline.current?.cancel(); timeline.current = null; }, []);
 

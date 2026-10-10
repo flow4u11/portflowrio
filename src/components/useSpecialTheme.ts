@@ -4,23 +4,26 @@ import { useMotionSettings } from './MotionSettings';
 import './special-theme.css';
 
 export type ThemeOrigin = { x: number; y: number };
+export type SpecialDesign = 'neobrutalism' | 'halloween';
+type Design = 'default' | SpecialDesign;
 export type SpecialThemeController = {
+  design: Design;
   specialTheme: boolean;
   transitioning: boolean;
-  activateSpecial: (origin?: ThemeOrigin) => void;
+  activateSpecial: (origin?: ThemeOrigin, design?: SpecialDesign) => void;
   exitSpecial: (origin?: ThemeOrigin) => void;
 };
 
 const STORAGE_KEY = 'portfolio-design';
-const SPECIAL_DESIGN = 'neobrutalism';
+const validDesign = (value: string | null | undefined): Design => value === 'neobrutalism' || value === 'halloween' ? value : 'default';
 
 function readDesign() {
-  try { return localStorage.getItem(STORAGE_KEY) === SPECIAL_DESIGN; }
-  catch { return document.documentElement.dataset.design === SPECIAL_DESIGN; }
+  try { return validDesign(localStorage.getItem(STORAGE_KEY)); }
+  catch { return validDesign(document.documentElement.dataset.design); }
 }
 
-function applyDesign(special: boolean) {
-  if (special) document.documentElement.dataset.design = SPECIAL_DESIGN;
+function applyDesign(special: Design) {
+  if (special !== 'default') document.documentElement.dataset.design = special;
   else delete document.documentElement.dataset.design;
 }
 
@@ -29,9 +32,9 @@ export function useSpecialTheme(): SpecialThemeController {
   const { settings } = useMotionSettings();
   const speedRef = useRef(settings.animationSpeed);
   speedRef.current = settings.animationSpeed;
-  const [specialTheme, setSpecialTheme] = useState(readDesign);
+  const [design, setDesign] = useState(readDesign);
   const [transitioning, setTransitioning] = useState(false);
-  const currentRef = useRef(specialTheme);
+  const currentRef = useRef(design);
   const changingRef = useRef(false);
   const mountedRef = useRef(true);
   const cleanupRef = useRef<(() => void) | null>(null);
@@ -42,10 +45,10 @@ export function useSpecialTheme(): SpecialThemeController {
     const onStorage = (event: StorageEvent) => {
       if (event.key !== STORAGE_KEY && event.key !== null) return;
       cleanupRef.current?.();
-      const next = event.key === null ? false : event.newValue === SPECIAL_DESIGN;
+      const next = event.key === null ? 'default' : validDesign(event.newValue);
       currentRef.current = next;
       applyDesign(next);
-      setSpecialTheme(next);
+      setDesign(next);
     };
     window.addEventListener('storage', onStorage);
     return () => {
@@ -55,13 +58,14 @@ export function useSpecialTheme(): SpecialThemeController {
     };
   }, []);
 
-  const changeDesign = useCallback((next: boolean, origin?: ThemeOrigin) => {
+  const changeDesign = useCallback((next: Design, origin?: ThemeOrigin) => {
     if (!mountedRef.current || changingRef.current || currentRef.current === next) return;
     changingRef.current = true;
     const speed = speedRef.current;
     let applied = false;
     let cancelled = false;
     let curtain: HTMLDivElement | undefined;
+    const halloween = next === 'halloween' || currentRef.current === 'halloween';
     const animations = new Set<Animation>();
     const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     const commit = () => {
@@ -69,9 +73,9 @@ export function useSpecialTheme(): SpecialThemeController {
       applied = true;
       currentRef.current = next;
       applyDesign(next);
-      try { localStorage.setItem(STORAGE_KEY, next ? SPECIAL_DESIGN : 'default'); }
+      try { localStorage.setItem(STORAGE_KEY, next); }
       catch { /* The selected design still works when storage is unavailable. */ }
-      flushSync(() => setSpecialTheme(next));
+      flushSync(() => setDesign(next));
     };
     const cleanup = () => {
       cancelled = true;
@@ -108,9 +112,10 @@ export function useSpecialTheme(): SpecialThemeController {
       try {
         curtain = document.createElement('div');
         curtain.className = 'special-design-curtain';
+        if (halloween) curtain.dataset.palette = 'halloween';
         curtain.setAttribute('aria-hidden', 'true');
         const startRight = (origin?.x ?? window.innerWidth / 2) > window.innerWidth / 2;
-        const panels = ['N', 'E', 'O'].map((letter, index) => {
+        const panels = (halloween ? ['B', 'O', 'O'] : ['N', 'E', 'O']).map((letter, index) => {
           const panel = document.createElement('div');
           panel.className = 'special-design-curtain-card';
           panel.dataset.card = String(index);
@@ -146,7 +151,7 @@ export function useSpecialTheme(): SpecialThemeController {
     void run();
   }, []);
 
-  const activateSpecial = useCallback((origin?: ThemeOrigin) => changeDesign(true, origin), [changeDesign]);
-  const exitSpecial = useCallback((origin?: ThemeOrigin) => changeDesign(false, origin), [changeDesign]);
-  return { specialTheme, transitioning, activateSpecial, exitSpecial };
+  const activateSpecial = useCallback((origin?: ThemeOrigin, next: SpecialDesign = 'neobrutalism') => changeDesign(next, origin), [changeDesign]);
+  const exitSpecial = useCallback((origin?: ThemeOrigin) => changeDesign('default', origin), [changeDesign]);
+  return { design, specialTheme: design !== 'default', transitioning, activateSpecial, exitSpecial };
 }

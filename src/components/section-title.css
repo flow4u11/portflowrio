@@ -2,3 +2,14 @@
 .section-title-word { display: inline-block; opacity: 0; transform: translate3d(0, 22px, 0) rotateX(-12deg); transform-origin: center bottom; transition: transform calc(.85s * var(--motion-duration-factor, 1)) var(--ease), opacity calc(.65s * var(--motion-duration-factor, 1)) ease; }
 .section-word-title[data-visible="true"] .section-title-word, .section-word-title:focus .section-title-word { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .section-title-word { opacity: 1; transform: none; transition: none; } }
+
+.title-hover-word { display: inline-block; transition: transform calc(280ms * var(--motion-duration-factor, 1)) var(--ease), text-shadow 280ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  .section-word-title:hover .title-hover-word { transform: translateY(-4px); text-shadow: 0 8px 24px color-mix(in srgb, var(--text) 12%, transparent); }
+  .section-word-title:hover i .title-hover-word { transform: translateY(-4px) skewX(-2deg); }
+  .localized-copy-content strong { background-image: linear-gradient(currentColor,currentColor); background-size: 0% 1px; background-position: 0 100%; background-repeat: no-repeat; transition: background-size 280ms ease, text-shadow 280ms ease; }
+  .localized-copy-content strong:hover { background-size: 100% 1px; text-shadow: 0 0 16px color-mix(in srgb, var(--text) 16%, transparent); }
+  .social-links a span { background-image: linear-gradient(currentColor,currentColor); background-size: 0% 1px; background-position: 0 100%; background-repeat: no-repeat; transition: background-size 280ms ease; }
+  .social-links a:hover span, .social-links a:focus-visible span { background-size: 100% 1px; }
+}
+@media (prefers-reduced-motion: reduce) { .title-hover-word { transition: none; } .section-word-title:hover .title-hover-word, .section-word-title:hover i .title-hover-word { transform: none; } }

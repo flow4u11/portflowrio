@@ -147,18 +147,18 @@ h2 i { font: italic 1.05em/1 Georgia, "Times New Roman", serif; letter-spacing: 
 .draft-note { display: flex; gap: 10px; align-items: center; margin-top: 41px; font-size: 10px; color: var(--muted); }
 .draft-note > span { font: 15px "Space Mono", monospace; }
 
-.contact-section { position: relative; isolation: isolate; max-width: none; border-top: 1px solid var(--line); overflow: hidden; text-align: center; padding-top: 116px; padding-bottom: 118px; }
-.contact-content { position: relative; z-index: 1; }
+.contact-section { position: relative; isolation: isolate; max-width: none; border-top: 1px solid var(--line); overflow: hidden; text-align: center; padding-top: 128px; padding-bottom: 128px; }
+.contact-content { position: relative; z-index: 1; max-width: 800px; margin-inline: auto; }
 .contact-content .eyebrow { justify-content: center; }
-.contact-content h2 { margin-top: 31px; font-size: clamp(50px, 6vw, 80px); line-height: 1.05; letter-spacing: -3px; }
-.contact-content > p:not(.eyebrow) { font-size: 13px; line-height: 1.9; color: var(--muted); margin-top: 27px; }
-.contact-button { display: flex; justify-content: center; align-items: center; gap: 26px; border: 1px solid var(--text); color: var(--bg); background: var(--text); margin: 29px auto 0; padding: 15px 24px; font-size: 12px; transition: transform calc(.25s * var(--motion-duration-factor, 1)) var(--ease), opacity calc(.2s * var(--motion-duration-factor, 1)); }
+.contact-content h2 { margin-top: 40px; font-size: clamp(48px, 6vw, 80px); line-height: 1.12; letter-spacing: -3px; }
+.contact-content > p:not(.eyebrow) { max-width: 44ch; margin-inline: auto; font-size: 16px; line-height: 28px; color: var(--muted); margin-top: 32px; }
+.contact-button { display: flex; justify-content: center; align-items: center; gap: 24px; border: 1px solid var(--text); color: var(--bg); background: var(--text); margin: 40px auto 0; padding: 16px 24px; font-size: 12px; transition: transform calc(.25s * var(--motion-duration-factor, 1)) var(--ease), opacity calc(.2s * var(--motion-duration-factor, 1)); }
 .contact-button svg { transition: transform calc(.25s * var(--motion-duration-factor, 1)) var(--ease); }
 .contact-button:hover svg { transform: translate(3px, -3px); }
-.contact-note { display: block; font-size: 10px; color: var(--muted); margin-top: 20px; }
+.contact-note { display: block; font-size: 12px; color: var(--muted); margin-top: 32px; }
 .brand-icon { width: 20px; height: 20px; flex-shrink: 0; }
-.social-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px 30px; margin-top: 37px; }
-.social-links a, .social-links button { display: inline-flex; align-items: center; gap: 9px; font-size: 11px; color: var(--muted); background: none; padding: 7px 0; border: 0; transition: color calc(.2s * var(--motion-duration-factor, 1)), transform calc(.25s * var(--motion-duration-factor, 1)) var(--ease); }
+.social-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px 40px; margin-top: 64px; }
+.social-links a, .social-links button { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); background: none; padding: 8px 0; border: 0; transition: color calc(.2s * var(--motion-duration-factor, 1)), transform calc(.25s * var(--motion-duration-factor, 1)) var(--ease); }
 .social-links a:hover, .social-links button:hover { color: var(--text); transform: translateY(-2px); }
 .social-links .brand-icon { width: 16px; height: 16px; }
 
@@ -278,11 +278,11 @@ dialog::backdrop { background: rgb(0 0 0 / 65%); }
   .project-view { opacity: 1; transform: none; width: 29px; height: 29px; top: 12px; right: 12px; }
   .project-view svg { width: 16px; }
   .draft-note { font-size: 9px; line-height: 1.9; align-items: flex-start; margin-top: 30px; }
-  .contact-section { padding-top: 92px; padding-bottom: 92px; }
+  .contact-section { padding-top: 96px; padding-bottom: 96px; }
   .contact-content h2 { font-size: 52px; letter-spacing: -2.6px; }
   .contact-content h2 i { letter-spacing: -2.5px; }
-  .contact-content > p:not(.eyebrow) { font-size: 12px; }
-  .contact-note { font-size: 9px; }
+  .contact-content > p:not(.eyebrow) { font-size: 16px; }
+  .contact-note { font-size: 12px; }
   .site-footer { flex-wrap: wrap; gap: 25px 15px; padding-top: 29px; padding-bottom: 29px; }
   .footer-brand { width: 100%; display: flex; justify-content: space-between; align-items: center; }
   .footer-brand p { margin-top: 0; font-size: 8px; }

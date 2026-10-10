@@ -1,0 +1,20 @@
+:root[data-design="halloween"] { color-scheme: dark; --bg: #100d18; --text: #f4eadf; --muted: #b5a7c5; --line: #44364f; --surface: #1d1629; --header: #100d18; --halloween-accent: #f7a15a; }
+:root[data-design="halloween"] ::selection { background: #814aad; color: #fff7ed; }
+:root[data-design="halloween"] :is(h2 i, .wordmark, .eyebrow > span, .theme-lab-trigger) { color: var(--halloween-accent); }
+:root[data-design="halloween"] .profile-avatar { box-shadow: 0 0 48px #b251aa26; outline-color: #bd7651; }
+:root[data-design="halloween"] .page-stars { opacity: .7; }
+:root[data-design="halloween"] .nav-indicator { background: #a967c328; border-color: #a66bc04a; }
+:root[data-design="halloween"] :is(.contact-button, .explore-button:hover) { background: var(--halloween-accent); border-color: var(--halloween-accent); color: #181021; }
+:root[data-design="halloween"] :is(.tool-item, .hero-tags, .interest-row > span) { border-color: #66456d; }
+.special-design-curtain[data-palette="halloween"] .special-design-curtain-card { color: #f4eadf; background: #5f3a7d; }
+.special-design-curtain[data-palette="halloween"] .special-design-curtain-card[data-card="1"] { background: #e08d47; color: #181021; }
+.special-design-curtain[data-palette="halloween"] .special-design-curtain-card[data-card="2"] { background: #2a1c3e; }
+.halloween-atmosphere { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.halloween-moon { position: absolute; top: 144px; right: 8%; width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle at 32% 28%, #eccb9950, #c0886720 68%, transparent 70%); box-shadow: 0 0 80px #b8875120; opacity: .6; }
+.halloween-atmosphere svg { position: absolute; top: 180px; right: 13%; width: 48px; fill: #a17baf; opacity: .35; }
+.halloween-atmosphere svg:nth-of-type(2) { top: 244px; right: 6%; width: 32px; opacity: .25; }
+.halloween-atmosphere svg:nth-of-type(3) { top: 128px; right: 19%; width: 24px; opacity: .2; }
+@media (max-width: 640px) { .halloween-moon { width: 64px; height: 64px; top: 128px; right: 8%; opacity: .3; } .halloween-atmosphere svg { opacity: .16; } }
+
+:root[data-design="halloween"] .special-theme-control { border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--halloween-accent); box-shadow: none; }
+:root[data-design="halloween"] .special-theme-control:hover:not([aria-disabled="true"]) { transform: translateY(-2px); box-shadow: none; }

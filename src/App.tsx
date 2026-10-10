@@ -14,6 +14,8 @@ import { copy, getProjects, toolkitRows, technologyRows } from './content';
 import { ThemeLab } from './components/ThemeLab';
 import { useSpecialTheme } from './components/useSpecialTheme';
 import { SpecialThemeControl } from './components/SpecialThemeControl';
+import { NagiChat } from './components/NagiChat';
+import { HalloweenAtmosphere } from './components/HalloweenAtmosphere';
 import { ScrambleWordmark } from './components/ScrambleWordmark';
 import { CyclingAboutTitle } from './components/CyclingAboutTitle';
 import { LoopingMarquee } from './components/LoopingMarquee';
@@ -52,7 +54,7 @@ export default function App() {
   });
   const text = copy[language];
   const projects = useMemo(() => getProjects(language), [language]);
-  const { specialTheme, transitioning, activateSpecial, exitSpecial } = useSpecialTheme();
+  const { design, specialTheme, transitioning, activateSpecial, exitSpecial } = useSpecialTheme();
   useEffect(() => {
     try { localStorage.setItem('portfolio-language', language); } catch { /* Reading still works without storage. */ }
   }, [language]);
@@ -167,7 +169,7 @@ export default function App() {
 
         <section className="section projects-section" id="projects" aria-labelledby="projects-title">
           <Depth><div className="section-heading"><div><p className="eyebrow"><span>02</span> Selected projects</p><SectionTitle id="projects-title" first="Ideas taking" last="shape." /></div></div></Depth>
-          <div className="showcase-renderer"><ProjectGallery projects={projects} onOpen={openModal} language={language} staticDesign={specialTheme} /></div>
+          <div className="showcase-renderer"><ProjectGallery projects={projects} onOpen={openModal} language={language} staticDesign={design === 'neobrutalism'} /></div>
         </section>
 
         <section className="section contact-section" id="contact" aria-labelledby="contact-title">
@@ -179,6 +181,8 @@ export default function App() {
       <footer className="site-footer"><div className="footer-brand"><a className="wordmark" href="#home" aria-label="flowrio, back to home"><ScrambleWordmark /></a><p>© {new Date().getFullYear()} · Made with curiosity.</p><p className="design-credit"><LocalizedCopy text={text.footer} language={language} /></p></div>{!loading && <FooterConfetti />}<a className="back-to-top" href="#home" onClick={event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate({ id: 'home', label: 'Home', keyboard: event.detail === 0 }); }}>Back to top <ArrowUp size={13} aria-hidden="true" /></a></footer>
     </div>
     <PixelTrail enabled={heroEntered} />
+    {design === 'halloween' && <HalloweenAtmosphere />}
+    {heroEntered && <NagiChat language={language} suspended={settingsOpen || modal !== null || transitioning} />}
     <FpsOverlay />
     <MotionSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} language={language} />
 

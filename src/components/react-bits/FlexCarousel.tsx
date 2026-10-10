@@ -629,6 +629,7 @@ const FlexCarousel = ({
       samples: [] as { x: number; t: number }[]
     };
     const introState = { kind: 'none', t: 0, running: false, done: false, readyAt: 0 };
+    let introduced = false;
     const focus = { index: -1, pending: -1, t: 0, v: 0, target: 0 };
     let instances: Instance[] = [];
 
@@ -851,6 +852,8 @@ const FlexCarousel = ({
       introState.running = introState.kind !== 'none';
       introState.done = !introState.running;
       introState.t = 0;
+      container.dataset.intro = s.intro;
+      container.dataset.introState = introState.running ? 'running' : 'done';
       if (introState.kind === 'spin') {
         const distance = m.loop * 1.6 + width;
         pos = goal + distance;
@@ -916,7 +919,16 @@ const FlexCarousel = ({
           }
           goal = snapPoint(m, goal);
           pos = goal;
-          beginIntro(s, m);
+          if (prewarming && !visible) {
+            // Preparation paints the final frame, but never consumes the
+            // visitor's entrance animation while the stage is offscreen.
+            introState.done = true;
+          container.dataset.introState = 'done';
+            introState.t = 1;
+          } else {
+            introduced = true;
+            beginIntro(s, m);
+          }
         }
       }
       if (introState.running) {
@@ -924,6 +936,7 @@ const FlexCarousel = ({
         if (introState.t >= 1) {
           introState.running = false;
           introState.done = true;
+          container.dataset.introState = 'done';
         }
         animating = true;
       }
@@ -1223,7 +1236,7 @@ const FlexCarousel = ({
         if (index < 0 || index === focus.index) { cancelHoverIntent(); return; }
         closeFocus();
       }
-      if (!s || e.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches || pointer.down || pointer.dragging || reducedMotion || !introState.done || focus.target > 0 || Math.abs(goal - pos) > 2 || Math.abs(vel) > 25) {
+      if (!s || !s.focusOnHover || e.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches || pointer.down || pointer.dragging || reducedMotion || !introState.done || focus.target > 0 || Math.abs(goal - pos) > 2 || Math.abs(vel) > 25) {
         cancelHoverIntent();
         return;
       }
@@ -1238,7 +1251,7 @@ const FlexCarousel = ({
       hoverTimer = setTimeout(() => {
         hoverCandidate = -1;
         const s = settingsRef.current;
-        if (!s || !alive || !visible || document.hidden || scrolling || pointer.down || pointer.dragging || !pointer.over || focus.target > 0 || Math.abs(goal - pos) > 2 || Math.abs(vel) > 25 || hitTest(pointer.x, pointer.y)?.index !== index) return;
+        if (!s || !s.focusOnHover || !alive || !visible || document.hidden || scrolling || pointer.down || pointer.dragging || !pointer.over || focus.target > 0 || Math.abs(goal - pos) > 2 || Math.abs(vel) > 25 || hitTest(pointer.x, pointer.y)?.index !== index) return;
         hoverAnchor = { x: pointer.x, y: pointer.y };
         interactedAt = performance.now();
         if (index === activeIndex && s.focusOnHover) openFocus(index);
@@ -1525,6 +1538,11 @@ const FlexCarousel = ({
     resizeObserver.observe(container);
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
+      if (visible && ready && !introduced && settingsRef.current) {
+        introduced = true;
+        beginIntro(settingsRef.current, metrics(settingsRef.current));
+        container.dataset.intro = settingsRef.current.intro;
+      }
       if (visible || prewarming) start();
       else stop();
     });

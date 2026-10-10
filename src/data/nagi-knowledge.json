@@ -1,0 +1,244 @@
+{
+  "welcome": {
+    "en": "Hi, I’m Nagi. I can show you around this portfolio, including the little secrets. Pick a question below or ask me in Thai or English.",
+    "th": "สวัสดีครับ ผม Nagi ช่วยแนะนำเว็บนี้ รวมถึงลูกเล่นที่ซ่อนอยู่ได้ เลือกคำถามด้านล่าง หรือพิมพ์ถามเป็นภาษาไทยหรืออังกฤษได้เลยครับ"
+  },
+  "fallback": {
+    "en": "I’m a website guide for now, so I don’t have a general AI service connected. I can help with projects, settings, secret themes, the minigame, and contact details. Which would you like to explore?",
+    "th": "ตอนนี้ผมเป็นคู่มือเว็บ ยังไม่ได้เชื่อมบริการ AI สำหรับคุยเรื่องทั่วไปครับ ผมช่วยแนะนำผลงาน การตั้งค่า ธีมลับ มินิเกม และช่องทางติดต่อได้ อยากลองส่วนไหนครับ?"
+  },
+  "topics": [
+    {
+      "id": "secrets",
+      "aliases": [
+        "secret",
+        "hidden",
+        "easter egg",
+        "ลูกเล่น",
+        "ลับ",
+        "ซ่อน"
+      ],
+      "question": {
+        "en": "Show me the secrets",
+        "th": "มีลูกเล่นลับอะไรบ้าง?"
+      },
+      "answer": {
+        "en": "Two places to explore: double-click the name in Home to scatter its pieces, or click the word ‘theme’ in About. Type neobrutalism for a playful design, or halloween for a moonlit orange-and-purple theme. Double-click anywhere to put the pieces back; the top-right theme button returns to your usual Light/Dark design.",
+        "th": "มีสองจุดให้ลองครับ: ดับเบิลคลิกชื่อใน Home เพื่อกระจายชิ้นส่วน หรือกดคำว่า ‘ธีม’ ใน About แล้วพิมพ์ neobrutalism เพื่อเปลี่ยนเป็นดีไซน์สนุก ๆ หรือ halloween เพื่อเปิดธีมคืนจันทร์สีส้มและม่วง ดับเบิลคลิกที่ไหนก็ได้เพื่อคืนชิ้นส่วน และกดปุ่มธีมมุมขวาบนเพื่อกลับดีไซน์ Light/Dark เดิมครับ"
+      }
+    },
+    {
+      "id": "minigame",
+      "aliases": [
+        "minigame",
+        "mini game",
+        "double",
+        "scatter",
+        "drag",
+        "idle",
+        "reset",
+        "มินิเกม",
+        "ดับเบิล",
+        "กระจาย",
+        "ลาก",
+        "คืนชิ้น"
+      ],
+      "question": {
+        "en": "How does the minigame work?",
+        "th": "มินิเกมเล่นยังไง?"
+      },
+      "answer": {
+        "en": "In Home, double-click the name to scatter the Hero pieces. Drag a piece, or hold it to preview its curved path home and release to send it back. Double-click anywhere or press Escape to restore everything. After 5 seconds without interaction, the pieces return automatically. The game stays still when reduced motion is enabled.",
+        "th": "ที่ Home ดับเบิลคลิกชื่อเพื่อกระจายชิ้นส่วน Hero จากนั้นลากชิ้นส่วน หรือกดค้างเพื่อดูเส้นทางโค้งกลับบ้านแล้วปล่อย ดับเบิลคลิกที่ไหนก็ได้หรือกด Escape เพื่อคืนทั้งหมด ถ้าไม่มีการโต้ตอบ 5 วินาที ชิ้นส่วนจะกลับเองครับ หากเปิด reduced motion มินิเกมจะไม่เคลื่อนไหว"
+      }
+    },
+    {
+      "id": "halloween",
+      "aliases": [
+        "halloween",
+        "spooky",
+        "ฮาโลวีน",
+        "ค้างคาว",
+        "พระจันทร์"
+      ],
+      "question": {
+        "en": "Try the Halloween theme",
+        "th": "เปิดธีม Halloween ยังไง?"
+      },
+      "answer": {
+        "en": "Go to About and click the word ‘theme’. Type halloween (spooky works too), then press Enter or Try it. You’ll get a dark purple canvas, warm orange accents, a moon and small bats. Your choice is saved in this browser. The theme button at the top-right returns you to your original Light/Dark theme.",
+        "th": "ไปที่ About แล้วกดคำว่า ‘ธีม’ พิมพ์ halloween (หรือ spooky) จากนั้นกด Enter หรือ ‘ลองเลย’ จะได้พื้นหลังม่วงเข้ม รายละเอียดสีส้ม พระจันทร์ และค้างคาวเล็ก ๆ ระบบจำธีมในเบราว์เซอร์นี้ครับ กดปุ่มธีมมุมขวาบนเพื่อกลับ Light/Dark เดิมได้"
+      }
+    },
+    {
+      "id": "themes",
+      "aliases": [
+        "theme",
+        "neo",
+        "brutal",
+        "dark",
+        "light",
+        "ธีม",
+        "สีมืด",
+        "สว่าง"
+      ],
+      "question": {
+        "en": "How do I change themes?",
+        "th": "เปลี่ยนธีมได้อย่างไร?"
+      },
+      "answer": {
+        "en": "Use the top-right theme button for Light/Dark. For a special design, click ‘theme’ in About, type neobrutalism or halloween, and press Enter. Tab completes the suggested keyword. Use the same top-right button to exit a special design. Your usual Light/Dark choice is kept separately.",
+        "th": "ปุ่มธีมมุมขวาบนใช้สลับ Light/Dark ครับ ถ้าอยากลองดีไซน์พิเศษ กดคำว่า ‘ธีม’ ใน About แล้วพิมพ์ neobrutalism หรือ halloween และกด Enter กด Tab เพื่อเติมคำแนะนำได้ ใช้ปุ่มมุมขวาบนเดิมเพื่อออกจากธีมพิเศษ โดยระบบยังจำ Light/Dark ที่เลือกไว้ก่อนหน้า"
+      }
+    },
+    {
+      "id": "settings",
+      "aliases": [
+        "setting",
+        "config",
+        "star",
+        "snow",
+        "gradient",
+        "motion",
+        "fps",
+        "pointer",
+        "avatar",
+        "ตั้งค่า",
+        "ปรับ",
+        "ดาว",
+        "หิมะ",
+        "แอนิเมชัน",
+        "แอนิเมชั่น"
+      ],
+      "question": {
+        "en": "Where are the settings?",
+        "th": "ตั้งค่าเว็บตรงไหน?"
+      },
+      "answer": {
+        "en": "Click the flowrio./portfolio. wordmark at the top-left. Settings has seven categories: name gradient, name shine, background, motion & performance, project gallery, profile photo and pointer trail. Changes apply immediately and are saved in this browser. Reset to defaults restores the shared preset; gallery motion starts off on mobile. Your device’s reduced-motion preference takes priority.",
+        "th": "กดโลโก้ flowrio./portfolio. มุมซ้ายบนครับ มี 7 หมวด: สีชื่อ แสงบนชื่อ พื้นหลัง การเคลื่อนไหวและประสิทธิภาพ แกลเลอรีผลงาน รูปโปรไฟล์ และรอยเมาส์ ปรับแล้วใช้ทันทีและจำในเบราว์เซอร์นี้ ‘คืนค่าเริ่มต้น’ จะกลับค่ากลางของเว็บ แกลเลอรีบนมือถือเริ่มต้นแบบไม่เคลื่อนไหว และ reduced motion ของอุปกรณ์มีความสำคัญก่อนครับ"
+      }
+    },
+    {
+      "id": "carousel",
+      "aliases": [
+        "carousel",
+        "gallery",
+        "flex",
+        "intro",
+        "curve",
+        "แกลเลอรี",
+        "คารูเซล",
+        "ภาพเลื่อน"
+      ],
+      "question": {
+        "en": "Customize the project carousel",
+        "th": "ปรับ Carousel ได้อะไรบ้าง?"
+      },
+      "answer": {
+        "en": "In Settings → Project gallery, choose Rise, Bloom, Spin, Deal or no entrance. You can adjust image fit, card height, spacing, corners, speed, tilt, curve, roundness, reach, dispersion and liquid motion. Cursor following and hover focus have their own switches. The entrance plays on your first visit to Projects; a changed entrance style applies on the next page load. Arrows, dragging and keyboard navigation work too; click an image to open project details.",
+        "th": "ไปที่ตั้งค่า → แกลเลอรีผลงาน เลือกการเข้าฉาก Rise, Bloom, Spin, Deal หรือไม่ใช้ ปรับสัดส่วนภาพ ความสูง ระยะห่าง มุมโค้ง ความเร็ว ความเอียง ความโค้ง รูปทรง ระยะกระจาย dispersion และการไหลได้ มีสวิตช์ตามเมาส์กับโฟกัสเมื่อชี้ด้วย การเข้าฉากเล่นครั้งแรกที่ไป Projects และแบบที่เปลี่ยนจะใช้เมื่อโหลดหน้าใหม่ ใช้ลูกศร ลาก หรือคีย์บอร์ดเลื่อนได้ กดภาพเพื่อดูรายละเอียดครับ"
+      }
+    },
+    {
+      "id": "projects",
+      "aliases": [
+        "project",
+        "laststand",
+        "school",
+        "ledger",
+        "unreal",
+        "grade",
+        "ผลงาน",
+        "โปรเจกต์",
+        "เกม",
+        "เกรด"
+      ],
+      "question": {
+        "en": "Tell me about the projects",
+        "th": "แนะนำผลงานหน่อย"
+      },
+      "answer": {
+        "en": "Projects features LastStand, a first Unreal Engine 5 FPS project, and School Ledger, a full stack student grade web app in live beta. Select a project in the carousel, then click its image or View project for the case study, tools and available links. LastStand includes gameplay; School Ledger has a live site and source link. I can describe the public portfolio, but I don’t have access to private school records.",
+        "th": "ใน Projects มี LastStand เกม FPS โปรเจกต์แรกด้วย Unreal Engine 5 และ School Ledger เว็บระบบเกรดแบบ full stack ที่เปิด live beta ครับ เลือกผลงานใน Carousel แล้วกดภาพหรือดูรายละเอียดเพื่ออ่านแนวคิด เครื่องมือ และลิงก์ LastStand มีวิดีโอเกมเพลย์ ส่วน School Ledger มีเว็บจริงกับซอร์ส ผมอธิบายข้อมูลสาธารณะในพอร์ตได้ แต่ไม่มีสิทธิ์เข้าถึงข้อมูลนักเรียนครับ"
+      }
+    },
+    {
+      "id": "about",
+      "aliases": [
+        "about",
+        "major",
+        "study",
+        "university",
+        "toolkit",
+        "technology",
+        "tech",
+        "skill",
+        "เรียน",
+        "สาขา",
+        "เกี่ยวกับ",
+        "เครื่องมือ",
+        "ทักษะ",
+        "ตัวคุณ"
+      ],
+      "question": {
+        "en": "What is this portfolio about?",
+        "th": "พอร์ตนี้เกี่ยวกับอะไร?"
+      },
+      "answer": {
+        "en": "This is a personal design and games portfolio with interests in UX/UI, game lighting and visual storytelling. About introduces the owner’s studies, creative process and interests. The creative toolkit and project technology each have two scrolling rows. Hover or hold a row to pause it; move away to continue. You can turn row motion off in Settings to see every item together.",
+        "th": "นี่คือพอร์ตส่วนตัวด้านดีไซน์และเกม สนใจ UX/UI แสงในเกม และการเล่าเรื่องด้วยภาพครับ About เล่าเรื่องการเรียน วิธีทำงาน และความสนใจ เครื่องมือสร้างสรรค์กับเทคโนโลยีแต่ละหมวดมีแถบเลื่อน 2 แถว ชี้เมาส์หรือกดค้างเพื่อหยุด เอาเมาส์ออกเพื่อเล่นต่อ ปิดการเลื่อนในตั้งค่าเพื่อดูรายการทั้งหมดพร้อมกันได้ครับ"
+      }
+    },
+    {
+      "id": "contact",
+      "aliases": [
+        "contact",
+        "email",
+        "gmail",
+        "discord",
+        "fastwork",
+        "instagram",
+        "github",
+        "hire",
+        "experience",
+        "ติดต่อ",
+        "อีเมล",
+        "จ้าง",
+        "ประสบการณ์"
+      ],
+      "question": {
+        "en": "How can I get in touch?",
+        "th": "ติดต่อได้อย่างไร?"
+      },
+      "answer": {
+        "en": "Go to Contact and click Say hello for Gmail, GitHub, Fastwork, Instagram and Discord. Email is flowxyzy@gmail.com; Discord is flow4u. You can copy the Discord username from the contact dialog. The owner is looking for experience and new opportunities.",
+        "th": "ไปที่ Contact แล้วกด ‘ทักทายกัน’ เพื่อดู Gmail, GitHub, Fastwork, Instagram และ Discord อีเมลคือ flowxyzy@gmail.com และ Discord คือ flow4u ครับ ในหน้าติดต่อมีปุ่มคัดลอกชื่อ Discord เจ้าของพอร์ตกำลังมองหาประสบการณ์และโอกาสใหม่ ๆ ครับ"
+      }
+    },
+    {
+      "id": "navigation",
+      "aliases": [
+        "navigate",
+        "topbar",
+        "scroll",
+        "warp",
+        "language",
+        "english",
+        "thai",
+        "ภาษา",
+        "เลื่อน",
+        "เมนู",
+        "ไปส่วน"
+      ],
+      "question": {
+        "en": "How do I navigate the website?",
+        "th": "ใช้งานและเปลี่ยนภาษาอย่างไร?"
+      },
+      "answer": {
+        "en": "Use Home, About, Projects and Contact in the topbar, or scroll normally. Clicking a section plays a short star time warp; manual scrolling or Escape interrupts the trip. Back to top works the same way. EN/TH switches the main copy with its scramble effect. Nagi understands both languages and its own EN/TH button changes suggested questions.",
+        "th": "กด Home, About, Projects หรือ Contact ที่เมนูบน หรือเลื่อนตามปกติได้ครับ การกดเมนูจะมีดาว time warp สั้น ๆ เลื่อนเองหรือกด Escape เพื่อหยุดการเดินทาง ‘Back to top’ ทำงานเหมือนกัน ปุ่ม EN/TH เปลี่ยนข้อความหลักพร้อม Scramble Text ส่วน Nagi เข้าใจสองภาษา และมี EN/TH ของตัวเองสำหรับเปลี่ยนคำถามแนะนำครับ"
+      }
+    }
+  ]
+}
