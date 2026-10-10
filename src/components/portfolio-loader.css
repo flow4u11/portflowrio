@@ -1,6 +1,6 @@
 .portfolio-loader.loading-screen { display: grid; place-items: center; place-content: center; width: 100%; height: 100dvh; padding: 24px; background: transparent; color: var(--text); transform-origin: 50% 50%; backface-visibility: hidden; }
 .portfolio-loader-center { width: min(440px, 86vw); text-align: center; transform-style: preserve-3d; }
-.portfolio-loader-label { display: block; min-height: 1.14em; font: 550 clamp(32px, 5vw, 48px)/1.14 var(--font-sans); letter-spacing: -.045em; }
+.portfolio-loader-label { display: block; min-height: 1.4em; padding-block: 8px; font: 550 clamp(32px, 5vw, 48px)/1.4 var(--font-sans); letter-spacing: -.045em; }
 .portfolio-loader-meter { display: flex; flex-direction: column; gap: 10px; width: min(300px, 76vw); margin: 26px auto 0; }
 .portfolio-loader-track { height: 2px; overflow: hidden; border-radius: 2px; background: var(--line); }
 .portfolio-loader-track > span { display: block; width: 100%; height: 100%; background: currentColor; transform-origin: center; }

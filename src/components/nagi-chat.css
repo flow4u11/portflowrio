@@ -7,36 +7,43 @@
 .nagi-panel { position: fixed; inset: auto max(24px, env(safe-area-inset-right)) max(88px, calc(env(safe-area-inset-bottom) + 64px)) auto; margin: 0; width: min(416px, calc(100vw - 32px)); max-width: none; height: min(680px, calc(100dvh - 120px)); max-height: none; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 24px; background: var(--bg); color: var(--text); box-shadow: 0 16px 64px #00000026; transform-origin: right bottom; container-type: inline-size; }
 .nagi-panel[open] { display: grid; grid-template-rows: auto auto minmax(48px, 1fr) auto auto auto auto; animation: nagi-in 280ms cubic-bezier(.2,.8,.2,1) both; }
 .nagi-panel[data-closing] { animation: nagi-out 160ms ease-in both; pointer-events: none; }
-.nagi-header { display: flex; align-items: center; gap: 12px; padding: 20px 20px 16px; }
+.nagi-header { display: flex; align-items: center; gap: 16px; padding: 24px 24px 16px; }
 .nagi-symbol { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 16px; }
-.nagi-header h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 16px; font-weight: 650; line-height: 24px; }
-.nagi-status { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
+.nagi-header h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 16px; font-weight: 600; line-height: 24px; letter-spacing: .02em; }
+.nagi-status { flex-shrink: 0; width: 4px; height: 4px; border-radius: 50%; background: #35b980; }
 .nagi-header p { margin: 0; font-size: 12px; line-height: 20px; color: var(--muted); }
 .nagi-language { margin-left: auto; flex-shrink: 0; font-size: 12px; width: 40px; height: 40px; border-radius: 12px; }
 .nagi-close { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; }
-.nagi-close:hover, .nagi-language:hover { background: var(--surface); }
-.nagi-note { margin: 0; padding: 0 20px 16px; font-size: 12px; line-height: 20px; color: var(--muted); border-bottom: 1px solid var(--line); }
-.nagi-log { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 24px 20px 8px; scrollbar-width: thin; }
+.nagi-close, .nagi-language { transition: background-color 200ms, transform 240ms var(--ease); }
+.nagi-close:is(:hover, :focus-visible), .nagi-language:is(:hover, :focus-visible) { background: var(--surface); transform: translateY(-4px); }
+.nagi-close svg, .nagi-send svg, .nagi-clear svg { transition: transform 240ms var(--ease); }
+.nagi-close:is(:hover, :focus-visible) svg { transform: rotate(90deg); }
+.nagi-note { margin: 0; padding: 0 24px 16px; font-size: 12px; line-height: 20px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.nagi-log { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 24px 24px 8px; scrollbar-width: thin; }
 .nagi-message { margin-bottom: 24px; max-width: 100%; }
 .nagi-message[data-role="assistant"] { padding-right: 8px; }
 .nagi-message[data-role="user"] { margin-left: auto; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px 16px 4px 16px; width: fit-content; }
-.nagi-message p { margin: 0; font-size: 16px; line-height: 28px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.nagi-message p { margin: 0; font-size: 12px; line-height: 24px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .nagi-welcome { color: var(--muted); }
 .nagi-reply[data-typing] > span[aria-hidden]::after { content: ''; display: inline-block; vertical-align: -2px; width: 2px; height: 16px; margin-left: 4px; background: var(--muted); animation: nagi-caret 800ms step-end infinite; }
 .nagi-thinking { margin: 8px 0; font-size: 12px; color: var(--muted); }
-.nagi-suggestions { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 20px 16px; max-height: 160px; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.nagi-suggestions button { border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; text-align: left; font-size: 12px; line-height: 20px; transition: background-color 160ms, transform 160ms; }
-.nagi-suggestions button:hover { background: var(--surface); transform: translateY(-2px); }
+.nagi-suggestions { display: flex; flex-wrap: wrap; gap: 12px 8px; padding: 12px 24px 20px; max-height: 160px; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.nagi-suggestions button { border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; text-align: left; font-size: 12px; line-height: 20px; transition: background-color 200ms, transform 240ms var(--ease); }
+.nagi-suggestions button:not(:disabled):is(:hover, :focus-visible) { background: var(--surface); transform: translateY(-4px); }
 .nagi-notice { font-size: 12px; line-height: 20px; margin: 0; padding: 0 20px 8px; color: var(--muted); }
 .nagi-form { display: flex; align-items: flex-end; gap: 8px; margin: 0 16px; padding: 8px 8px 8px 12px; border: 1px solid var(--line); border-radius: 16px; }
 .nagi-form:focus-within { border-color: var(--text); }
 .nagi-input { position: relative; min-width: 0; flex: 1; }
 .nagi-form textarea { display: block; width: 100%; min-width: 0; min-height: 48px; max-height: 120px; resize: none; border: 0; outline: 0; padding: 8px 0; color: var(--text); background: transparent; font: inherit; font-size: 16px; line-height: 24px; overflow-wrap: anywhere; }
 .nagi-form textarea::placeholder { color: transparent; }
-.nagi-placeholder { position: absolute; top: 8px; left: 0; width: 100%; color: var(--muted); font-size: 16px; line-height: 24px; overflow-wrap: anywhere; pointer-events: none; }
-.nagi-send { flex-shrink: 0; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--text); color: var(--bg); }
+.nagi-placeholder { position: absolute; top: 8px; left: 0; width: 100%; color: var(--muted); font-size: 12px; line-height: 24px; overflow-wrap: anywhere; pointer-events: none; }
+.nagi-send { flex-shrink: 0; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--text); color: var(--bg); transition: transform 240ms var(--ease); }
+.nagi-send:not(:disabled):is(:hover, :focus-visible) svg { transform: translateY(-4px); }
+.nagi :is(.nagi-launcher, .nagi-close, .nagi-language, .nagi-suggestions button, .nagi-send):not(:disabled):active { transform: scale(.96); }
 .nagi button:disabled { opacity: .4; cursor: default; transform: none; }
-.nagi-clear { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 12px auto 16px; font-size: 12px; line-height: 20px; color: var(--muted); }
+.nagi-clear { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 16px auto; padding: 4px 8px; font-size: 12px; line-height: 20px; color: var(--muted); transition: color 200ms; }
+.nagi-clear:not(:disabled):is(:hover, :focus-visible) { color: var(--text); }
+.nagi-clear:not(:disabled):is(:hover, :focus-visible) svg { transform: rotate(-24deg); }
 @keyframes nagi-in { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
 @keyframes nagi-out { to { opacity: 0; transform: translateY(8px) scale(.98); } }
 @keyframes nagi-caret { 50% { opacity: 0; } }
@@ -45,4 +52,4 @@
 @container (max-width: 340px) { .nagi-header { gap: 8px; } .nagi-placeholder, .nagi-form textarea { line-height: 24px; } .nagi-suggestions { padding-left: 16px; padding-right: 16px; } }
 @media (max-width: 640px) { .nagi { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); } .nagi-panel { right: max(16px, env(safe-area-inset-right)); bottom: max(80px, calc(env(safe-area-inset-bottom) + 64px)); height: min(640px, calc(100dvh - 112px)); border-radius: 20px; } .nagi-header { padding: 16px; } .nagi-note, .nagi-suggestions { padding-left: 16px; padding-right: 16px; } .nagi-log { padding: 20px 16px 8px; } }
 @media (max-height: 540px) { .nagi-panel { bottom: 72px; height: calc(100dvh - 88px); } .nagi-header { padding: 12px 16px; } .nagi-note { padding-bottom: 8px; } .nagi-suggestions { max-height: 80px; padding-bottom: 8px; } .nagi-clear { margin-block: 8px; } }
-@media (prefers-reduced-motion: reduce) { .nagi-panel[open], .nagi-reply[data-typing] > span[aria-hidden]::after { animation: none; } .nagi-launcher, .nagi-launcher > span, .nagi-suggestions button { transition: none; transform: none !important; } }
+@media (prefers-reduced-motion: reduce) { .nagi-panel[open], .nagi-reply[data-typing] > span[aria-hidden]::after { animation: none; } .nagi button, .nagi button svg, .nagi-launcher > span { transition: none; transform: none !important; } }

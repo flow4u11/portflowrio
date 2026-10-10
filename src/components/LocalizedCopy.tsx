@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Languages } from 'lucide-react';
 import { useIdleMotion } from './useIdleMotion';
 import { useMotionSettings } from './MotionSettings';
@@ -9,7 +9,7 @@ export type Language = 'en' | 'th';
 const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 /** Readable semantic copy stays intact beneath the finite visual scramble. */
-export function LocalizedCopy({ text, language, shine = false }: { text: string; language: Language; shine?: boolean }) {
+export function LocalizedCopy({ text, language, shine = false, children }: { text: string; language: Language; shine?: boolean; children?: ReactNode }) {
   const { settings } = useMotionSettings();
   const speed = useRef(settings.animationSpeed);
   speed.current = settings.animationSpeed;
@@ -48,7 +48,7 @@ export function LocalizedCopy({ text, language, shine = false }: { text: string;
     return () => { clearInterval(timer); clearTimeout(exitTimer); clearTimeout(enterTimer); };
   }, [text, active, reduced]);
   return <span ref={ref} className="localized-copy" lang={language} data-scrambling={transition.scramble !== null || undefined} data-bold-entering={transition.entering || undefined}>
-    <span className="localized-copy-content">{text.split('**').map((part, index) => index % 2 ? <strong key={index}>{part}</strong> : shine ? <ShinyText key={index} continuous direction="right" disabled={reduced} text={part} speed={2.8 / settings.animationSpeed} delay={0} /> : part)}</span>
+    <span className="localized-copy-content">{children ?? text.split('**').map((part, index) => index % 2 ? <strong key={index}>{part}</strong> : shine ? <ShinyText key={index} continuous direction="right" disabled={reduced} text={part} speed={2.8 / settings.animationSpeed} delay={0} /> : part)}</span>
     {transition.scramble !== null && <span className="localized-copy-scramble" aria-hidden="true">{transition.scramble}</span>}
     {transition.outgoing !== null && <span className="localized-copy-outgoing" aria-hidden="true">{transition.outgoing.split('**').map((part, index) => index % 2 ? <strong key={index}>{part}</strong> : <span key={index}>{part}</span>)}</span>}
   </span>;
