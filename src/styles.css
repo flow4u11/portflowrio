@@ -97,6 +97,12 @@ h2 i { font: italic 1.05em/1 Georgia, "Times New Roman", serif; letter-spacing: 
 .about-story .about-copy { max-width: none; font-size: 14px; margin-top: 0; }
 .about-story .interest-row { margin-top: 0; }
 .about-lead { font-size: 16px; line-height: 28px; letter-spacing: -.2px; margin-top: 32px; }
+.about-project-link { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 32px; padding-block: 16px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 24px; transition: color 200ms; }
+.about-project-link strong { font-size: 16px; }
+.about-project-link > svg { flex-shrink: 0; color: var(--text); transition: transform 240ms var(--ease); }
+.about-project-link:is(:hover, :focus-visible) { color: var(--text); }
+.about-project-link:is(:hover, :focus-visible) > svg { transform: translate(4px, -4px); }
+@media (prefers-reduced-motion: reduce) { .about-project-link, .about-project-link > svg { transition: none; transform: none !important; } }
 .about-copy { font-size: 13px; line-height: 1.95; color: var(--muted); margin-top: 21px; max-width: 560px; }
 .study-strip { display: flex; align-items: center; gap: 15px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 31px; padding: 22px 0; }
 .study-mark { display: grid; place-items: center; width: 37px; height: 37px; border: 1px solid var(--text); font-size: 12px; font-weight: 650; letter-spacing: -1px; flex-shrink: 0; transition: transform calc(.25s * var(--motion-duration-factor, 1)) var(--ease); }

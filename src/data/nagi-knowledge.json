@@ -152,15 +152,19 @@
         "ผลงาน",
         "โปรเจกต์",
         "เกม",
-        "เกรด"
+        "เกรด",
+        "unochess",
+        "uno chess",
+        "อูโนเชส",
+        "ยูโนเชส"
       ],
       "question": {
         "en": "Tell me about the projects",
         "th": "แนะนำผลงานหน่อย"
       },
       "answer": {
-        "en": "Projects features LastStand, a first Unreal Engine 5 FPS project, and School Ledger, a full stack student grade web app in live beta. Select a project in the carousel, then click its image or View project for the case study, tools and available links. LastStand includes gameplay; School Ledger has a live site and source link. I can describe the public portfolio, but I don’t have access to private school records.",
-        "th": "ใน Projects มี LastStand เกม FPS โปรเจกต์แรกด้วย Unreal Engine 5 และ School Ledger เว็บระบบเกรดแบบ full stack ที่เปิด live beta ครับ เลือกผลงานใน Carousel แล้วกดภาพหรือดูรายละเอียดเพื่ออ่านแนวคิด เครื่องมือ และลิงก์ LastStand มีวิดีโอเกมเพลย์ ส่วน School Ledger มีเว็บจริงกับซอร์ส ผมอธิบายข้อมูลสาธารณะในพอร์ตได้ แต่ไม่มีสิทธิ์เข้าถึงข้อมูลนักเรียนครับ"
+        "en": "Projects is ordered UNOChess, School Ledger, then LastStand (UE5). UNOChess is the owner’s browser-based strategy game combining chess and cards, with bot, online friend and local play. Use the “Owner of UNOChess” link in About or open its project details and Visit website to play at https://uno-chess-hazel.vercel.app/home. School Ledger is a bilingual student grade app in live beta with a live site and source link; LastStand is the first Unreal Engine 5 FPS project and includes gameplay. Choose a carousel cover or title to open the project details. I only describe public portfolio information and cannot access private school records.",
+        "th": "Projects เรียงเป็น UNOChess, School Ledger และ LastStand (UE5) ครับ UNOChess เป็นเกมวางแผนบนเว็บของเจ้าของพอร์ต ผสมหมากรุกกับการ์ด เล่นกับบอท เพื่อนออนไลน์ หรือบนเครื่องเดียวกันได้ กดลิงก์ “เจ้าของ UNOChess” ใน About หรือเปิดรายละเอียดผลงานแล้วกดเปิดเว็บไซต์เพื่อเล่นที่ https://uno-chess-hazel.vercel.app/home ส่วน School Ledger เป็นเว็บระบบเกรดสองภาษาใน live beta มีเว็บจริงและซอร์ส และ LastStand เป็นเกม FPS โปรเจกต์แรกด้วย Unreal Engine 5 พร้อมวิดีโอเกมเพลย์ครับ เลือกภาพหรือชื่อใน Carousel เพื่อเปิดรายละเอียดได้ ผมอธิบายเฉพาะข้อมูลสาธารณะของพอร์ตและเข้าถึงข้อมูลนักเรียนไม่ได้ครับ"
       }
     },
     {
@@ -186,8 +190,8 @@
         "th": "พอร์ตนี้เกี่ยวกับอะไร?"
       },
       "answer": {
-        "en": "This is a personal design and games portfolio with interests in UX/UI, game lighting and visual storytelling. About introduces the owner’s studies, creative process and interests. The creative toolkit and project technology each have two scrolling rows. Hover or hold a row to pause it; move away to continue. You can turn row motion off in Settings to see every item together.",
-        "th": "นี่คือพอร์ตส่วนตัวด้านดีไซน์และเกม สนใจ UX/UI แสงในเกม และการเล่าเรื่องด้วยภาพครับ About เล่าเรื่องการเรียน วิธีทำงาน และความสนใจ เครื่องมือสร้างสรรค์กับเทคโนโลยีแต่ละหมวดมีแถบเลื่อน 2 แถว ชี้เมาส์หรือกดค้างเพื่อหยุด เอาเมาส์ออกเพื่อเล่นต่อ ปิดการเลื่อนในตั้งค่าเพื่อดูรายการทั้งหมดพร้อมกันได้ครับ"
+        "en": "This is a personal design and games portfolio with interests in UX/UI, game lighting and visual storytelling. About introduces the owner’s studies, creative process and interests, with an “Owner of UNOChess” link to the game. The creative toolkit and project technology each have two scrolling rows. Hover or hold a row to pause it; move away to continue. You can turn row motion off in Settings to see every item together.",
+        "th": "นี่คือพอร์ตส่วนตัวด้านดีไซน์และเกม สนใจ UX/UI แสงในเกม และการเล่าเรื่องด้วยภาพครับ About เล่าเรื่องการเรียน วิธีทำงาน และความสนใจ พร้อมลิงก์เจ้าของ UNOChess เพื่อเปิดเกม เครื่องมือสร้างสรรค์กับเทคโนโลยีแต่ละหมวดมีแถบเลื่อน 2 แถว ชี้เมาส์หรือกดค้างเพื่อหยุด เอาเมาส์ออกเพื่อเล่นต่อ ปิดการเลื่อนในตั้งค่าเพื่อดูรายการทั้งหมดพร้อมกันได้ครับ"
       }
     },
     {

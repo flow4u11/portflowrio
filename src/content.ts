@@ -1,6 +1,8 @@
 import type { Project } from './components/ProjectGallery';
 import type { Language } from './components/LocalizedCopy';
 
+export const UNOCHESS_URL = 'https://uno-chess-hazel.vercel.app/home';
+
 export const copy = {
   en: {
     lead: 'A **Games and Interactive Media** student at Bangkok University, exploring the space between **design and play**.',
@@ -9,8 +11,9 @@ export const copy = {
     leisure: 'Gaming montages first taught me rhythm and visual storytelling. I play **basketball, FPS and story-driven games**. I also love beautiful game worlds and architecture, especially in **Assassin’s Creed**.',
     themeBefore: 'I enjoy experimenting with visual styles. Even a different ', themeAfter: ' can give the same idea a new personality. Try one of mine.',
     country: 'Based in', countryValue: 'Bangkok, Thailand', school: 'High school · Graduated', schoolValue: 'Matthayom Taksin Rayong School (MTRS)', present: 'Present',
+    projectOwner: 'Owner of **UNOChess**',
     projectIntro: 'Games, useful tools, and what comes next. Scroll through the collection.',
-    projectNote: 'A growing collection. Three open layouts are waiting for their next project.',
+    projectNote: 'A growing collection. Two open layouts are waiting for their next project.',
     contact: 'Have an idea, a project, or a shared love for design? **I’d love to hear about it.**',
     contactDialog: 'A project idea, a design conversation, or just a hello — find me here.',
     footer: 'Every design is **my own, created in Figma**. Built with **AI-assisted coding**.',
@@ -24,8 +27,9 @@ export const copy = {
     leisure: 'การตัดต่อมอนทาจเกมทำให้ผมเริ่มสนใจจังหวะและการเล่าเรื่องด้วยภาพ ผมชอบ **เล่นบาสเกตบอล เกม FPS และเกมเนื้อเรื่อง** รวมถึงโลกในเกมที่มีภาพและสถาปัตยกรรมสวย ๆ โดยเฉพาะ **Assassin’s Creed**',
     themeBefore: 'ผมชอบทดลองรูปแบบการออกแบบ แค่เปลี่ยน ', themeAfter: ' ก็ทำให้ไอเดียเดิมมีบุคลิกใหม่ได้ ลองธีมที่ผมออกแบบดูได้ครับ',
     country: 'ที่อยู่ปัจจุบัน', countryValue: 'กรุงเทพฯ ประเทศไทย', school: 'มัธยมศึกษา · สำเร็จการศึกษา', schoolValue: 'โรงเรียนมัธยมตากสินระยอง (MTRS)', present: 'ปัจจุบัน',
+    projectOwner: 'เจ้าของ **UNOChess**',
     projectIntro: 'เกม เครื่องมือที่ใช้งานได้จริง และไอเดียใหม่ ๆ เลื่อนดูผลงานในคอลเลกชันได้เลย',
-    projectNote: 'คอลเลกชันที่กำลังเติบโต พร้อมอีกสามเลย์เอาต์สำหรับโปรเจกต์ถัดไป',
+    projectNote: 'คอลเลกชันที่กำลังเติบโต พร้อมอีกสองเลย์เอาต์สำหรับโปรเจกต์ถัดไป',
     contact: 'มีไอเดีย โปรเจกต์ หรือสนใจการออกแบบเหมือนกันไหม? **ผมยินดีพูดคุยด้วยครับ**',
     contactDialog: 'คุยเรื่องโปรเจกต์ งานออกแบบ หรือแค่ทักทาย ติดต่อผมได้จากช่องทางเหล่านี้',
     footer: '**ผมออกแบบทุกดีไซน์ด้วย Figma** และใช้ **AI ช่วยในการเขียนโค้ด**',
@@ -62,19 +66,20 @@ export function getProjects(language: Language): Project[] {
   const thai = language === 'th';
   return [
     {
-      id: 'laststand', title: 'LastStand', category: 'Unreal Engine 5 · FPS game', image: '/assets/project-laststand.svg', status: 'FIRST UE5 PROJECT',
-      videoUrl: 'https://www.youtube.com/watch?v=DzqB6cp7Z2g', videoId: 'DzqB6cp7Z2g',
-      alt: 'Original LastStand illustrated cover with an industrial FPS arena',
-      description: thai ? 'เกม FPS โปรเจกต์แรกที่ผมสร้างด้วย Unreal Engine 5 ในเทอม Summer ปี 1 จุดเริ่มต้นของการเรียนรู้การสร้างเกมและโลกอินเทอร์แอคทีฟ' : 'My first Unreal Engine 5 game, made during the summer term of year one. An FPS project and a first step into building an interactive world.',
-      tags: ['Unreal Engine 5', 'FPS', 'Year 01 · Summer'],
+      id: 'unochess', title: 'UNOChess', category: 'Web-based strategy game', image: '/assets/project-unochess.png', status: 'LIVE GAME',
+      liveUrl: UNOCHESS_URL,
+      alt: 'UNOChess cover showing the chess board, action cards, home screen, player profile and game customization',
+      description: thai ? 'เกมวางแผนบนเว็บที่นำหมากรุกมาผสมกับการ์ดในทุกเทิร์น เล่นกับบอท ชวนเพื่อนมาแข่ง หรือเล่นด้วยกันบนเครื่องเดียว' : 'A browser-based strategy game that brings a card twist to every turn of chess. Play against a bot, invite a friend, or share a board locally.',
+      tags: ['UX/UI', 'Game design', 'Web development', 'Multiplayer', 'AI bot'],
+      coverNote: thai ? 'ภาพปกรวมหน้าจอของ UNOChess ตั้งแต่กระดานหมากรุก โปรไฟล์ผู้เล่น ไปจนถึงการปรับแต่งเกม เปิดเว็บไซต์เพื่อทดลองเล่นได้เลย' : 'A look at UNOChess, from the board to player profiles and custom themes. Open the website to play.',
       details: thai ? [
-        { label: 'จุดเริ่มต้น', text: 'LastStand เป็นโปรเจกต์แรกในการเรียนรู้และสร้างเกมด้วย Unreal Engine 5 ทำในเทอม Summer ปี 1' },
-        { label: 'ผลงาน', text: 'ดูเกมจริงได้จากวิดีโอเกมเพลย์ที่แนบไว้ โปรเจกต์มีชุดเกมสำหรับ Windows' },
-        { label: 'สิ่งที่สนใจ', text: 'การออกแบบภาพภายในเกม แสงเงา และบรรยากาศของโลกที่ผู้เล่นเข้าไปสำรวจได้' },
+        { label: 'แนวคิด', text: 'ผสมการวางแผนแบบหมากรุกกับการ์ดที่เปลี่ยนเงื่อนไขในแต่ละเทิร์น ทำให้ต้องปรับแผนและรับมือกับสถานการณ์ใหม่อยู่เสมอ' },
+        { label: 'วิธีเล่น', text: 'เลือกเล่นกับบอท ชวนเพื่อนผ่านระบบออนไลน์ หรือสลับกันเล่นบนกระดานเดียว พร้อมตัวเลือกกติกาและเวลา' },
+        { label: 'งานออกแบบ', text: 'ออกแบบประสบการณ์ตั้งแต่การตั้งค่าเกม กระดาน การ์ด และโปรไฟล์ผู้เล่น ไปจนถึงการปรับแต่งรูปลักษณ์ พร้อมรองรับภาษาไทยและอังกฤษ' },
       ] : [
-        { label: 'The first step', text: 'LastStand was my first experience learning and making a game in Unreal Engine 5, during the summer term of year one.' },
-        { label: 'The project', text: 'The gameplay video shows the actual game. A packaged Windows build is part of the project.' },
-        { label: 'Visual interests', text: 'In-game graphics, light and shadow, and the atmosphere of an interactive world.' },
+        { label: 'The idea', text: 'Chess strategy meets cards that change the conditions of each turn, asking players to adapt their plans as the game unfolds.' },
+        { label: 'Ways to play', text: 'Challenge a bot, invite a friend online, or take turns on the same board, with a choice of rules and time controls.' },
+        { label: 'The design', text: 'An experience spanning game setup, the board, cards, player profiles and visual customization, with Thai and English interfaces.' },
       ],
     },
     {
@@ -91,6 +96,22 @@ export function getProjects(language: Language): Project[] {
         { label: 'For teachers', text: 'Manage terms, classes, and subjects. Enter scores, configure grading rules, calculate GPA, and publish results.' },
         { label: 'For students', text: 'View published grades through a PIN-based portal. Thai and English interfaces and personal themes keep the experience approachable.' },
         { label: 'The details', text: 'Excel import and export, audit history, and a public demo using fictional data. Built with Next.js, React, TypeScript, Tailwind CSS, Supabase, Radix UI, GSAP, Zod, and ExcelJS.' },
+      ],
+    },
+    {
+      id: 'laststand', title: 'LastStand', category: 'Unreal Engine 5 · FPS game', image: '/assets/project-laststand.svg', status: 'FIRST UE5 PROJECT',
+      videoUrl: 'https://www.youtube.com/watch?v=DzqB6cp7Z2g', videoId: 'DzqB6cp7Z2g',
+      alt: 'Original LastStand illustrated cover with an industrial FPS arena',
+      description: thai ? 'เกม FPS โปรเจกต์แรกที่ผมสร้างด้วย Unreal Engine 5 ในเทอม Summer ปี 1 จุดเริ่มต้นของการเรียนรู้การสร้างเกมและโลกอินเทอร์แอคทีฟ' : 'My first Unreal Engine 5 game, made during the summer term of year one. An FPS project and a first step into building an interactive world.',
+      tags: ['Unreal Engine 5', 'FPS', 'Year 01 · Summer'],
+      details: thai ? [
+        { label: 'จุดเริ่มต้น', text: 'LastStand เป็นโปรเจกต์แรกในการเรียนรู้และสร้างเกมด้วย Unreal Engine 5 ทำในเทอม Summer ปี 1' },
+        { label: 'ผลงาน', text: 'ดูเกมจริงได้จากวิดีโอเกมเพลย์ที่แนบไว้ โปรเจกต์มีชุดเกมสำหรับ Windows' },
+        { label: 'สิ่งที่สนใจ', text: 'การออกแบบภาพภายในเกม แสงเงา และบรรยากาศของโลกที่ผู้เล่นเข้าไปสำรวจได้' },
+      ] : [
+        { label: 'The first step', text: 'LastStand was my first experience learning and making a game in Unreal Engine 5, during the summer term of year one.' },
+        { label: 'The project', text: 'The gameplay video shows the actual game. A packaged Windows build is part of the project.' },
+        { label: 'Visual interests', text: 'In-game graphics, light and shadow, and the atmosphere of an interactive world.' },
       ],
     },
   ];

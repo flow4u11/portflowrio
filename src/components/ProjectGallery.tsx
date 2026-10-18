@@ -19,6 +19,7 @@ export type Project = {
   tags: string[];
   details: { label: string; text: string }[];
   status: string;
+  coverNote?: string;
   liveUrl?: string;
   sourceUrl?: string;
   videoUrl?: string;
@@ -35,7 +36,6 @@ type ProjectGalleryProps = {
 const futureSlots = [
   { id: 'future-01', cover: 'orbit', caption: 'An open canvas' },
   { id: 'future-02', cover: 'grid', caption: 'Room to explore' },
-  { id: 'future-03', cover: 'fold', caption: 'The next chapter' },
 ] as const;
 
 type GalleryPosition = { index: number; atStart: boolean; atEnd: boolean };
@@ -362,7 +362,7 @@ export function ProjectGallery({ projects, onOpen, language = 'en', staticDesign
 
   return <div className="project-gallery" ref={galleryRef} data-enhanced={enhanced || undefined} data-animation-disabled={!settings.galleryAnimated || undefined} data-static-design={staticDesign || undefined}>
     <div className="pg-toolbar">
-      <p className="pg-summary"><span>{String(projects.length).padStart(2, '0')} projects</span><span aria-hidden="true">/</span><span>03 open slots</span></p>
+      <p className="pg-summary"><span>{String(projects.length).padStart(2, '0')} projects</span><span aria-hidden="true">/</span><span>{String(futureSlots.length).padStart(2, '0')} open slots</span></p>
       <span className="pg-instruction" id={instructionId}>{thai ? 'ลากหรือใช้ลูกศรเพื่อสำรวจ' : 'Drag, swipe, or use the arrows to explore.'}<span className="pg-sr-only"> When the gallery is focused, use Left and Right arrow keys. Home goes to the first card and End goes to the last. Enter opens the selected project.</span></span>
     </div>
 
